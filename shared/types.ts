@@ -36,7 +36,11 @@ export type CityId =
   | 'osaka'
   | 'taipei'
   | 'singapore'
-  | 'sydney';
+  | 'sydney'
+  | 'budapest'
+  | 'milan'
+  | 'rome'
+  | 'philadelphia';
 
 /** Flat coordinate list: [x0, y0, x1, y1, ...] in meters. */
 export type Flat = number[];

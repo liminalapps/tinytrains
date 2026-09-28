@@ -89,6 +89,7 @@ const TRAIN_SVG = `<svg viewBox="0 0 64 40" aria-hidden="true"><rect x="3" y="5"
  * this hour an empty map means the network is asleep; any other time it means the feed is quiet. */
 const FIRST_TRAIN: Record<CityId, number> = { nyc: 0, sf: 5, london: 5, paris: 5.5, berlin: 4.5, madrid: 6, tokyo: 5, seoul: 5.5, hongkong: 6,
   washington: 5, chicago: 0, boston: 5, mexicocity: 5, saopaulo: 4.67, moscow: 5.5, stockholm: 0, vienna: 5, helsinki: 5.5, amsterdam: 6, oslo: 5.5, cairo: 5, delhi: 5.5, shanghai: 5.5, beijing: 5, guangzhou: 6, shenzhen: 6.5, chengdu: 6, hangzhou: 6, wuhan: 6, chongqing: 6.5, osaka: 5, taipei: 6, singapore: 5.5, sydney: 4.5,
+  budapest: 4.5, milan: 5.5, rome: 5.5, philadelphia: 5,
 };
 const asleepNow = (city: CityId) => {
   const h = localHour(city, Date.now());
@@ -620,8 +621,8 @@ export class UI {
     const now = Date.now();
     const cur = this.app.city?.id;
     const regions: [string, CityId[]][] = [
-      ['Americas', ['nyc', 'sf', 'washington', 'chicago', 'boston', 'mexicocity', 'saopaulo']],
-      ['Europe', ['london', 'paris', 'berlin', 'madrid', 'moscow', 'stockholm', 'vienna', 'helsinki', 'amsterdam', 'oslo']],
+      ['Americas', ['nyc', 'sf', 'washington', 'chicago', 'boston', 'philadelphia', 'mexicocity', 'saopaulo']],
+      ['Europe', ['london', 'paris', 'berlin', 'madrid', 'moscow', 'stockholm', 'vienna', 'helsinki', 'amsterdam', 'oslo', 'budapest', 'milan', 'rome']],
       ['Asia', ['tokyo', 'osaka', 'seoul', 'taipei', 'hongkong', 'shanghai', 'beijing', 'guangzhou', 'shenzhen', 'chengdu', 'hangzhou', 'wuhan', 'chongqing', 'singapore', 'delhi']],
       ['Africa & Oceania', ['cairo', 'sydney']],
     ];

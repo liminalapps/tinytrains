@@ -423,6 +423,8 @@ const PREFERRED: Record<string, string[]> = {
   'fi-FI': ['Satu', 'Google suomi', 'Microsoft Noora', 'Onni'],
   'nl-NL': ['Xander', 'Ellen', 'Google Nederlands', 'Microsoft Colette', 'Claire'],
   'de-AT': ['Microsoft Ingrid', 'Anna', 'Google Deutsch'],
+  'hu-HU': ['Mariska', 'Tünde', 'Google magyar', 'Microsoft Noemi', 'Microsoft Szabolcs'],
+  'it-IT': ['Alice', 'Federica', 'Google italiano', 'Microsoft Elsa', 'Luca', 'Microsoft Isabella'],
 };
 
 let voices: SpeechSynthesisVoice[] = [];

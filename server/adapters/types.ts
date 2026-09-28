@@ -12,6 +12,7 @@ export interface AdapterEnv {
   CTA_TRAIN_KEY?: string; // transitchicago.com Train Tracker API
   MBTA_KEY?: string; // api-v3.mbta.com (optional; raises the rate limit)
   TFNSW_KEY?: string; // opendata.transport.nsw.gov.au (Sydney realtime + GTFS)
+  BKK_KEY?: string; // opendata.bkk.hu (Budapest GTFS-realtime)
   TRAFIKLAB_KEY?: string; // trafiklab.se GTFS Sweden 3 / GTFS Regional (Stockholm realtime)
   DIGITRANSIT_KEY?: string; // digitransit.fi (Helsinki realtime)
   TDX_CLIENT_ID?: string; // tdx.transportdata.tw OAuth client (Taipei Metro realtime)

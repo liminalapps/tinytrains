@@ -33,7 +33,11 @@ import { stock as osaka } from './osaka.ts';
 import { stock as taipei } from './taipei.ts';
 import { stock as singapore } from './singapore.ts';
 import { stock as sydney } from './sydney.ts';
+import { stock as budapest } from './budapest.ts';
+import { stock as milan } from './milan.ts';
+import { stock as rome } from './rome.ts';
+import { stock as philadelphia } from './philadelphia.ts';
 
 export const STOCK: Record<string, StockSpec> = Object.fromEntries(
-  [...nyc, ...sf, ...london, ...paris, ...berlin, ...madrid, ...tokyo, ...seoul, ...hongkong, ...washington, ...chicago, ...boston, ...mexicocity, ...saopaulo, ...moscow, ...stockholm, ...vienna, ...helsinki, ...amsterdam, ...oslo, ...cairo, ...delhi, ...shanghai, ...beijing, ...guangzhou, ...shenzhen, ...chengdu, ...hangzhou, ...wuhan, ...chongqing, ...osaka, ...taipei, ...singapore, ...sydney].map((s) => [s.id, s]),
+  [...nyc, ...sf, ...london, ...paris, ...berlin, ...madrid, ...tokyo, ...seoul, ...hongkong, ...washington, ...chicago, ...boston, ...mexicocity, ...saopaulo, ...moscow, ...stockholm, ...vienna, ...helsinki, ...amsterdam, ...oslo, ...cairo, ...delhi, ...shanghai, ...beijing, ...guangzhou, ...shenzhen, ...chengdu, ...hangzhou, ...wuhan, ...chongqing, ...osaka, ...taipei, ...singapore, ...sydney, ...budapest, ...milan, ...rome, ...philadelphia].map((s) => [s.id, s]),
 );

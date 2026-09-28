@@ -84,6 +84,10 @@ const CORE: Record<CityId, BBox[]> = {
   taipei: [[121.5, 25.02, 121.575, 25.065]], // Taipei Main Station, Ximending, Zhongshan, Da'an, Xinyi
   singapore: [[103.815, 1.265, 103.875, 1.31]], // Downtown Core, Marina Bay, Chinatown, Orchard, Bugis
   sydney: [[151.18, -33.9, 151.23, -33.83]], // CBD, The Rocks, Darling Harbour, Pyrmont, Surry Hills, North Sydney
+  budapest: [[19.03, 47.485, 19.085, 47.52]], // Belváros, Lipótváros, Castle Hill, Parliament, Terézváros, Erzsébetváros
+  milan: [[9.16, 45.45, 9.215, 45.49]], // Duomo, Brera, Porta Nuova, Centrale, Porta Venezia
+  rome: [[12.455, 41.88, 12.51, 41.91]], // Centro Storico, Vatican, Trastevere, Termini, Colosseum
+  philadelphia: [[-75.185, 39.94, -75.14, 39.965]], // Center City, Old City, Rittenhouse, Logan Square
 };
 
 /**
@@ -94,6 +98,10 @@ const CORE: Record<CityId, BBox[]> = {
  */
 const EXTRA_LABELS: Record<CityId, { text: string; local?: string; kind: GeoLabel['kind']; at: [number, number]; rank: number }[]> = {
   washington: [],
+  budapest: [],
+  milan: [],
+  rome: [],
+  philadelphia: [],
   chicago: [{ text: 'Lake Michigan', kind: 'water', at: [-87.575, 41.95], rank: 0 }],
   boston: [],
   mexicocity: [

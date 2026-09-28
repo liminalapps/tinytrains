@@ -4,6 +4,7 @@ import { makeProjection } from '../../shared/geo.ts';
 import type { CityId } from '../../shared/types.ts';
 import { Kit, V, suspensionBridge, wheel, type Placed } from './landmarkKit.ts';
 import { WORLD_LANDMARKS } from './landmarksWorld.ts';
+import { ROUND4_LANDMARKS } from './landmarksRound4.ts';
 import type { FrameInfo, Layer } from './world.ts';
 
 // Hand-built toy landmarks. Local frame: x east, y up, z south, meters. Each landmark is placed at its
@@ -783,6 +784,7 @@ function starFerry() {
 
 const LANDMARKS: Record<CityId, Placed[]> = {
   ...WORLD_LANDMARKS,
+  ...ROUND4_LANDMARKS,
 
   paris: [
     { build: eiffelTower, at: [2.2945, 48.85826], rot: -0.75, clear: 90 },

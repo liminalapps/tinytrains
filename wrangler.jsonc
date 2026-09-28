@@ -9,7 +9,7 @@
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
     // The API and the page shell (per-URL OpenGraph tags) run code; data and assets come straight from the edge.
-    "run_worker_first": ["/api/*", "/", "/nyc", "/nyc/*", "/sf", "/sf/*", "/london", "/london/*", "/paris", "/paris/*", "/berlin", "/berlin/*", "/madrid", "/madrid/*", "/tokyo", "/tokyo/*", "/seoul", "/seoul/*", "/hongkong", "/hongkong/*", "/washington", "/washington/*", "/chicago", "/chicago/*", "/boston", "/boston/*", "/mexicocity", "/mexicocity/*", "/saopaulo", "/saopaulo/*", "/moscow", "/moscow/*", "/stockholm", "/stockholm/*", "/vienna", "/vienna/*", "/helsinki", "/helsinki/*", "/amsterdam", "/amsterdam/*", "/oslo", "/oslo/*", "/cairo", "/cairo/*", "/delhi", "/delhi/*", "/shanghai", "/shanghai/*", "/beijing", "/beijing/*", "/guangzhou", "/guangzhou/*", "/shenzhen", "/shenzhen/*", "/chengdu", "/chengdu/*", "/hangzhou", "/hangzhou/*", "/wuhan", "/wuhan/*", "/chongqing", "/chongqing/*", "/osaka", "/osaka/*", "/taipei", "/taipei/*", "/singapore", "/singapore/*", "/sydney", "/sydney/*"]
+    "run_worker_first": ["/api/*", "/", "/nyc", "/nyc/*", "/sf", "/sf/*", "/london", "/london/*", "/paris", "/paris/*", "/berlin", "/berlin/*", "/madrid", "/madrid/*", "/tokyo", "/tokyo/*", "/seoul", "/seoul/*", "/hongkong", "/hongkong/*", "/washington", "/washington/*", "/chicago", "/chicago/*", "/boston", "/boston/*", "/mexicocity", "/mexicocity/*", "/saopaulo", "/saopaulo/*", "/moscow", "/moscow/*", "/stockholm", "/stockholm/*", "/vienna", "/vienna/*", "/helsinki", "/helsinki/*", "/amsterdam", "/amsterdam/*", "/oslo", "/oslo/*", "/cairo", "/cairo/*", "/delhi", "/delhi/*", "/shanghai", "/shanghai/*", "/beijing", "/beijing/*", "/guangzhou", "/guangzhou/*", "/shenzhen", "/shenzhen/*", "/chengdu", "/chengdu/*", "/hangzhou", "/hangzhou/*", "/wuhan", "/wuhan/*", "/chongqing", "/chongqing/*", "/osaka", "/osaka/*", "/taipei", "/taipei/*", "/singapore", "/singapore/*", "/sydney", "/sydney/*", "/budapest", "/budapest/*", "/milan", "/milan/*", "/rome", "/rome/*", "/philadelphia", "/philadelphia/*"]
   },
   "routes": [
     { "pattern": "tinytrains.app", "custom_domain": true },
@@ -48,7 +48,8 @@
     { "binding": "GUANGZHOU", "service": "tinytrains-guangzhou" },
     { "binding": "SHENZHEN", "service": "tinytrains-shenzhen" },
     { "binding": "OSLO", "service": "tinytrains-oslo" },
-    { "binding": "HELSINKI", "service": "tinytrains-helsinki" }
+    { "binding": "HELSINKI", "service": "tinytrains-helsinki" },
+    { "binding": "BUDAPEST", "service": "tinytrains-budapest" }
   ],
   "observability": { "enabled": true }
 }
