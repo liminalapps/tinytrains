@@ -455,7 +455,7 @@ export const CITIES: Record<CityId, CityConfig> = {
     country: 'Portugal',
     tz: 'Europe/Lisbon',
     origin: [-9.15, 38.74],
-    bbox: [-9.3, 38.68, -9.05, 38.82],
+    bbox: [-9.3, 38.655, -9.05, 38.82],
     view: { center: [-9.139, 38.711], span: 2600 },
     tagline: 'Metro, Trams & Funiculars',
   },
