@@ -390,14 +390,290 @@ function independenceHall() {
   return k.build();
 }
 
+// --- Prague -------------------------------------------------------------------------------
+function praguecastle() {
+  const k = new Kit();
+  const stone = '#e6dcc6';
+  const roof = '#b4533c';
+  // The long palace wings along the ridge.
+  k.box(300, 22, 40, 0, 0, -40, stone, { glow: true });
+  k.hip(300, 40, 290, 10, 9, 0, 22, -40, roof);
+  k.box(40, 22, 120, -130, 0, 10, stone, { glow: true });
+  // St. Vitus Cathedral inside: nave, twin west spires and the great south tower.
+  k.box(124, 34, 34, 20, 0, 30, '#9c968a', { glow: true });
+  k.hip(124, 34, 120, 4, 16, 20, 34, 30, '#5f7068');
+  for (const z of [22, 38]) {
+    k.box(9, 52, 9, -44, 0, z, '#8f897d');
+    k.cone(5, 30, -44, 52, z, '#8f897d', 8);
+  }
+  k.box(16, 60, 16, 30, 0, 50, '#9c968a', { glow: true });
+  k.sphere(7, 30, 66, 50, '#6f8f7a', { half: true, sy: 1.6 });
+  k.cone(2, 20, 30, 74, 50, '#6f8f7a', 8);
+  return k.build();
+}
+
+function charlesBridge() {
+  const k = new Kit();
+  const stone = '#b9ad98';
+  const L = 516;
+  k.box(L, 3, 10, 0, 11, 0, stone);
+  for (let i = 0; i < 16; i++) k.box(8, 11, 12, -L / 2 + 16 + (i * (L - 32)) / 15, 0, 0, stone);
+  // The Gothic towers at both ends.
+  for (const x of [-L / 2 - 8, L / 2 + 8]) {
+    k.box(14, 34, 14, x, 0, 0, '#8f8676', { glow: true });
+    k.cone(10, 16, x, 34, 0, '#3f4a4a', 4);
+  }
+  // Statues along the parapets.
+  for (let i = 0; i < 15; i++) for (const z of [-5, 5]) k.box(1.4, 4, 1.4, -L / 2 + 20 + (i * (L - 40)) / 14, 14, z, '#5a544a');
+  return k.build();
+}
+
+function dancingHouse() {
+  const k = new Kit();
+  k.box(24, 24, 18, 6, 0, 0, '#e8e0d0', { glow: true });
+  k.frustum(7, 9, 24, -8, 0, 0, '#9ab0c0', 16, { glow: true });
+  k.sphere(5, 10, 26, 0, '#9aa3a8', { sy: 0.7 });
+  return k.build();
+}
+
+// --- Naples -------------------------------------------------------------------------------
+function vesuvius() {
+  const k = new Kit();
+  // Far out at the southeast edge of the map: the volcano (1281 m) with its crater and the ridge of Somma.
+  k.frustum(3200, 420, 1150, 0, 0, 0, '#8a7a68', 40);
+  k.frustum(420, 300, 90, 0, 1150, 0, '#6f6356', 40);
+  k.frustum(290, 230, 5, 0, 1236, 0, '#4a4038', 40);
+  k.frustum(2400, 1600, 700, -900, 0, -1100, '#7a8a62', 32);
+  return k.build();
+}
+
+function castelNuovo() {
+  const k = new Kit();
+  const stone = '#b7a88e';
+  k.box(110, 26, 90, 0, 0, 0, stone, { glow: true });
+  for (const [x, z] of [[-55, -45], [55, -45], [-55, 45], [55, 45], [-20, 45]]) k.frustum(12, 11, 38, x, 0, z, '#9d8f76', 20);
+  // The white marble triumphal arch between the two front towers.
+  k.box(14, 34, 4, -38, 0, 47, '#f2eee4', { glow: true });
+  return k.build();
+}
+
+function galleriaUmberto() {
+  const k = new Kit();
+  k.box(120, 24, 16, 0, 0, 0, '#e8dcc6', { glow: true });
+  k.box(16, 24, 140, 0, 0, 0, '#e8dcc6', { glow: true });
+  k.sphere(18, 0, 24, 0, '#b8cad2', { half: true, sy: 1.6 });
+  k.frustum(2, 1, 6, 0, 52, 0, '#e8dcc6', 8);
+  return k.build();
+}
+
+// --- Barcelona ----------------------------------------------------------------------------
+function sagradaFamilia() {
+  const k = new Kit();
+  const stone = '#c9b48e';
+  k.box(90, 45, 60, 0, 0, 0, stone, { glow: true });
+  k.box(40, 45, 110, 0, 0, 0, stone, { glow: true });
+  const spire = (x: number, z: number, h: number, r: number, top = '#e6c24a') => {
+    k.frustum(r, r * 0.35, h, x, 0, z, stone, 10, { glow: true });
+    k.sphere(r * 0.45, x, h + r * 0.3, z, top, { glow: true });
+  };
+  // The twelve apostles' towers on the three facades, the four evangelists and Jesus Christ at 172 m.
+  for (const z of [-60, 60]) for (const x of [-14, -5, 5, 14]) spire(x, z, 100 + Math.abs(x) * -1.2, 4);
+  for (const x of [-42, 42]) for (const z of [-10, 10]) spire(x, z, 105, 4);
+  for (const [x, z] of [[-12, -12], [12, -12], [-12, 12], [12, 12]]) spire(x, z, 135, 5.5, '#e8e2d6');
+  spire(22, 0, 138, 6, '#8fb0d6');
+  spire(0, 0, 172, 8, '#f2f2f2');
+  return k.build();
+}
+
+function torreGlories() {
+  const k = new Kit();
+  k.frustum(20, 18, 110, 0, 0, 0, '#d9434f', 32, { glow: true });
+  k.sphere(18, 0, 110, 0, '#4f7fc9', { half: true, sy: 1.45 });
+  return k.build();
+}
+
+// --- Lisbon -------------------------------------------------------------------------------
+function ponte25Abril() {
+  const red = '#c4402f';
+  return suspensionBridge({
+    span: 1013,
+    side: 483,
+    towerH: 190,
+    deckH: 70,
+    width: 24,
+    color: red,
+    cableColor: red,
+    deckColor: '#8a8f96',
+    hangers: 24,
+    tower: (k, x) => {
+      for (const z of [-11, 11]) k.box(9, 190, 7, x, 0, z, red, { glow: true });
+      for (const y of [60, 120, 175]) k.box(7, 6, 24, x, y, 0, red);
+    },
+  });
+}
+
+function belemTower() {
+  const k = new Kit();
+  const stone = '#ede4cc';
+  k.box(30, 10, 30, 0, 0, 0, stone);
+  k.box(18, 30, 18, -4, 10, 0, stone, { glow: true });
+  for (const [x, z] of [[-13, -9], [-13, 9], [5, -9], [5, 9]]) k.sphere(1.8, x, 42, z, stone, { half: true, sy: 1.5 });
+  k.box(12, 4, 12, -4, 40, 0, stone);
+  return k.build();
+}
+
+function santaJusta() {
+  const k = new Kit();
+  k.box(9, 45, 9, 0, 0, 0, '#5a5048', { glow: true });
+  k.box(11, 4, 11, 0, 45, 0, '#4a423c');
+  k.box(26, 2, 3, 13, 42, 0, '#4a423c');
+  return k.build();
+}
+
+// --- Istanbul -----------------------------------------------------------------------------
+function mosque(o: { dome: number; drum: number; minarets: [number, number][]; minH: number; base: [number, number]; color: string; domeColor: string }) {
+  const k = new Kit();
+  k.box(o.base[0], o.drum, o.base[1], 0, 0, 0, o.color, { glow: true });
+  // Semi-domes and half-domes as a smaller ring around the main dome.
+  for (const [x, z] of [[-o.dome * 0.9, 0], [o.dome * 0.9, 0]]) k.sphere(o.dome * 0.6, x, o.drum, z, o.domeColor, { half: true, sy: 0.9 });
+  k.frustum(o.dome, o.dome, 6, 0, o.drum, 0, o.color, 24, { glow: true });
+  k.sphere(o.dome, 0, o.drum + 6, 0, o.domeColor, { half: true, sy: 0.75 });
+  for (const [x, z] of o.minarets) {
+    k.frustum(2.4, 2, o.minH, x, 0, z, o.color, 12, { glow: true });
+    k.cone(2.3, 9, x, o.minH, z, o.domeColor, 12);
+  }
+  return k.build();
+}
+const hagiaSophia = () =>
+  mosque({ dome: 16, drum: 40, base: [80, 72], minH: 58, color: '#d8a888', domeColor: '#7f8e96', minarets: [[-42, -38], [42, -38], [-42, 38], [42, 38]] });
+const blueMosque = () =>
+  mosque({ dome: 12, drum: 32, base: [64, 64], minH: 64, color: '#e4ddd0', domeColor: '#6f8594', minarets: [[-40, -40], [40, -40], [-40, 40], [40, 40], [-70, -40], [-70, 40]] });
+
+function galataTower() {
+  const k = new Kit();
+  k.frustum(9, 8.5, 52, 0, 0, 0, '#c9b8a0', 24, { glow: true });
+  k.frustum(10, 10, 3, 0, 52, 0, '#b8a68c', 24);
+  k.cone(9, 14, 0, 55, 0, '#5a6a72', 24);
+  return k.build();
+}
+
+function bosphorusBridge() {
+  const col = '#c9ced4';
+  return suspensionBridge({
+    span: 1074,
+    side: 250,
+    towerH: 165,
+    deckH: 64,
+    width: 33,
+    color: col,
+    cableColor: col,
+    deckColor: '#7c828a',
+    hangers: 26,
+    tower: (k, x) => {
+      for (const z of [-15, 15]) k.box(8, 165, 6, x, 0, z, col, { glow: true });
+      k.box(6, 6, 32, x, 160, 0, col);
+    },
+  });
+}
+
+// --- Montreal -----------------------------------------------------------------------------
+function olympicStadium() {
+  const k = new Kit();
+  // The oval stadium and the inclined tower (45°), the world's tallest.
+  k.add(new THREE.CylinderGeometry(1, 1.12, 40, 40).scale(145, 1, 115).translate(0, 20, 0), '#dcd8cc', true);
+  k.add(new THREE.CylinderGeometry(1, 1, 3, 40).scale(90, 1, 70).translate(0, 41, 0), '#c8c6be');
+  k.leanBox(26, 165, 18, -150, 0, 0, '#dcd8cc', 0.62, true);
+  return k.build();
+}
+
+function biosphere() {
+  const k = new Kit();
+  k.sphere(38, 0, 30, 0, '#b8c6d0', { sy: 1 });
+  k.ring(38, 0.8, 0, 30, 0, '#8a9aa6');
+  k.ring(33, 0.7, 0, 50, 0, '#8a9aa6');
+  k.ring(33, 0.7, 0, 10, 0, '#8a9aa6');
+  return k.build();
+}
+
+function notreDameMontreal() {
+  const k = new Kit();
+  const stone = '#b8b0a2';
+  k.box(70, 28, 40, 0, 0, 0, stone, { glow: true });
+  k.hip(70, 40, 66, 4, 10, 0, 28, 0, '#6f7e84');
+  for (const z of [-15, 15]) k.box(12, 69, 12, 38, 0, z, stone, { glow: true });
+  return k.build();
+}
+
+// --- Dubai --------------------------------------------------------------------------------
+function burjKhalifa() {
+  const k = new Kit();
+  const glass = '#b9c9d8';
+  // The Y-plan tower stepping back in tiers to 828 m.
+  const tiers = [[0, 150, 62], [150, 150, 52], [300, 150, 42], [450, 110, 32], [560, 70, 22], [630, 40, 14]];
+  for (const [y, h, w] of tiers) for (let i = 0; i < 3; i++) {
+    const a = (i / 3) * Math.PI * 2;
+    k.box(w * 0.55, h, w * 0.38, Math.cos(a) * w * 0.3, y, Math.sin(a) * w * 0.3, glass, { rotY: -a, glow: true });
+  }
+  k.frustum(5, 0.4, 160, 0, 670, 0, '#d8e2ea', 8, { glow: true });
+  return k.build();
+}
+
+function burjAlArab() {
+  const k = new Kit();
+  // A sail on its own island: a curved white face and the exoskeleton mast.
+  for (let i = 0; i < 10; i++) {
+    const y = i * 32;
+    const w = 58 * Math.sin(((i + 1) / 11) * Math.PI * 0.9 + 0.3);
+    k.box(w, 32, 12, w / 2 - 10, y, 0, '#f2f2f0', { glow: true });
+  }
+  k.frustum(4, 1, 320, -12, 0, 0, '#c9ced4', 6);
+  k.frustum(35, 35, 3, 10, 0, 0, '#e8dcb8', 16);
+  return k.build();
+}
+
+function museumOfTheFuture() {
+  const k = new Kit();
+  k.add(new THREE.TorusGeometry(40, 18, 12, 32).rotateY(Math.PI / 2).scale(1, 1.2, 0.8).translate(0, 50, 0), '#d8dde2', true);
+  k.box(40, 10, 60, 0, 0, 0, '#b8c8a0');
+  return k.build();
+}
+
 export const ROUND4_LANDMARKS: Record<'budapest' | 'milan' | 'rome' | 'philadelphia' | 'prague' | 'naples' | 'barcelona' | 'lisbon' | 'istanbul' | 'montreal' | 'dubai', Placed[]> = {
-  prague: [],
-  naples: [],
-  barcelona: [],
-  lisbon: [],
-  istanbul: [],
-  montreal: [],
-  dubai: [],
+  prague: [
+    { build: praguecastle, at: [14.40043, 50.09046], face: [14.4004, 50.0960], clear: 140 },
+    { build: charlesBridge, at: [14.41143, 50.08649], toward: [14.41436, 50.08641], cutHalf: 270 },
+    { build: dancingHouse, at: [14.41423, 50.07549], clear: 20 },
+  ],
+  naples: [
+    { build: vesuvius, at: [14.4260, 40.8215], clear: 2600 },
+    { build: castelNuovo, at: [14.25256, 40.83833], clear: 70 },
+    { build: galleriaUmberto, at: [14.24963, 40.83866], clear: 60 },
+  ],
+  barcelona: [
+    { build: sagradaFamilia, at: [2.17435, 41.40363], rot: 0.78, clear: 80 },
+    { build: torreGlories, at: [2.18939, 41.40338], clear: 25 },
+  ],
+  lisbon: [
+    { build: ponte25Abril, at: [-9.17737, 38.69232], toward: [-9.1738, 38.6832], cutHalf: 700 },
+    { build: belemTower, at: [-9.21596, 38.69157], clear: 25 },
+    { build: santaJusta, at: [-9.13939, 38.71207], clear: 8 },
+  ],
+  istanbul: [
+    { build: hagiaSophia, at: [28.98019, 41.00857], rot: 0.3, clear: 60 },
+    { build: blueMosque, at: [28.97684, 41.00541], rot: 0.3, clear: 70 },
+    { build: galataTower, at: [28.97414, 41.02562], clear: 15 },
+    { build: bosphorusBridge, at: [29.03572, 41.04523], toward: [29.0402, 41.0476], cutHalf: 800 },
+  ],
+  montreal: [
+    { build: olympicStadium, at: [-73.55167, 45.55833], rot: 0.35, clear: 180 },
+    { build: biosphere, at: [-73.53162, 45.51408], clear: 45 },
+    { build: notreDameMontreal, at: [-73.55614, 45.50448], face: [-73.5570, 45.5037], clear: 45 },
+  ],
+  dubai: [
+    { build: burjKhalifa, at: [55.27437, 25.19716], clear: 60 },
+    { build: burjAlArab, at: [55.18532, 25.14124], rot: 0.9, clear: 30 },
+    { build: museumOfTheFuture, at: [55.28174, 25.21925], clear: 30 },
+  ],
 
   budapest: [
     { build: parliament, at: [19.04573, 47.50706], face: [19.0472, 47.5125], clear: 90 },
