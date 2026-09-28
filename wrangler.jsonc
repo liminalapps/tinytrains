@@ -53,7 +53,8 @@
     { "binding": "PHILADELPHIA", "service": "tinytrains-philadelphia" },
     { "binding": "MILAN", "service": "tinytrains-milan" },
     { "binding": "ROME", "service": "tinytrains-rome" },
-    { "binding": "PRAGUE", "service": "tinytrains-prague" }
+    { "binding": "PRAGUE", "service": "tinytrains-prague" },
+    { "binding": "DUBAI", "service": "tinytrains-dubai" }
   ],
   "observability": { "enabled": true }
 }
