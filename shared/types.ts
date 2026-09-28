@@ -40,7 +40,14 @@ export type CityId =
   | 'budapest'
   | 'milan'
   | 'rome'
-  | 'philadelphia';
+  | 'philadelphia'
+  | 'prague'
+  | 'naples'
+  | 'barcelona'
+  | 'lisbon'
+  | 'istanbul'
+  | 'montreal'
+  | 'dubai';
 
 /** Flat coordinate list: [x0, y0, x1, y1, ...] in meters. */
 export type Flat = number[];

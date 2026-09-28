@@ -11,7 +11,7 @@ import type { CityId } from '../../shared/types.ts';
 
 const ROOT = resolve(import.meta.dirname, '..', '..');
 const CACHE = join(ROOT, '.cache', 'og');
-const BASE = process.env.OG_BASE ?? 'http://localhost:5173';
+const BASE = process.env.OG_BASE ?? 'http://[::1]:5173'; // IPv6: another local app can hold 127.0.0.1:5173
 const tsx = join(ROOT, 'node_modules', '.bin', 'tsx');
 
 // Close enough to see buildings and trains, framed so the card (bottom left) covers little of interest.
@@ -45,6 +45,7 @@ const VIEWS: Partial<Record<CityId, string>> = {
   wuhan: '30.5480,114.2930,1600',
   hangzhou: '30.2560,120.1700,1800',  sydney: '-33.8620,151.2100,1500',
   budapest: '47.5020,19.0450,1500', milan: '45.4650,9.1900,1400', rome: '41.8960,12.4850,1600', philadelphia: '39.9530,-75.1600,1600',
+  prague: '50.0870,14.4190,1500', naples: '40.8420,14.2500,1600', barcelona: '41.3900,2.1700,1600', lisbon: '38.7110,-9.1390,1400', istanbul: '41.0150,28.9780,1800', montreal: '45.5040,-73.5670,1600', dubai: '25.1970,55.2750,2200',
   guangzhou: '23.1120,113.3230,1700',
   shenzhen: '22.5400,114.0550,1700',  oslo: '59.9110,10.7450,1400',
   helsinki: '60.1700,24.9450,1400',

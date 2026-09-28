@@ -90,6 +90,7 @@ const TRAIN_SVG = `<svg viewBox="0 0 64 40" aria-hidden="true"><rect x="3" y="5"
 const FIRST_TRAIN: Record<CityId, number> = { nyc: 0, sf: 5, london: 5, paris: 5.5, berlin: 4.5, madrid: 6, tokyo: 5, seoul: 5.5, hongkong: 6,
   washington: 5, chicago: 0, boston: 5, mexicocity: 5, saopaulo: 4.67, moscow: 5.5, stockholm: 0, vienna: 5, helsinki: 5.5, amsterdam: 6, oslo: 5.5, cairo: 5, delhi: 5.5, shanghai: 5.5, beijing: 5, guangzhou: 6, shenzhen: 6.5, chengdu: 6, hangzhou: 6, wuhan: 6, chongqing: 6.5, osaka: 5, taipei: 6, singapore: 5.5, sydney: 4.5,
   budapest: 4.5, milan: 5.5, rome: 5.5, philadelphia: 5,
+  prague: 4.75, naples: 6, barcelona: 5, lisbon: 6.5, istanbul: 6, montreal: 5.5, dubai: 5,
 };
 const asleepNow = (city: CityId) => {
   const h = localHour(city, Date.now());
@@ -468,6 +469,13 @@ export class UI {
   }
 
   private summary: Record<string, { trains: number; live: number }> = {};
+  private pickerSort: 'region' | 'busy' = (() => {
+    try {
+      return localStorage.getItem('tt-picker-sort') === 'busy' ? 'busy' : 'region';
+    } catch {
+      return 'region';
+    }
+  })();
 
   // -------------------------------------------------------------------------
   // Search
@@ -598,8 +606,22 @@ export class UI {
       inner.innerHTML = `<button class="picker-close" aria-label="Close">×</button>
         <h2>Where to?</h2>
         <p class="world-count"></p>
-        <label class="picker-filter">${SEARCH_SVG}<input type="text" placeholder="Find a city" autocomplete="off" spellcheck="false" aria-label="Find a city" /></label>
+        <div class="picker-tools">
+          <label class="picker-filter">${SEARCH_SVG}<input type="text" placeholder="Find a city or country" autocomplete="off" spellcheck="false" aria-label="Find a city or country" /></label>
+          <div class="picker-sort" role="group" aria-label="Sort cities"><button data-sort="region">By region</button><button data-sort="busy">Busiest now</button></div>
+        </div>
         <div class="picker-list"></div>`;
+      inner.querySelector('.picker-sort')!.addEventListener('click', (e) => {
+        const b = (e.target as HTMLElement).closest<HTMLElement>('[data-sort]');
+        if (!b) return;
+        this.pickerSort = b.dataset.sort === 'busy' ? 'busy' : 'region';
+        try {
+          localStorage.setItem('tt-picker-sort', this.pickerSort);
+        } catch {
+          /* private mode */
+        }
+        this.renderPicker();
+      });
       const input = inner.querySelector('input')!;
       input.addEventListener('input', () => {
         this.pickerFilter = input.value;
@@ -612,12 +634,14 @@ export class UI {
     }
     const now = Date.now();
     const cur = this.app.city?.id;
+    // Four regions, cities alphabetical within each (the keys 1–9 still reach the original nine).
     const regions: [string, CityId[]][] = [
-      ['Americas', ['nyc', 'sf', 'washington', 'chicago', 'boston', 'philadelphia', 'mexicocity', 'saopaulo']],
-      ['Europe', ['london', 'paris', 'berlin', 'madrid', 'moscow', 'stockholm', 'vienna', 'helsinki', 'amsterdam', 'oslo', 'budapest', 'milan', 'rome']],
-      ['Asia', ['tokyo', 'osaka', 'seoul', 'taipei', 'hongkong', 'shanghai', 'beijing', 'guangzhou', 'shenzhen', 'chengdu', 'hangzhou', 'wuhan', 'chongqing', 'singapore', 'delhi']],
-      ['Africa & Oceania', ['cairo', 'sydney']],
+      ['Americas', ['nyc', 'sf', 'washington', 'chicago', 'boston', 'philadelphia', 'montreal', 'mexicocity', 'saopaulo']],
+      ['Europe', ['london', 'paris', 'berlin', 'madrid', 'barcelona', 'lisbon', 'moscow', 'stockholm', 'vienna', 'helsinki', 'amsterdam', 'oslo', 'budapest', 'prague', 'milan', 'rome', 'naples', 'istanbul']],
+      ['Middle East & Africa', ['cairo', 'dubai']],
+      ['Asia-Pacific', ['tokyo', 'osaka', 'seoul', 'taipei', 'hongkong', 'shanghai', 'beijing', 'guangzhou', 'shenzhen', 'chengdu', 'hangzhou', 'wuhan', 'chongqing', 'singapore', 'delhi', 'sydney']],
     ];
+    for (const r of regions) r[1].sort((a, b) => CITIES[a].name.localeCompare(CITIES[b].name));
     const total = Object.values(this.summary).reduce((n, x) => n + x.trains, 0);
     inner.querySelector('.world-count')!.innerHTML = total
       ? `<b>${total.toLocaleString()}</b> trains moving across ${READY.length} cities right now`
@@ -644,17 +668,30 @@ export class UI {
           ? '<span class="t-count sleep">asleep</span>'
           : `<span class="t-count"><i class="${sum.live ? 'is-live' : 'is-sched'}"></i>${sum.trains.toLocaleString()} trains</span>`;
       return `<button class="ticket ${id === cur ? 'active' : ''}" style="--i:${Math.min(n++, 14)}" data-city="${id}">
+        <img class="t-map" src="/thumbs/${id}.svg" alt="" loading="lazy" onerror="this.remove()" />
         ${idx < 9 ? `<span class="t-key">${idx + 1}</span>` : ''}
         <span class="t-name">${esc(cfg.name)}${cfg.nameLocal ? ` <small>${esc(cfg.nameLocal)}</small>` : ''}${cfg.country !== cfg.name ? `<em class="t-country">${esc(cfg.country)}</em>` : ''}</span>
         <span class="t-meta">${wxIcon(w, h < 6 || h >= 19)}<span>${esc(localTime(id, now))}</span>${w ? `<span class="t-temp">${Math.round(w.temp)}°</span>` : ''}</span>
         ${count}
       </button>`;
     };
-    const html = regions
-      .map(([name, ids]) => [name, ids.filter((id) => READY.includes(id) && match(id))] as const)
-      .filter(([, ids]) => ids.length)
-      .map(([name, ids]) => `<h3>${name}</h3><div class="picker-row">${ids.map(ticket).join('')}</div>`)
-      .join('');
+    // Busiest now: one list by trains running (asleep and unknown last); otherwise by region.
+    const busy = (id: CityId) => {
+      const x = this.summary[id];
+      return x ? x.trains : -1;
+    };
+    const html =
+      this.pickerSort === 'busy'
+        ? (() => {
+            const ids = regions.flatMap(([, ids]) => ids).filter((id) => READY.includes(id) && match(id)).sort((a, b) => busy(b) - busy(a));
+            return ids.length ? `<div class="picker-row">${ids.map(ticket).join('')}</div>` : '';
+          })()
+        : regions
+            .map(([name, ids]) => [name, ids.filter((id) => READY.includes(id) && match(id))] as const)
+            .filter(([, ids]) => ids.length)
+            .map(([name, ids]) => `<h3>${name}</h3><div class="picker-row">${ids.map(ticket).join('')}</div>`)
+            .join('');
+    inner.querySelectorAll<HTMLElement>('.picker-sort button').forEach((b) => b.classList.toggle('on', b.dataset.sort === this.pickerSort));
     const list = inner.querySelector<HTMLElement>('.picker-list')!;
     // Only the first render after opening plays the entrance; refreshes and filtering swap cards quietly.
     list.classList.toggle('quiet', list.dataset.shown === '1');

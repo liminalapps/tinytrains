@@ -390,7 +390,15 @@ function independenceHall() {
   return k.build();
 }
 
-export const ROUND4_LANDMARKS: Record<'budapest' | 'milan' | 'rome' | 'philadelphia', Placed[]> = {
+export const ROUND4_LANDMARKS: Record<'budapest' | 'milan' | 'rome' | 'philadelphia' | 'prague' | 'naples' | 'barcelona' | 'lisbon' | 'istanbul' | 'montreal' | 'dubai', Placed[]> = {
+  prague: [],
+  naples: [],
+  barcelona: [],
+  lisbon: [],
+  istanbul: [],
+  montreal: [],
+  dubai: [],
+
   budapest: [
     { build: parliament, at: [19.04573, 47.50706], face: [19.0472, 47.5125], clear: 90 },
     { build: chainBridge, at: [19.0436, 47.49893], toward: [19.0477, 47.49955], cutHalf: 200 },
