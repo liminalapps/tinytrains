@@ -49,7 +49,8 @@
     { "binding": "SHENZHEN", "service": "tinytrains-shenzhen" },
     { "binding": "OSLO", "service": "tinytrains-oslo" },
     { "binding": "HELSINKI", "service": "tinytrains-helsinki" },
-    { "binding": "BUDAPEST", "service": "tinytrains-budapest" }
+    { "binding": "BUDAPEST", "service": "tinytrains-budapest" },
+    { "binding": "PHILADELPHIA", "service": "tinytrains-philadelphia" }
   ],
   "observability": { "enabled": true }
 }

@@ -57,4 +57,5 @@ export const CITY_DATA: Record<string, string[]> = {
   oslo: ['server/data/oslo/schedule.json'],
   helsinki: ['server/data/helsinki/schedule.json'],
   budapest: ['server/data/budapest/schedule.json'],
+  philadelphia: ['server/data/philadelphia/schedule.json'],
 };

@@ -373,7 +373,7 @@ export const CITIES: Record<CityId, CityConfig> = {
     name: 'Philadelphia',
     tz: 'America/New_York',
     origin: [-75.16, 39.95],
-    bbox: [-75.3, 39.85, -74.98, 40.1],
+    bbox: [-75.3, 39.825, -74.98, 40.1],
     view: { center: [-75.162, 39.952], span: 2600 },
     tagline: 'SEPTA Metro, Trolleys & PATCO',
   },
