@@ -29,8 +29,10 @@ or add `?theme=` to any link:
 | **Blueprint** (`blueprint`) | Drafted in white ink on engineer's blue: outlined buildings, a ruled grid, lines in colored pencil. |
 | **NYC Subway** (`subway`) | The New York City Subway's signage: black signs with a thin white rule, Helvetica, route bullets, and a diagram-clean map with white-cased lines. |
 | **Neon** (`neon`) | A synthwave night: lines and trains lit from within, the coast traced in pink, a soft bloom. |
-| **Pixel** (`pixel`) | A 90s tycoon-game city: a two-pixel grid, dark sprite outlines, hard shadows, banded warm/cool shading. |
-| **Voxel** (`voxel`) | The whole city rebuilt in blocks: stepped coasts, block parks, cube houses and trees. The blocks grow as you zoom out. |
+| **Pixel** (`pixel`) | A SimCity 2000 city: SVGA pixels, grass tiles, asphalt roads with lane dashes, a black void and gray bevelled windows. |
+| **Voxel** (`voxel`) | The whole city rebuilt in bright blocks, Minecraft Dungeons style: stepped coasts, block parks, cube houses and trees. Buildings keep their real angles; the ground's blocks grow as you zoom out. |
+| **Monet** (`monet`) | An impressionist painting: brushstrokes that stay the same size at every zoom, lilac shadows, water-lily blues. |
+| **Cubism** (`cubism`) | The city broken into planes, in ochre, olive and slate, with dark outlines and cut-paper panels. |
 
 A theme is a *look*, not a filter: every material (ground, water, roads, buildings, houses, trees, landmarks, lines,
 trains) reads its palette and treatment from one set of shared uniforms (`src/themes/look.ts`), so the style is

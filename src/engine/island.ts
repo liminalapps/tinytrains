@@ -142,6 +142,69 @@ float lkGrid(vec3 w) {
   float l1 = 1.0 - smoothstep(0.3, 1.1, min(g1.x, g1.y));
   return max(l0 * (1.0 - f), l1);
 }
+/** Brushstrokes: overlapping elongated dabs laid along a slowly turning flow; returns the top dab's tone (0..1). */
+float lkBrushAt(vec2 p) {
+  vec2 g = floor(p);
+  float flow = vnoise(p * 0.07) * 3.1416;
+  float best = 0.0, tone = 0.5;
+  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {
+    vec2 o = vec2(float(x), float(y));
+    vec2 c = g + o + vec2(hash12(g + o), hash12(g + o + 5.3));
+    float a = flow + (hash12(g + o + 9.1) - 0.5) * 0.9;
+    vec2 d = mat2(cos(a), -sin(a), sin(a), cos(a)) * (p - c);
+    float w = 1.0 - smoothstep(0.35, 0.75, length(d * vec2(0.55, 1.7)));
+    w *= 0.6 + 0.4 * hash12(g + o + 2.2);
+    if (w > best) { best = w; tone = hash12(g + o + 4.4); }
+  }
+  return mix(0.5, tone, smoothstep(0.0, 0.3, best));
+}
+/** Strokes about 24 px across at any zoom, crossfading between powers of two. */
+float lkBrush(vec3 w) {
+  float lv = log2(max(uMpp, 0.05) * 24.0);
+  float s0 = exp2(floor(lv));
+  float f = smoothstep(0.0, 1.0, fract(lv));
+  return mix(lkBrushAt(w.xz / s0), lkBrushAt(w.xz / (s0 * 2.0) + 31.7), f);
+}
+/** Cubist planes: jittered cells; returns a per-plane shade (-1..1) and an edge weight (0..1). */
+vec2 lkFacetAt(vec2 p, float px) {
+  vec2 g = floor(p);
+  vec2 f = fract(p);
+  float d1 = 8.0, d2 = 8.0, id = 0.0;
+  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) {
+    vec2 o = vec2(float(x), float(y));
+    vec2 h = vec2(hash12(g + o), hash12(g + o + 7.31));
+    vec2 r = o + 0.1 + h * 0.8 - f;
+    float d = max(abs(r.x * 0.87 + r.y * 0.5), max(abs(r.x * 0.87 - r.y * 0.5), abs(r.y)));
+    if (d < d1) { d2 = d1; d1 = d; id = hash12(g + o + 3.7); }
+    else if (d < d2) d2 = d;
+  }
+  return vec2(id * 2.0 - 1.0, 1.0 - smoothstep(0.6 * px, 1.4 * px, (d2 - d1) * 0.5));
+}
+vec2 lkFacet(vec3 w) {
+  float lv = log2(max(uMpp, 0.05) * 70.0);
+  float s0 = exp2(floor(lv));
+  float f = smoothstep(0.0, 1.0, fract(lv));
+  float px0 = uMpp / s0;
+  vec2 a = lkFacetAt(w.xz / s0, px0);
+  vec2 b = lkFacetAt(w.xz / (s0 * 2.0) + 13.1, px0 * 0.5);
+  return mix(a, b, f);
+}
+/** The painterly and cubist treatments, blending a surface's color toward an alternate tone. */
+vec3 lkPaint(vec3 col, vec3 alt, vec3 w) {
+  if (uLk_brushK > 0.001) {
+    float b = lkBrush(w);
+    col = mix(col, alt, smoothstep(0.45, 0.8, b) * 0.9 * uLk_brushK);
+    // Impressionist shade: cool lilac dabs rather than darker paint.
+    col = mix(col, col * vec3(0.9, 0.86, 1.06), smoothstep(0.38, 0.12, b) * 0.9 * uLk_brushK);
+  }
+  if (uLk_facetK > 0.001) {
+    vec2 fc = lkFacet(w);
+    col = mix(col, alt, (fc.x * 0.5 + 0.5) * 0.6 * uLk_facetK);
+    col *= 1.0 + fc.x * 0.08 * uLk_facetK;
+    col = mix(col, uLk_facetEdge, fc.y * 0.3 * uLk_facetK);
+  }
+  return col;
+}
 /** Voxel ground at block size V: every cell takes one material (water, beach, park or land) from its center. */
 vec3 voxelCell(vec3 w, float V, out float isWater) {
   vec2 cell = floor(w.xz / V);
@@ -164,8 +227,8 @@ vec3 voxelCell(vec3 w, float V, out float isWater) {
   } else {
     bool park = greenAt(cc) > 0.5;
     if (d < min(V * 1.3, 36.0) && !park) col = uLk_sand * (0.95 + 0.07 * h);
-    else if (park) col = uLk_park * (0.9 + 0.16 * h);
-    else col = uLk_land * (0.955 + 0.06 * h);
+    else if (park) col = uLk_park * (0.86 + 0.22 * h);
+    else col = uLk_land * (0.92 + 0.13 * h);
     // A lit top-left edge and a shaded bottom-right edge on each block.
     col *= 1.0 + 0.08 * (1.0 - step(0.1, f.y)) - 0.07 * step(0.9, f.x);
   }
@@ -220,6 +283,7 @@ function landMaterial() {
         diffuseColor.rgb = uLk_land;
         float n = vnoise(vWorld.xz / 2600.0) * 0.6 + vnoise(vWorld.xz / 700.0) * 0.4;
         diffuseColor.rgb = mix(diffuseColor.rgb, uLk_land2, smoothstep(0.35, 0.75, n) * uLk_detail);
+        diffuseColor.rgb = lkPaint(diffuseColor.rgb, uLk_land2, vWorld);
         float d = sdfAt(vWorld);
         float beach = max(50.0, uMpp * 5.0);
         diffuseColor.rgb = mix(uLk_sand, diffuseColor.rgb, smoothstep(beach * 0.25, beach, d));
@@ -307,6 +371,7 @@ function waterMaterial() {
       // Night: ink-blue water; the coast lines and glints pick up moonlight.
       vec3 nightCol = ${glslColor(NIGHT.water)} * (1.0 + 0.25 * (1.0 - deepK));
       nightCol += vec3(0.42, 0.55, 0.9) * (rings * 0.35 * K + foamAmt * 0.3 + glint * 0.8 + caust * 0.12);
+      col = lkPaint(col, mix(uLk_waterShallow, uLk_foam, 0.45), vWorld);
       diffuseColor.rgb = mix(col, nightCol, uNight * 0.88 * uLk_nightK);
       // Neon traces only a thin band at the shore (the lacy foam would light up whole narrow rivers).
       float glowW = (rings * 0.5 * uLk_detail + 1.0 - smoothstep(fd, fw * 0.4, d)) * uLk_coastGlowK * mix(1.0, 0.45, smoothstep(4.0, 20.0, uMpp));
@@ -336,7 +401,8 @@ function flatMaterial(role: 'park' | 'green' | 'sand' | 'airport' | 'runway', ni
     sh.fragmentShader = sh.fragmentShader.replace(
       '#include <color_fragment>',
       `${voxelDiscard}
-      diffuseColor.rgb = uLk_${role} * (1.0 - ${noiseAmt.toFixed(3)} * uLk_detail + ${(noiseAmt * 2).toFixed(3)} * uLk_detail * vnoise(vWorld.xz / 180.0));${nightMix(night)}`,
+      diffuseColor.rgb = uLk_${role} * (1.0 - ${noiseAmt.toFixed(3)} * uLk_detail + ${(noiseAmt * 2).toFixed(3)} * uLk_detail * vnoise(vWorld.xz / 180.0));
+      diffuseColor.rgb = lkPaint(diffuseColor.rgb, ${role === 'park' ? 'uLk_green' : role === 'green' ? 'uLk_park' : 'uLk_land2'}, vWorld);${nightMix(night)}`,
     );
   });
 }
@@ -616,6 +682,12 @@ export class Island implements Layer {
       diffuseColor.rgb = vKind < 0.5 ? uLk_motorway : uLk_road;
       float edge = smoothstep(0.72, 1.0, abs(vSide));
       diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * 0.9, edge);
+      // Pixel (SimCity): dashed center lines, only once a road is wide enough on screen to carry them.
+      if (abs(uLk_style - 4.0) < 0.5) {
+        float halfPx = 1.0 / max(fwidth(vSide), 1e-3);
+        float dash = step(abs(vSide), max(0.07, 0.6 / halfPx)) * step(fract(vDist / 9.0), 0.5) * smoothstep(3.0, 6.0, halfPx);
+        diffuseColor.rgb = mix(diffuseColor.rgb, vKind < 0.5 ? vec3(0.95, 0.8, 0.25) : vec3(0.92, 0.92, 0.88), dash);
+      }
       `,
     );
     roadMat.onBeforeCompile = ((orig) => (sh: THREE.WebGLProgramParametersWithUniforms, r: THREE.WebGLRenderer) => {

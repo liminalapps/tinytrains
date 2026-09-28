@@ -187,12 +187,13 @@ export const VOXEL_SNAP_GLSL = /* glsl */ `
 mat4 lkSnap(mat4 m) {
   float V = uLk_voxel;
   if (V < 0.8) return m;
+  // Sizes step to whole blocks; each box keeps its own orientation and position. A small per-box nudge keeps
+  // neighbors that round to the same size from sharing a wall or roof plane (z-fighting).
   vec3 sc = vec3(length(m[0].xyz), length(m[1].xyz), length(m[2].xyz));
-  vec3 p = m[3].xyz;
-  if (abs(m[0].x) < 0.7071 * sc.x) sc.xz = sc.zx;
   vec3 s = max(vec3(V), floor(sc / V + 0.5) * V);
-  vec2 lo = floor((p.xz - s.xz * 0.5) / V + 0.5) * V;
-  return mat4(vec4(s.x, 0.0, 0.0, 0.0), vec4(0.0, s.y, 0.0, 0.0), vec4(0.0, 0.0, s.z, 0.0), vec4(lo.x + s.x * 0.5, p.y, lo.y + s.z * 0.5, 1.0));
+  float j = fract(sin(dot(m[3].xz, vec2(12.9898, 78.233))) * 43758.5453);
+  s += vec3(0.12, 0.3, 0.12) * j;
+  return mat4(vec4(m[0].xyz * (s.x / sc.x), 0.0), vec4(m[1].xyz * (s.y / sc.y), 0.0), vec4(m[2].xyz * (s.z / sc.z), 0.0), m[3]);
 }
 `;
 
@@ -278,6 +279,7 @@ function makeMaterial(city: CityId) {
           float ve = min(min(vq.x, 1.0 - vq.x), min(vq.y, 1.0 - vq.y)) * vpx;
           diffuseColor.rgb *= 1.0 + vshow * (0.06 * (bh(floor(vf) + vSeed * 13.0) - 0.5) - 0.12 * (1.0 - smoothstep(0.3, 1.2, ve)));
         }
+        diffuseColor.rgb = mix(vec3(dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11))), diffuseColor.rgb, uLk_bSat);
         // Silhouette edges, drawn here rather than by a screen filter so they stay crisp and quiet: they fade
         // out once a building is only a few pixels across.
         if (uLk_bEdgeK > 0.001) {

@@ -4,6 +4,7 @@ export interface CityConfig {
   id: CityId;
   name: string;
   nameLocal?: string;
+  country: string;
   tz: string; // IANA timezone
   /** Projection origin [lon, lat]. */
   origin: [number, number];
@@ -18,6 +19,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   nyc: {
     id: 'nyc',
     name: 'New York',
+    country: 'United States',
     tz: 'America/New_York',
     origin: [-73.98, 40.705],
     bbox: [-74.26, 40.49, -73.7, 40.92],
@@ -27,6 +29,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   sf: {
     id: 'sf',
     name: 'San Francisco',
+    country: 'United States',
     tz: 'America/Los_Angeles',
     origin: [-122.14, 37.67],
     bbox: [-122.54, 37.29, -121.74, 38.05],
@@ -36,6 +39,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   london: {
     id: 'london',
     name: 'London',
+    country: 'United Kingdom',
     tz: 'Europe/London',
     origin: [-0.145, 51.525],
     bbox: [-0.63, 51.33, 0.34, 51.72],
@@ -45,6 +49,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   paris: {
     id: 'paris',
     name: 'Paris',
+    country: 'France',
     tz: 'Europe/Paris',
     origin: [2.35, 48.86],
     bbox: [2.08, 48.7, 2.62, 49.03],
@@ -54,6 +59,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   berlin: {
     id: 'berlin',
     name: 'Berlin',
+    country: 'Germany',
     tz: 'Europe/Berlin',
     origin: [13.4, 52.52],
     bbox: [13.08, 52.36, 13.76, 52.68],
@@ -63,6 +69,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   madrid: {
     id: 'madrid',
     name: 'Madrid',
+    country: 'Spain',
     tz: 'Europe/Madrid',
     origin: [-3.7, 40.42],
     bbox: [-3.9, 40.27, -3.52, 40.56],
@@ -72,6 +79,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   seoul: {
     id: 'seoul',
     name: 'Seoul',
+    country: 'South Korea',
     nameLocal: '서울',
     tz: 'Asia/Seoul',
     origin: [126.98, 37.55],
@@ -82,6 +90,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   hongkong: {
     id: 'hongkong',
     name: 'Hong Kong',
+    country: 'Hong Kong SAR, China',
     nameLocal: '香港',
     tz: 'Asia/Hong_Kong',
     origin: [114.17, 22.32],
@@ -92,6 +101,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   tokyo: {
     id: 'tokyo',
     name: 'Tokyo',
+    country: 'Japan',
     nameLocal: '東京',
     tz: 'Asia/Tokyo',
     origin: [139.78, 35.68],
@@ -102,6 +112,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   washington: {
     id: 'washington',
     name: 'Washington',
+    country: 'United States',
     tz: 'America/New_York',
     origin: [-77.03, 38.9],
     bbox: [-77.51, 38.755, -76.83, 39.13],
@@ -111,6 +122,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   chicago: {
     id: 'chicago',
     name: 'Chicago',
+    country: 'United States',
     tz: 'America/Chicago',
     origin: [-87.68, 41.88],
     bbox: [-87.95, 41.71, -87.56, 42.085],
@@ -120,6 +132,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   boston: {
     id: 'boston',
     name: 'Boston',
+    country: 'United States',
     tz: 'America/New_York',
     origin: [-71.07, 42.35],
     bbox: [-71.27, 42.195, -70.95, 42.45],
@@ -129,6 +142,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   mexicocity: {
     id: 'mexicocity',
     name: 'Mexico City',
+    country: 'Mexico',
     nameLocal: 'Ciudad de México',
     tz: 'America/Mexico_City',
     origin: [-99.13, 19.43],
@@ -139,6 +153,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   saopaulo: {
     id: 'saopaulo',
     name: 'São Paulo',
+    country: 'Brazil',
     tz: 'America/Sao_Paulo',
     origin: [-46.63, -23.55],
     bbox: [-46.85, -23.78, -46.42, -23.4],
@@ -148,6 +163,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   moscow: {
     id: 'moscow',
     name: 'Moscow',
+    country: 'Russia',
     nameLocal: 'Москва',
     tz: 'Europe/Moscow',
     origin: [37.62, 55.75],
@@ -158,6 +174,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   stockholm: {
     id: 'stockholm',
     name: 'Stockholm',
+    country: 'Sweden',
     tz: 'Europe/Stockholm',
     origin: [18.05, 59.33],
     bbox: [17.8, 59.23, 18.24, 59.42],
@@ -167,6 +184,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   vienna: {
     id: 'vienna',
     name: 'Vienna',
+    country: 'Austria',
     nameLocal: 'Wien',
     tz: 'Europe/Vienna',
     origin: [16.37, 48.21],
@@ -177,6 +195,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   helsinki: {
     id: 'helsinki',
     name: 'Helsinki',
+    country: 'Finland',
     tz: 'Europe/Helsinki',
     origin: [24.94, 60.19],
     bbox: [24.62, 60.12, 25.22, 60.34],
@@ -186,6 +205,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   amsterdam: {
     id: 'amsterdam',
     name: 'Amsterdam',
+    country: 'Netherlands',
     tz: 'Europe/Amsterdam',
     origin: [4.9, 52.36],
     bbox: [4.7, 52.28, 5.06, 52.43],
@@ -195,6 +215,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   oslo: {
     id: 'oslo',
     name: 'Oslo',
+    country: 'Norway',
     tz: 'Europe/Oslo',
     origin: [10.75, 59.92],
     bbox: [10.45, 59.84, 10.95, 60.0],
@@ -204,6 +225,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   cairo: {
     id: 'cairo',
     name: 'Cairo',
+    country: 'Egypt',
     nameLocal: 'القاهرة',
     tz: 'Africa/Cairo',
     origin: [31.24, 30.05],
@@ -214,6 +236,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   delhi: {
     id: 'delhi',
     name: 'Delhi',
+    country: 'India',
     nameLocal: 'दिल्ली',
     tz: 'Asia/Kolkata',
     origin: [77.2, 28.63],
@@ -224,6 +247,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   shanghai: {
     id: 'shanghai',
     name: 'Shanghai',
+    country: 'China',
     nameLocal: '上海',
     tz: 'Asia/Shanghai',
     origin: [121.47, 31.23],
@@ -234,6 +258,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   beijing: {
     id: 'beijing',
     name: 'Beijing',
+    country: 'China',
     nameLocal: '北京',
     tz: 'Asia/Shanghai',
     origin: [116.4, 39.91],
@@ -244,6 +269,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   guangzhou: {
     id: 'guangzhou',
     name: 'Guangzhou',
+    country: 'China',
     nameLocal: '广州',
     tz: 'Asia/Shanghai',
     origin: [113.32, 23.13],
@@ -254,6 +280,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   shenzhen: {
     id: 'shenzhen',
     name: 'Shenzhen',
+    country: 'China',
     nameLocal: '深圳',
     tz: 'Asia/Shanghai',
     origin: [114.05, 22.55],
@@ -264,6 +291,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   chengdu: {
     id: 'chengdu',
     name: 'Chengdu',
+    country: 'China',
     nameLocal: '成都',
     tz: 'Asia/Shanghai',
     origin: [104.07, 30.66],
@@ -274,6 +302,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   hangzhou: {
     id: 'hangzhou',
     name: 'Hangzhou',
+    country: 'China',
     nameLocal: '杭州',
     tz: 'Asia/Shanghai',
     origin: [120.17, 30.26],
@@ -284,6 +313,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   wuhan: {
     id: 'wuhan',
     name: 'Wuhan',
+    country: 'China',
     nameLocal: '武汉',
     tz: 'Asia/Shanghai',
     origin: [114.3, 30.58],
@@ -294,6 +324,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   chongqing: {
     id: 'chongqing',
     name: 'Chongqing',
+    country: 'China',
     nameLocal: '重庆',
     tz: 'Asia/Shanghai',
     origin: [106.55, 29.56],
@@ -304,6 +335,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   osaka: {
     id: 'osaka',
     name: 'Osaka',
+    country: 'Japan',
     nameLocal: '大阪',
     tz: 'Asia/Tokyo',
     origin: [135.5, 34.69],
@@ -314,6 +346,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   taipei: {
     id: 'taipei',
     name: 'Taipei',
+    country: 'Taiwan',
     nameLocal: '臺北',
     tz: 'Asia/Taipei',
     origin: [121.53, 25.05],
@@ -324,6 +357,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   singapore: {
     id: 'singapore',
     name: 'Singapore',
+    country: 'Singapore',
     tz: 'Asia/Singapore',
     origin: [103.83, 1.33],
     bbox: [103.6, 1.23, 104.05, 1.47],
@@ -333,6 +367,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   sydney: {
     id: 'sydney',
     name: 'Sydney',
+    country: 'Australia',
     tz: 'Australia/Sydney',
     origin: [151.15, -33.87],
     bbox: [150.89, -33.98, 151.3, -33.68],
@@ -342,6 +377,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   budapest: {
     id: 'budapest',
     name: 'Budapest',
+    country: 'Hungary',
     tz: 'Europe/Budapest',
     origin: [19.06, 47.5],
     bbox: [18.92, 47.4, 19.28, 47.6],
@@ -351,6 +387,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   milan: {
     id: 'milan',
     name: 'Milan',
+    country: 'Italy',
     nameLocal: 'Milano',
     tz: 'Europe/Rome',
     origin: [9.19, 45.465],
@@ -361,6 +398,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   rome: {
     id: 'rome',
     name: 'Rome',
+    country: 'Italy',
     nameLocal: 'Roma',
     tz: 'Europe/Rome',
     origin: [12.5, 41.89],
@@ -371,6 +409,7 @@ export const CITIES: Record<CityId, CityConfig> = {
   philadelphia: {
     id: 'philadelphia',
     name: 'Philadelphia',
+    country: 'United States',
     tz: 'America/New_York',
     origin: [-75.16, 39.95],
     bbox: [-75.3, 39.825, -74.98, 40.1],

@@ -85,5 +85,19 @@ export async function makePostcard(app: App): Promise<Blob | null> {
   g.font = '600 24px Fredoka, sans-serif';
   const when = new Intl.DateTimeFormat('en-US', { timeZone: CITIES[c.id].tz, weekday: 'long', hour: 'numeric', minute: '2-digit' }).format(Date.now());
   g.fillText(`Greetings from ${CITIES[c.id].name}! · ${when}`, pad + 240, pad + H + 58);
+  // The full link to this exact view (city, selection, theme and camera), right-aligned; shrinks to fit.
+  app.syncUrl();
+  const link = location.href.replace(/^https?:\/\//, '');
+  const greetEnd = pad + 240 + g.measureText(`Greetings from ${CITIES[c.id].name}! · ${when}`).width + 32;
+  const room = out.width - pad - 4 - greetEnd;
+  let lfs = 20;
+  g.font = `600 ${lfs}px Nunito, sans-serif`;
+  while (lfs > 13 && g.measureText(link).width > room) g.font = `600 ${--lfs}px Nunito, sans-serif`;
+  const fits = g.measureText(link).width <= room;
+  // A very long link (a train deep in a long URL) drops to its own line under the caption.
+  if (!fits) g.font = '600 15px Nunito, sans-serif';
+  g.textAlign = 'right';
+  g.fillStyle = '#6b7a90';
+  g.fillText(link, out.width - pad - 4, pad + H + (fits ? 57 : 84));
   return await new Promise((resolve) => out.toBlob((b) => resolve(b), 'image/png'));
 }

@@ -127,6 +127,7 @@ export class UI {
         <div class="sources" hidden></div>
       </header>
       <button class="city-switch" aria-haspopup="dialog" title="Change city (C)"></button>
+      <button class="tour-cta" data-act="tour" title="Tour: ride along from train to train (T)">${PLAY_SVG}<span class="tc-text">Tour the city</span></button>
       <div class="picker" hidden role="dialog" aria-label="Choose a city"><div class="picker-inner panel"></div></div>
       <div class="search" hidden role="dialog" aria-label="Search"><div class="search-inner panel">
         <div class="search-field">${SEARCH_SVG}<input type="search" placeholder="Search stations, lines, trains, cities…" autocomplete="off" spellcheck="false" /><button class="search-close" aria-label="Close">Esc</button></div>
@@ -140,7 +141,6 @@ export class UI {
       <aside class="card station-card panel" hidden></aside>
       <aside class="card line-card panel" hidden></aside>
       <div class="controls">
-        <button data-act="tour" class="tour-btn" title="Tour: ride along with random trains (T)">${PLAY_SVG}</button>
         <button data-act="zin" class="zoom" title="Zoom in (+)">+</button>
         <button data-act="zout" class="zoom" title="Zoom out (−)">−</button>
         <button data-act="compass" class="compass" title="Reset view (N)"><svg viewBox="0 0 24 24"><path d="M12 3l4 9h-8z" fill="#ff5a5f"/><path d="M12 21l-4-9h8z" fill="#9fb3c8"/></svg></button>
@@ -154,7 +154,6 @@ export class UI {
       <nav class="dock" aria-label="Tools">
         <button data-dock="lines">${LINES_SVG}<span>Lines</span></button>
         <button data-dock="fleet">${FLEET_SVG}<span>Fleet</span></button>
-        <button data-dock="tour" class="tour-btn">${PLAY_SVG}<span>Tour</span></button>
         <button data-dock="search">${SEARCH_SVG}<span>Search</span></button>
         <button data-dock="share">${SHARE_SVG}<span>Share</span></button>
       </nav>
@@ -205,6 +204,10 @@ export class UI {
       else if (act === 'share') void this.share();
     });
     this.$('.tp-stop').addEventListener('click', () => app.toggleTour(false));
+    this.$('.tour-cta').addEventListener('click', () => {
+      this.dismissHint();
+      app.toggleTour(true);
+    });
     this.$('.hint').innerHTML = TOUCH
       ? 'Pinch to zoom · twist to rotate · <b>tap any train</b>'
       : 'Drag to pan · scroll to zoom · right-drag to rotate · <b>click any train</b>';
@@ -472,6 +475,7 @@ export class UI {
     const h = localHour(cur, now);
     this.$('.city-switch').innerHTML = `<span class="cs-name">${esc(cfg.name)}${cfg.nameLocal ? ` <small>${esc(cfg.nameLocal)}</small>` : ''}</span>
       <span class="cs-meta">${wxIcon(w, h < 6 || h >= 19)}<span>${esc(localTime(cur, now))}</span>${w ? `<span class="t-temp">${Math.round(w.temp)}°</span>` : ''}</span>${CHEV}`;
+    this.$('.tc-text').textContent = `Tour ${cfg.name}`;
     if (shown(this.$('.picker'))) this.renderPicker();
   }
 
@@ -636,7 +640,7 @@ export class UI {
     const match = (id: CityId) => {
       const c = CITIES[id];
       if (!q) return true;
-      const words = fold(`${c.name} ${id}`).split(/[^\p{L}\p{N}]+/u);
+      const words = fold(`${c.name} ${id} ${c.country}`).split(/[^\p{L}\p{N}]+/u);
       return words.some((w) => w.startsWith(q)) || fold(c.name).startsWith(q) || (!!c.nameLocal && c.nameLocal.includes(this.pickerFilter.trim()));
     };
     let n = 0;
@@ -653,7 +657,7 @@ export class UI {
           : `<span class="t-count"><i class="${sum.live ? 'is-live' : 'is-sched'}"></i>${sum.trains.toLocaleString()} trains</span>`;
       return `<button class="ticket ${id === cur ? 'active' : ''}" style="--i:${Math.min(n++, 14)}" data-city="${id}">
         ${idx < 9 ? `<span class="t-key">${idx + 1}</span>` : ''}
-        <span class="t-name">${esc(cfg.name)}${cfg.nameLocal ? ` <small>${esc(cfg.nameLocal)}</small>` : ''}</span>
+        <span class="t-name">${esc(cfg.name)}${cfg.nameLocal ? ` <small>${esc(cfg.nameLocal)}</small>` : ''}${cfg.country !== cfg.name ? `<em class="t-country">${esc(cfg.country)}</em>` : ''}</span>
         <span class="t-meta">${wxIcon(w, h < 6 || h >= 19)}<span>${esc(localTime(id, now))}</span>${w ? `<span class="t-temp">${Math.round(w.temp)}°</span>` : ''}</span>
         ${count}
       </button>`;

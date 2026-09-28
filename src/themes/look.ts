@@ -7,7 +7,7 @@ import * as THREE from 'three';
 const c = (hex: string) => new THREE.Color(hex);
 
 /** Style ids used by shader branches. */
-export const STYLE = { toy: 0, clay: 1, blueprint: 2, neon: 3, pixel: 4, voxel: 5, subway: 6 } as const;
+export const STYLE = { toy: 0, clay: 1, blueprint: 2, neon: 3, pixel: 4, voxel: 5, subway: 6, monet: 7, cubism: 8 } as const;
 
 export interface LookConfig {
   style: number;
@@ -41,6 +41,11 @@ export interface LookConfig {
   coastGlowK: number;
   /** Voxel size in meters (0 = off). */
   voxel: number;
+  /** Painterly brushstrokes on the ground and water (Monet): strokes stay ~14 px wide at every zoom. */
+  brushK: number;
+  /** Cubist facets on the ground and water: angular planes ~70 px across with a hairline edge. */
+  facetK: number;
+  facetEdge: string;
   // Buildings
   bTint: string;
   bTintK: number;
@@ -55,6 +60,8 @@ export interface LookConfig {
   bEdge: string;
   bEdgeK: number;
   bEdgePx: number;
+  /** Saturation of buildings and houses (1 = as painted; voxel pushes it up). */
+  bSat: number;
   // Everything else
   suburbWall: string;
   suburbRoof: string;
@@ -101,6 +108,9 @@ export const TOY_LOOK: LookConfig = {
   coastGlow: '#ff2fb3',
   coastGlowK: 0,
   voxel: 0,
+  brushK: 0,
+  facetK: 0,
+  facetEdge: '#3a2f25',
   bTint: '#ffffff',
   bTintK: 0,
   bRoof: '#ffffff',
@@ -112,6 +122,7 @@ export const TOY_LOOK: LookConfig = {
   bEdge: '#000000',
   bEdgeK: 0,
   bEdgePx: 1,
+  bSat: 1,
   suburbWall: '#ffffff',
   suburbRoof: '#ffffff',
   suburbK: 0,

@@ -296,7 +296,7 @@ export class App {
     const t = activeTheme();
     this.city?.island.setTreeShape(t.trees);
     this.city?.clouds.setShown(t.clouds);
-    this.city?.suburbs?.setRoofs(t.trees !== 'cube');
+    this.city?.suburbs?.setRoofs(t.roofs ?? true);
   }
 
   private unload() {

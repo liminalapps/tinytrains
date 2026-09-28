@@ -556,7 +556,7 @@ function roofMaterial() {
     Object.assign(sh.uniforms, lookUniforms);
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', `#include <common>\n${LOOK_PARS}`)
-      .replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.rgb = mix(diffuseColor.rgb, uLk_suburbRoof * (0.8 + 0.4 * dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11))), uLk_suburbK);');
+      .replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.rgb = mix(diffuseColor.rgb, uLk_suburbRoof * (0.8 + 0.4 * dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11))), uLk_suburbK);\ndiffuseColor.rgb = mix(vec3(dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11))), diffuseColor.rgb, uLk_bSat);');
   };
   m.customProgramCacheKey = () => 'suburb-roofs';
   return m;
@@ -574,7 +574,7 @@ function windowMaterial() {
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvLocal = position;\nvLitSeed = fract(sin(dot(instanceMatrix[3].xz, vec2(12.9898, 78.233))) * 43758.5453);');
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', `#include <common>\nuniform float uNight;\nvarying float vLitSeed;\nvarying vec3 vLocal;\n${LOOK_PARS}`)
-      .replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.rgb = mix(diffuseColor.rgb, uLk_suburbWall * (0.8 + 0.4 * dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11))), uLk_suburbK);')
+      .replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.rgb = mix(diffuseColor.rgb, uLk_suburbWall * (0.8 + 0.4 * dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11))), uLk_suburbK);\ndiffuseColor.rgb = mix(vec3(dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11))), diffuseColor.rgb, uLk_bSat);')
       .replace(
         '#include <emissivemap_fragment>',
         `#include <emissivemap_fragment>

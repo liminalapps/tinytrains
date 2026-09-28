@@ -126,6 +126,22 @@ Typos are left as typed. Screenshots and reference images that came with a promp
 
 > keep going
 
+### 30. 2026-09-28 16:42 UTC
+
+> Include countries in the city list.  The themes should also theme the loading screen.  Let's add a couple more themes: Monet (painterly), Cubism. -- Move Follow to be a PRIMARY CTA button that's like has a play icon and "Tour City" or something
+
+### 31. 2026-09-28 16:46 UTC
+
+> Voxel mode has a bunch of zfighting, also voxel mode does NOT need to be axis aligned, would also like the colors on voxel mode to be more vibrant like minecraft dungeons or the sandbox.
+
+### 32. 2026-09-28 16:46 UTC
+
+> Pixel mode should look like simcity 2000 or simcity 3000, VESA/SVGA style graphics.
+
+### 33. 2026-09-28 16:52 UTC
+
+> Make sure that screenshot feature includes the full url for the app.
+
 ## Briefs given to agents
 
 ### nyc-data (new agent, 2026-09-24 17:48 UTC)
