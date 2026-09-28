@@ -1,0 +1,13 @@
+node_modules
+dist
+.cache
+.env
+*.log
+.DS_Store
+*.bin.gz
+.wrangler
+.dev.vars
+.env.*
+
+# Names to redact from docs/PROMPTS.md (one per line); kept out of the repo on purpose.
+.redact

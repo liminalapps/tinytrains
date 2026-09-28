@@ -1,0 +1,54 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "tinytrains",
+  "main": "worker/main.ts",
+  "workers_dev": false,
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    // The API and the page shell (per-URL OpenGraph tags) run code; data and assets come straight from the edge.
+    "run_worker_first": ["/api/*", "/", "/nyc", "/nyc/*", "/sf", "/sf/*", "/london", "/london/*", "/paris", "/paris/*", "/berlin", "/berlin/*", "/madrid", "/madrid/*", "/tokyo", "/tokyo/*", "/seoul", "/seoul/*", "/hongkong", "/hongkong/*", "/washington", "/washington/*", "/chicago", "/chicago/*", "/boston", "/boston/*", "/mexicocity", "/mexicocity/*", "/saopaulo", "/saopaulo/*", "/moscow", "/moscow/*", "/stockholm", "/stockholm/*", "/vienna", "/vienna/*", "/helsinki", "/helsinki/*", "/amsterdam", "/amsterdam/*", "/oslo", "/oslo/*", "/cairo", "/cairo/*", "/delhi", "/delhi/*", "/shanghai", "/shanghai/*", "/beijing", "/beijing/*", "/guangzhou", "/guangzhou/*", "/shenzhen", "/shenzhen/*", "/chengdu", "/chengdu/*", "/hangzhou", "/hangzhou/*", "/wuhan", "/wuhan/*", "/chongqing", "/chongqing/*", "/osaka", "/osaka/*", "/taipei", "/taipei/*", "/singapore", "/singapore/*", "/sydney", "/sydney/*"]
+  },
+  "routes": [
+    { "pattern": "tinytrains.app", "custom_domain": true },
+    { "pattern": "www.tinytrains.app", "custom_domain": true }
+  ],
+  "services": [
+    { "binding": "NYC", "service": "tinytrains-nyc" },
+    { "binding": "SF", "service": "tinytrains-sf" },
+    { "binding": "LONDON", "service": "tinytrains-london" },
+    { "binding": "TOKYO", "service": "tinytrains-tokyo" },
+    { "binding": "PARIS", "service": "tinytrains-paris" },
+    { "binding": "BERLIN", "service": "tinytrains-berlin" },
+    { "binding": "MADRID", "service": "tinytrains-madrid" },
+    { "binding": "SEOUL", "service": "tinytrains-seoul" },
+    { "binding": "HONGKONG", "service": "tinytrains-hongkong" },
+    { "binding": "MOSCOW", "service": "tinytrains-moscow" },
+    { "binding": "SINGAPORE", "service": "tinytrains-singapore" },
+    { "binding": "VIENNA", "service": "tinytrains-vienna" },
+    { "binding": "MEXICOCITY", "service": "tinytrains-mexicocity" },
+    { "binding": "CHONGQING", "service": "tinytrains-chongqing" },
+    { "binding": "WASHINGTON", "service": "tinytrains-washington" },
+    { "binding": "CHENGDU", "service": "tinytrains-chengdu" },
+    { "binding": "DELHI", "service": "tinytrains-delhi" },
+    { "binding": "SAOPAULO", "service": "tinytrains-saopaulo" },
+    { "binding": "CAIRO", "service": "tinytrains-cairo" },
+    { "binding": "BOSTON", "service": "tinytrains-boston" },
+    { "binding": "CHICAGO", "service": "tinytrains-chicago" },
+    { "binding": "STOCKHOLM", "service": "tinytrains-stockholm" },
+    { "binding": "TAIPEI", "service": "tinytrains-taipei" },
+    { "binding": "OSAKA", "service": "tinytrains-osaka" },
+    { "binding": "WUHAN", "service": "tinytrains-wuhan" },
+    { "binding": "HANGZHOU", "service": "tinytrains-hangzhou" },
+    { "binding": "SHANGHAI", "service": "tinytrains-shanghai" },
+    { "binding": "BEIJING", "service": "tinytrains-beijing" },
+    { "binding": "SYDNEY", "service": "tinytrains-sydney" },
+    { "binding": "GUANGZHOU", "service": "tinytrains-guangzhou" },
+    { "binding": "SHENZHEN", "service": "tinytrains-shenzhen" },
+    { "binding": "OSLO", "service": "tinytrains-oslo" },
+    { "binding": "HELSINKI", "service": "tinytrains-helsinki" }
+  ],
+  "observability": { "enabled": true }
+}

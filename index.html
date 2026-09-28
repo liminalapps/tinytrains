@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Tiny Trains · every train, live, on a tiny toy map</title>
+    <meta name="description" content="Watch every subway and metro train in New York, London, Paris, Tokyo, Seoul, Hong Kong and more move in real time, on a whimsical isometric toy map. Tap any train to ride along." />
+    <meta name="theme-color" content="#9fdcf2" />
+    <link rel="canonical" href="https://tinytrains.app/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Tiny Trains" />
+    <meta property="og:title" content="Tiny Trains · every train, live, on a tiny toy map" />
+    <meta property="og:description" content="Watch every subway and metro train in the world's great cities move in real time. Tap any train to ride along." />
+    <meta property="og:url" content="https://tinytrains.app/" />
+    <meta property="og:image" content="https://tinytrains.app/og/default.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="A tiny isometric toy map of a city with live trains on colorful lines" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Tiny Trains · every train, live, on a tiny toy map" />
+    <meta name="twitter:description" content="Watch every subway and metro train in the world's great cities move in real time. Tap any train to ride along." />
+    <meta name="twitter:image" content="https://tinytrains.app/og/default.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tiny Trains" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/icons/favicon-64.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@500;600;700;800&family=M+PLUS+Rounded+1c:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="sky"><canvas id="stars"></canvas><div id="sun"></div><svg id="moon" viewBox="-1 -1 2 2"><circle r="1" fill="#2c3668"/><path id="moon-lit" fill="#fff6d8"/></svg></div>
+    <div id="stage"></div>
+    <div id="labels"></div>
+    <div id="ui"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
