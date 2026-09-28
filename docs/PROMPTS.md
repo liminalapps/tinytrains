@@ -150,6 +150,14 @@ Typos are left as typed. Screenshots and reference images that came with a promp
 
 > Id also add a "Noir" theme that's like sin city (mostly black and white and only a couple things have a SPLASH of saturated color)
 
+### 36. 2026-09-28 17:50 UTC
+
+> there's some bug with the neon theme, it sometimes doesnt render the map at all
+
+### 37. 2026-09-28 17:50 UTC
+
+> Add a new tron/circuit board theme (something futuristic,virtual world, computer-world-y)
+
 ## Briefs given to agents
 
 ### nyc-data (new agent, 2026-09-24 17:48 UTC)

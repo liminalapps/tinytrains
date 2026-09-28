@@ -15,7 +15,7 @@ const pos = args.filter((a, i) => !a.startsWith('--') && !flags.has(args[i - 1])
 const [city, prefix, ...views] = pos as [CityId, string, ...string[]];
 const W = Number(opt('w', '900'));
 const H = Number(opt('h', '640'));
-const BASE = opt('base', 'http://localhost:5173');
+const BASE = opt('base', 'http://[::1]:5173'); // IPv6: another local app can hold 127.0.0.1:5173
 const PORT = 9333;
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 

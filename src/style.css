@@ -815,3 +815,21 @@ body[data-theme='noir'] .tour-cta { background: #e0102a; border-radius: 2px; box
 body[data-theme='noir'] .loader { background: radial-gradient(circle at 50% 40%, #2a2a2a, #000 70%); }
 body[data-theme='noir'] .loop { border-color: #f2f2f2; }
 body[data-theme='noir'] .loader-text { color: #f2f2f2; }
+
+/* Circuit: a terminal inside the machine. Black glass, cyan hairlines, a monospace face, amber accents. */
+body[data-theme='circuit'] {
+  --ink: #c9f6ff; --muted: #5fa9b8; --paper: rgba(1, 10, 14, 0.9); --paper-solid: #010a0e; --line-soft: rgba(25, 230, 255, 0.16);
+  --shadow: 0 0 0 1px rgba(25, 230, 255, 0.35), 0 0 24px rgba(25, 230, 255, 0.18); --shadow-sm: 0 0 0 1px rgba(25, 230, 255, 0.4), 0 0 10px rgba(25, 230, 255, 0.15);
+  --r: 3px; --accent: #ffa51f; --display: 'Share Tech Mono', ui-monospace, monospace; --body: 'Share Tech Mono', ui-monospace, monospace;
+  background: #000;
+}
+body[data-theme='circuit'] :is(.panel, .logo, .sb-name, .pill-btn, .live:not(.badge), .clock, .controls button, .ticket, .lbl.station, .city-switch, .dock) { border-radius: 3px; }
+body[data-theme='circuit'] .logo h1 { color: #19e6ff; text-shadow: 0 0 8px rgba(25, 230, 255, 0.8); letter-spacing: 0.04em; }
+body[data-theme='circuit'] .city-switch { background: #010a0e; color: #19e6ff; }
+body[data-theme='circuit'] .city-switch .cs-meta { color: #5fa9b8; }
+body[data-theme='circuit'] .lbl.station { background: rgba(1, 10, 14, 0.92); color: #c9f6ff; box-shadow: 0 0 0 1px #19e6ff; }
+body[data-theme='circuit'] .lbl.geo { color: #7fe8ff; text-shadow: 0 0 5px rgba(25, 230, 255, 0.7); }
+body[data-theme='circuit'] .tour-cta { background: #ffa51f; color: #000; border-radius: 3px; box-shadow: 0 0 16px rgba(255, 165, 31, 0.7); }
+body[data-theme='circuit'] .loader { background: linear-gradient(rgba(25, 230, 255, 0.12) 1px, transparent 1px) 0 0 / 28px 28px, linear-gradient(90deg, rgba(25, 230, 255, 0.12) 1px, transparent 1px) 0 0 / 28px 28px, #000; }
+body[data-theme='circuit'] .loop { border: 3px solid #19e6ff; border-left-color: transparent; filter: drop-shadow(0 0 6px #19e6ff); }
+body[data-theme='circuit'] .loader-text { color: #19e6ff; }

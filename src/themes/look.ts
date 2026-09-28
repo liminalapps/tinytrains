@@ -7,7 +7,7 @@ import * as THREE from 'three';
 const c = (hex: string) => new THREE.Color(hex);
 
 /** Style ids used by shader branches. */
-export const STYLE = { toy: 0, clay: 1, blueprint: 2, neon: 3, pixel: 4, voxel: 5, subway: 6, monet: 7, cubism: 8, noir: 9 } as const;
+export const STYLE = { toy: 0, clay: 1, blueprint: 2, neon: 3, pixel: 4, voxel: 5, subway: 6, monet: 7, cubism: 8, noir: 9, circuit: 10 } as const;
 
 export interface LookConfig {
   style: number;

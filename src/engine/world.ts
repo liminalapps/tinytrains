@@ -65,6 +65,10 @@ export class World {
     canvas.addEventListener('webglcontextlost', () => console.warn('[world] WebGL context lost'));
     canvas.addEventListener('webglcontextrestored', () => {
       console.warn('[world] WebGL context restored');
+      const kind = this.post?.kind ?? null;
+      this.post?.dispose();
+      this.post = null;
+      this.setPost(kind);
       this.resize();
     });
     this.resize();
@@ -80,6 +84,15 @@ export class World {
     if (this.post?.kind === kind) return;
     this.post?.dispose();
     this.post = kind ? new Post(this.renderer, kind) : null;
+    if (this.post) {
+      const failed = this.post;
+      failed.onFail = () => {
+        if (this.post !== failed) return;
+        failed.dispose();
+        this.post = null;
+        this.resize();
+      };
+    }
     this.resize();
   }
 

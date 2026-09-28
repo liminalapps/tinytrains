@@ -112,6 +112,9 @@ export class Post {
   private scene = new THREE.Scene();
   private mat: THREE.ShaderMaterial;
   private bloom: UnrealBloomPass | null = null;
+  private checked = false;
+  /** Called once if the GPU can't render to the offscreen buffer (the world then drops post-processing). */
+  onFail: (() => void) | null = null;
 
   constructor(
     private renderer: THREE.WebGLRenderer,
@@ -120,12 +123,16 @@ export class Post {
     const pixel = kind === 'pixel';
     const depth = new THREE.DepthTexture(1, 1, THREE.UnsignedInt248Type);
     depth.format = THREE.DepthStencilFormat;
+    // Half-float keeps bloom's highlights, but not every GPU can render to it (or multisample it); fall back
+    // to 8-bit rather than drawing nothing.
+    const ext = renderer.extensions;
+    const hdr = renderer.capabilities.isWebGL2 && (ext.has('EXT_color_buffer_float') || ext.has('EXT_color_buffer_half_float'));
     this.target = new THREE.WebGLRenderTarget(1, 1, {
-      type: THREE.HalfFloatType,
+      type: hdr ? THREE.HalfFloatType : THREE.UnsignedByteType,
       depthBuffer: true,
       stencilBuffer: true,
       depthTexture: depth,
-      samples: 4,
+      samples: pixel ? 4 : 2,
       minFilter: pixel ? THREE.NearestFilter : THREE.LinearFilter,
       magFilter: pixel ? THREE.NearestFilter : THREE.LinearFilter,
     });
@@ -157,7 +164,8 @@ export class Post {
 
   setSize(cssW: number, cssH: number, pr: number) {
     // Pixel art: one texel per two CSS pixels, scaled up with hard edges.
-    const k = this.kind === 'pixel' ? 0.5 : pr;
+    // Neon's buffers (color, depth, bloom mips) are big: cap them at ~3 megapixels so phones don't run out of GPU memory.
+    const k = this.kind === 'pixel' ? 0.5 : Math.min(pr, Math.sqrt(3e6 / Math.max(1, cssW * cssH)));
     const w = Math.max(1, Math.round(cssW * k));
     const h = Math.max(1, Math.round(cssH * k));
     this.target.setSize(w, h);
@@ -179,6 +187,16 @@ export class Post {
     r.setRenderTarget(this.target);
     r.clear(true, true, true);
     r.render(scene, camera);
+    if (!this.checked) {
+      this.checked = true;
+      const gl = r.getContext();
+      if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
+        console.warn(`[post] ${this.kind}: offscreen buffer unsupported on this GPU; drawing without post-processing`);
+        r.setRenderTarget(null);
+        this.onFail?.();
+        return;
+      }
+    }
     if (this.bloom) {
       // Zoomed out, lines crowd together and their glows sum toward white: bloom less so each keeps its color.
       this.bloom.strength = 0.7 - 0.38 * THREE.MathUtils.smoothstep(f.mpp, 3, 18);

@@ -32,6 +32,7 @@ or add `?theme=` to any link:
 | **Pixel** (`pixel`) | A 90s city-builder: SVGA pixels, grass tiles, asphalt roads with lane dashes, a black void and gray bevelled windows. |
 | **Voxel** (`voxel`) | The whole city rebuilt in bright blocks, Minecraft Dungeons style: stepped coasts, block parks, cube houses and trees. Buildings keep their real angles; the ground's blocks grow as you zoom out. |
 | **Monet** (`monet`) | An impressionist painting: brushstrokes that stay the same size at every zoom, lilac shadows, water-lily blues. |
+| **Circuit** (`circuit`) | Inside the machine: a black circuit board of cyan traces, buildings as outlined chips, trains as packets of light. |
 | **Noir** (`noir`) | A black-and-white city in hard light, where only the trains and their lines carry color. |
 | **Cubism** (`cubism`) | The city broken into planes, in ochre, olive and slate, with dark outlines and cut-paper panels. |
 
