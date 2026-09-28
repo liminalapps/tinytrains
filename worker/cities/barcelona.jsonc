@@ -1,0 +1,14 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "tinytrains-barcelona",
+  "main": "barcelona.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  // Reached only through the front Worker's service binding.
+  "workers_dev": false,
+  // Static schedule/network files are bundled as plain text and parsed once inside the Durable Object.
+  "rules": [{ "type": "Text", "globs": ["**/data/**/*.json"], "fallthrough": false }],
+  "durable_objects": { "bindings": [{ "name": "HUB", "class_name": "CityHub" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["CityHub"] }],
+  "observability": { "enabled": true }
+}
