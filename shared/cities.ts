@@ -434,7 +434,7 @@ export const CITIES: Record<CityId, CityConfig> = {
     country: 'Italy',
     tz: 'Europe/Rome',
     origin: [14.25, 40.855],
-    bbox: [14.1, 40.76, 14.47, 40.93],
+    bbox: [14.03, 40.76, 14.47, 40.95],
     view: { center: [14.253, 40.844], span: 2600 },
     tagline: 'Metro, Funiculars & Circumvesuviana',
   },

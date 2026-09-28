@@ -3,7 +3,7 @@
 **Live at [tinytrains.app](https://tinytrains.app)**
 
 Every train in the world's great metro systems, live, on a tiny isometric toy map: New York, London, Paris,
-Tokyo, Seoul, Hong Kong, Moscow, Singapore, Mexico City and more, 37 cities in all.
+Tokyo, Seoul, Hong Kong, Moscow, Singapore, Mexico City and more, 44 cities in all.
 
 Each city is a little floating island in the clouds, built from real geography, with hand-built toy landmarks
 (the Eiffel Tower, the Fernsehturm, Tower Bridge, the Star Ferries crossing Victoria Harbour). The trains are
@@ -86,6 +86,13 @@ A plain Node server works too: `npm run build && npm start` (serves dist/ and th
 | Budapest | | Metro, HÉV, trams, Cog-wheel Railway (BKK GTFS) | `BKK_KEY` (opendata.bkk.hu) makes them live |
 | Milan | | Metro, S lines, trams (ATM and Trenord GTFS); S-line delays from ViaggiaTreno when it answers | |
 | Rome | Tram 8 (Roma Servizi per la Mobilità GTFS-realtime) | Metro A, B/B1, C; Roma–Lido and Roma–Viterbo (simulated) | |
+| Prague | Metro, trams, Esko (PID GTFS-realtime via Golemio) | Petřín funicular | |
+| Naples | | Metro Lines 1, 2, 6 and 11, Circumvesuviana, Cumana, Circumflegrea, funiculars (ANM, EAV GTFS) | |
+| Barcelona | FGC (GTFS-realtime), Rodalies (Renfe GTFS-realtime) | Metro, Trambaix/Trambesòs | |
+| Lisbon | Trams and funiculars (Carris GTFS-realtime) | Metro, CP, Fertagus | |
+| Istanbul | | Metro, Marmaray, trams, funiculars (simulated from Metro İstanbul's published departures) | |
+| Montreal | | Métro, exo; the REM simulated from its published frequencies | |
+| Dubai | | Metro, Tram (RTA GTFS), Palm Monorail (simulated) | |
 
 Put keys in `.env` at the repo root for local runs, and in each city Worker's secrets for production
 (`npx wrangler secret put PRIM_KEY -c worker/cities/paris.jsonc`, and so on):
