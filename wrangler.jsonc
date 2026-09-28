@@ -51,7 +51,8 @@
     { "binding": "HELSINKI", "service": "tinytrains-helsinki" },
     { "binding": "BUDAPEST", "service": "tinytrains-budapest" },
     { "binding": "PHILADELPHIA", "service": "tinytrains-philadelphia" },
-    { "binding": "MILAN", "service": "tinytrains-milan" }
+    { "binding": "MILAN", "service": "tinytrains-milan" },
+    { "binding": "ROME", "service": "tinytrains-rome" }
   ],
   "observability": { "enabled": true }
 }

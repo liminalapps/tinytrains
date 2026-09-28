@@ -3,7 +3,7 @@
 **Live at [tinytrains.app](https://tinytrains.app)**
 
 Every train in the world's great metro systems, live, on a tiny isometric toy map: New York, London, Paris,
-Tokyo, Seoul, Hong Kong, Moscow, Singapore, Mexico City and more, with 34 cities in the works.
+Tokyo, Seoul, Hong Kong, Moscow, Singapore, Mexico City and more, 37 cities in all.
 
 Each city is a little floating island in the clouds, built from real geography, with hand-built toy landmarks
 (the Eiffel Tower, the Fernsehturm, Tower Bridge, the Star Ferries crossing Victoria Harbour). The trains are
@@ -78,6 +78,10 @@ A plain Node server works too: `npm run build && npm start` (serves dist/ and th
 | Tokyo | Toei Subway, Arakawa tram, Nippori-Toneri Liner (ODPT public API) | Tokyo Metro, JR East, Yurikamome, Monorail, Rinkai | `ODPT_KEY` (developer.odpt.org) makes Tokyo Metro live |
 | Seoul | | Seoul subway lines 1–9 and the Korail, AREX and light-rail lines | `SEOUL_API_KEY` (data.seoul.go.kr) makes them live |
 | Hong Kong | MTR (Next Train API) | | |
+| Philadelphia | SEPTA trolleys (T, G, D) and Regional Rail (GTFS-realtime, TrainView) | SEPTA Metro L, B and M, PATCO | |
+| Budapest | | Metro, HÉV, trams, Cog-wheel Railway (BKK GTFS) | `BKK_KEY` (opendata.bkk.hu) makes them live |
+| Milan | | Metro, S lines, trams (ATM and Trenord GTFS); S-line delays from ViaggiaTreno when it answers | |
+| Rome | Tram 8 (Roma Servizi per la Mobilità GTFS-realtime) | Metro A, B/B1, C; Roma–Lido and Roma–Viterbo (simulated) | |
 
 Put keys in `.env` at the repo root for local runs, and in each city Worker's secrets for production
 (`npx wrangler secret put PRIM_KEY -c worker/cities/paris.jsonc`, and so on):

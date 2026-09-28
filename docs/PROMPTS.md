@@ -114,6 +114,18 @@ Typos are left as typed. Screenshots and reference images that came with a promp
 
 > https://github.com/liminalapps -- yes move tinytrains over.
 
+### 27. 2026-09-28 02:10 UTC
+
+> ehh what am i doing? just use gitcommands?
+
+### 28. 2026-09-28 15:50 UTC
+
+> Add budapest, milan, rome, philadelphia.
+
+### 29. 2026-09-28 16:05 UTC
+
+> keep going
+
 ## Briefs given to agents
 
 ### nyc-data (new agent, 2026-09-24 17:48 UTC)
@@ -939,4 +951,287 @@ Rebuild if you change anything and send me a one-line note either way.
 
 ````text
 Small visual check: the GTFS kit now has `geometry: { variants: 'merge' }` (docs/KIT_GTFS.md). Boston has 5 station pairs with more than one segment variant and Washington has 3. Look at them. If they're overlapping ribbons (diversions or shape variants) rather than genuinely separate tracks, opt in, rebuild, re-run the checks, and send me a one-line OK. If they're real, just tell me and leave them.
+````
+
+### budapest-data (new agent, 2026-09-28 15:54 UTC)
+
+````text
+You are budapest-data, a data agent on Tiny Trains (repo: ./, live at https://tinytrains.app). It's a whimsical isometric 3D map that shows every train in a city in real time, each drawn as a procedural model of its real rolling stock. 33 cities are live. We're adding four more (Budapest, Milan, Rome, Philadelphia), and you own **budapest**.
+
+Already done for you (by team-lead, don't redo):
+- `shared/cities.ts`: id, origin [19.06, 47.5], bbox [18.92, 47.4, 19.28, 47.6]. Also the `CityId` type, the UI tables and the city picker.
+- `shared/stock/budapest.ts`: an empty `stock` array, already registered in shared/stock/index.ts. Fill it in.
+- Geography (`public/data/budapest/geo.json`, `buildings.bin`, `density.bin`) is being built right now and should land within the hour.
+
+## Read first
+1. docs/DATA_BRIEF.md in full, including the Round 2 and Round 3 sections. It's the contract (transit.json format, adapter interface, stock spec, verification, report).
+2. docs/KIT_GTFS.md (static GTFS plus a GTFS-RT overlay) and docs/KIT_SIM.md (OSM relations plus researched headways). Pick the kit that fits.
+3. Finished cities for the quality bar: look at scripts/build-*.ts to find one built with each kit (e.g. vienna, boston, stockholm), their server/adapters/<city>/ and scripts/check-<city>.ts, and shared/stock/vienna.ts and hongkong.ts for stock.
+
+The kits are finished and shared by ~25 cities. Avoid changing them. If a change is truly needed, keep it small and backwards-compatible, run `./node_modules/.bin/tsc --noEmit -p .` and one other kit city's build and check afterward, and list the change in your report.
+
+## Budapest specifics
+- **Data:**
+  - BKK publishes a keyless static GTFS (try https://go.bkk.hu/api/static/v1/public-gtfs/budapest_gtfs.zip; verify it's current).
+  - Realtime (BKK FUTÁR / OpenData GTFS-RT) normally needs a free key. Check whether any keyless realtime exists.
+  - If not, run on the timetable, and make the adapter go live when a key env var is set (name it BKK_KEY, and add it to server/adapters/types.ts only if the kit's pattern requires it).
+- **Lines:**
+  - Metro M1–M4. M1 is the 1896 Millennium Underground: shallow, small cars, yellow.
+  - HÉV suburban lines H5–H9, as far as the bbox allows.
+  - The tram network. At minimum the Grand Boulevard lines 4/6 (the Siemens Combinos, among the world's longest trams), 2 along the Danube, and the other main lines inside the bbox.
+  - The Cogwheel Railway (60) is optional.
+  - Official line colors and numbers; Hungarian names are also the English names.
+  - Bridges over the Danube need `el` where lines cross on bridges.
+- **Rolling stock, per line:** builder, year, length, doors, livery and cars. For example:
+  - M1: refurbished Ganz cars.
+  - M2 and M4: Alstom Metropolis, with M4 driverless.
+  - M3: refurbished Metrovagonmash 81-717/714.
+  - HÉV: MIX/MXA units and newer stock.
+  - Trams: Combino, CAF Urbos 3, Tatra T5C5, Ganz CSMG and ICS.
+  Research each one; don't trust this list blindly.
+  After writing shared/stock/budapest.ts, open the stock sheet at http://localhost:5173/stock.html?prefix=budapest with the screenshot tool and fix what looks wrong.
+
+## Deliverables (only edit these)
+- scripts/build-budapest.ts
+- public/data/budapest/transit.json
+- server/data/budapest/*
+- server/adapters/budapest/index.ts (plus helpers in that folder)
+- shared/stock/budapest.ts
+- scripts/check-budapest.ts
+
+Do NOT edit shared files: server/data.ts, wrangler.jsonc, package.json, worker/, shared/cities.ts, shared/stock/index.ts, src/. Team-lead wires those in from your report. If you need a different bbox (e.g. to reach a terminus), say so in your report rather than editing cities.ts.
+
+Iterate until scripts/check-budapest.ts is clean, and view the map at http://localhost:5173/budapest with the screenshot tool once geo and transit exist. The API on :8787 loads adapters only at startup, so live trains won't show there until team-lead restarts it; test the adapter through your check script. Don't restart it.
+
+## Environment notes
+- Run TypeScript with ./node_modules/.bin/tsx (an rtk hook rewrites npx).
+- Read JSON APIs with node -e "fetch(...)", since curl output gets rewritten.
+- Use `command cat` when you need exact file contents; rtk strips comments from cat.
+- Screenshots: `./node_modules/.bin/tsx scripts/dev/shot.ts <url> <out.png> --w 1600 --h 900 --wait 8000`, then Read the png.
+- Don't run npm install. Do the research yourself with WebSearch/WebFetch; don't spawn subagents.
+- American English in code and comments.
+- Never write personal names, emails or org names into repo files; the repo is published anonymously.
+
+## Final report (your last message, ≤ 400 words)
+Cover:
+- the kit used and data sources with licenses
+- what's live vs timetable, and which key unlocks live
+- lines covered
+- the stock list
+- the exact list of server/data/budapest files the Worker must bundle, with their sizes
+- bbox requests
+- known issues
+````
+
+### milan-data (new agent, 2026-09-28 15:54 UTC)
+
+````text
+You are milan-data, a data agent on Tiny Trains (repo: ./, live at https://tinytrains.app). It's a whimsical isometric 3D map that shows every train in a city in real time, each drawn as a procedural model of its real rolling stock. 33 cities are live. We're adding four more (Budapest, Milan, Rome, Philadelphia), and you own **milan**.
+
+Already done for you (by team-lead, don't redo):
+- `shared/cities.ts`: id, name Milan, nameLocal Milano, origin [9.19, 45.465], bbox [9.04, 45.39, 9.33, 45.56]. Also the `CityId` type, the UI tables and the city picker.
+- `shared/stock/milan.ts`: an empty `stock` array, already registered in shared/stock/index.ts. Fill it in.
+- Geography (`public/data/milan/geo.json`, `buildings.bin`, `density.bin`) is being built right now and should land within the hour.
+
+## Read first
+1. docs/DATA_BRIEF.md in full, including the Round 2 and Round 3 sections. It's the contract (transit.json format, adapter interface, stock spec, verification, report).
+2. docs/KIT_GTFS.md (static GTFS plus a GTFS-RT overlay) and docs/KIT_SIM.md (OSM relations plus researched headways). Pick the kit that fits.
+3. Finished cities for the quality bar: look at scripts/build-*.ts to find one built with each kit (e.g. vienna, boston, stockholm), their server/adapters/<city>/ and scripts/check-<city>.ts, and shared/stock/vienna.ts and hongkong.ts for stock.
+
+The kits are finished and shared by ~25 cities. Avoid changing them. If a change is truly needed, keep it small and backwards-compatible, run `./node_modules/.bin/tsc --noEmit -p .` and one other kit city's build and check afterward, and list the change in your report.
+
+## Milan specifics
+- **Data:**
+  - ATM publishes GTFS (check the Comune di Milano open data portal dati.comune.milano.it, ATM's site and the Mobility Database for a current keyless copy).
+  - Research whether any keyless realtime exists (ATM, Trenord). If none, run on the timetable and keep `live` honest.
+  - If only OSM is usable, use the sim kit with researched headways.
+- **Lines:**
+  - Metro M1 (red), M2 (green), M3 (yellow), M4 (blue, driverless, the newest) and M5 (lilac, driverless).
+  - The Passante ferroviario S lines inside the bbox (Trenord), if data allows.
+  - The tram network, especially tram 1 with the 1928 "Ventotto" Peter Witt cars, plus the other main lines inside the bbox.
+  - Official colors. Italian names where they differ from English (nameLocal).
+  - Elevated or at-grade sections, e.g. M2's surface stretch toward Gessate, need `el` where relevant. Tell me if you want the bbox widened to reach Gessate or Rho Fiera.
+- **Rolling stock, per line:** builder, year, length, doors, livery and cars. For example:
+  - M1–M3: the classic 1960s–80s cars, and the Alstom Metropolis "Leonardo".
+  - M4 and M5: Hitachi Rail driverless.
+  - Trams: Ventotto, Jumbotram, Eurotram, Sirio, Tramlink.
+  - Trenord TSR and Coradia on the Passante.
+  Research each one; don't trust this list blindly. Get the Ventotto right; it's iconic.
+  After writing shared/stock/milan.ts, open the stock sheet at http://localhost:5173/stock.html?prefix=milan with the screenshot tool and fix what looks wrong.
+
+## Deliverables (only edit these)
+- scripts/build-milan.ts
+- public/data/milan/transit.json
+- server/data/milan/*
+- server/adapters/milan/index.ts (plus helpers in that folder)
+- shared/stock/milan.ts
+- scripts/check-milan.ts
+
+Do NOT edit shared files: server/data.ts, wrangler.jsonc, package.json, worker/, shared/cities.ts, shared/stock/index.ts, src/. Team-lead wires those in from your report. Ask for bbox changes in your report rather than editing cities.ts.
+
+Iterate until scripts/check-milan.ts is clean, and view the map at http://localhost:5173/milan with the screenshot tool once geo and transit exist. The API on :8787 loads adapters only at startup, so live trains won't show there until team-lead restarts it; test the adapter through your check script. Don't restart it.
+
+## Environment notes
+- Run TypeScript with ./node_modules/.bin/tsx (an rtk hook rewrites npx).
+- Read JSON APIs with node -e "fetch(...)", since curl output gets rewritten.
+- Use `command cat` when you need exact file contents; rtk strips comments from cat.
+- Screenshots: `./node_modules/.bin/tsx scripts/dev/shot.ts <url> <out.png> --w 1600 --h 900 --wait 8000`, then Read the png.
+- Don't run npm install. Do the research yourself with WebSearch/WebFetch; don't spawn subagents.
+- American English in code and comments.
+- Never write personal names, emails or org names into repo files; the repo is published anonymously.
+
+## Final report (your last message, ≤ 400 words)
+Cover:
+- the kit used and data sources with licenses
+- what's live vs timetable, and which key unlocks live
+- lines covered
+- the stock list
+- the exact list of server/data/milan files the Worker must bundle, with their sizes
+- bbox requests
+- known issues
+````
+
+### rome-data (new agent, 2026-09-28 15:54 UTC)
+
+````text
+You are rome-data, a data agent on Tiny Trains (repo: ./, live at https://tinytrains.app). It's a whimsical isometric 3D map that shows every train in a city in real time, each drawn as a procedural model of its real rolling stock. 33 cities are live. We're adding four more (Budapest, Milan, Rome, Philadelphia), and you own **rome**.
+
+Already done for you (by team-lead, don't redo):
+- `shared/cities.ts`: id, name Rome, nameLocal Roma, origin [12.5, 41.89], bbox [12.34, 41.78, 12.7, 41.99]. Also the `CityId` type, the UI tables and the city picker.
+- `shared/stock/rome.ts`: an empty `stock` array, already registered in shared/stock/index.ts. Fill it in.
+- Geography (`public/data/rome/geo.json`, `buildings.bin`, `density.bin`) is being built right now and should land within the hour.
+
+## Read first
+1. docs/DATA_BRIEF.md in full, including the Round 2 and Round 3 sections. It's the contract (transit.json format, adapter interface, stock spec, verification, report).
+2. docs/KIT_GTFS.md (static GTFS plus a GTFS-RT overlay) and docs/KIT_SIM.md (OSM relations plus researched headways). Pick the kit that fits.
+3. Finished cities for the quality bar: look at scripts/build-*.ts to find one built with each kit (e.g. vienna, boston, stockholm), their server/adapters/<city>/ and scripts/check-<city>.ts, and shared/stock/vienna.ts and hongkong.ts for stock.
+
+The kits are finished and shared by ~25 cities. Avoid changing them. If a change is truly needed, keep it small and backwards-compatible, run `./node_modules/.bin/tsc --noEmit -p .` and one other kit city's build and check afterward, and list the change in your report.
+
+## Rome specifics
+- **Data:**
+  - Roma Servizi per la Mobilità publishes a keyless static GTFS and keyless GTFS-realtime feeds (vehicle positions and trip updates) for ATAC. Look on romamobilita.it's open data page and verify the current URLs.
+  - If the realtime covers the metro and trams, use the GTFS kit with the RT overlay and make it live.
+  - Check what realtime reports for the metro specifically, since underground vehicle positions are often missing. Trip updates may still work.
+- **Lines:**
+  - Metro A (orange), B/B1 (blue) and C (green, driverless, including the newest central stations if open).
+  - The tram network, e.g. 8 to Trastevere, 2, 3, 14 and 19.
+  - The ATAC/regional railways inside the bbox: Roma–Lido, Roma–Viterbo (urban section) and Termini–Centocelle (if still running).
+  - FL lines are optional, and only if data is easy.
+  - Official colors. Italian names where they differ (nameLocal).
+  - Elevated sections and Tiber bridges need `el`.
+- **Rolling stock, per line:** builder, year, length, doors, livery and cars. For example:
+  - Line A: CAF MA-300.
+  - Line B: CAF MB-100, plus older stock.
+  - Line C: Hitachi (AnsaldoBreda) driverless.
+  - Trams: Socimi, Fiat Cityway, Stanga.
+  - Roma–Lido stock.
+  Research each one; don't trust this list blindly.
+  After writing shared/stock/rome.ts, open the stock sheet at http://localhost:5173/stock.html?prefix=rome with the screenshot tool and fix what looks wrong.
+
+## Deliverables (only edit these)
+- scripts/build-rome.ts
+- public/data/rome/transit.json
+- server/data/rome/*
+- server/adapters/rome/index.ts (plus helpers in that folder)
+- shared/stock/rome.ts
+- scripts/check-rome.ts
+
+Do NOT edit shared files: server/data.ts, wrangler.jsonc, package.json, worker/, shared/cities.ts, shared/stock/index.ts, src/. Team-lead wires those in from your report. Ask for bbox changes in your report rather than editing cities.ts.
+
+Iterate until scripts/check-rome.ts is clean, and view the map at http://localhost:5173/rome with the screenshot tool once geo and transit exist. The API on :8787 loads adapters only at startup, so live trains won't show there until team-lead restarts it; test the adapter through your check script. Don't restart it.
+
+## Environment notes
+- Run TypeScript with ./node_modules/.bin/tsx (an rtk hook rewrites npx).
+- Read JSON APIs with node -e "fetch(...)", since curl output gets rewritten.
+- Use `command cat` when you need exact file contents; rtk strips comments from cat.
+- Screenshots: `./node_modules/.bin/tsx scripts/dev/shot.ts <url> <out.png> --w 1600 --h 900 --wait 8000`, then Read the png.
+- Don't run npm install. Do the research yourself with WebSearch/WebFetch; don't spawn subagents.
+- American English in code and comments.
+- Never write personal names, emails or org names into repo files; the repo is published anonymously.
+
+## Final report (your last message, ≤ 400 words)
+Cover:
+- the kit used and data sources with licenses
+- what's live vs timetable, and which key unlocks live
+- lines covered
+- the stock list
+- the exact list of server/data/rome files the Worker must bundle, with their sizes
+- bbox requests
+- known issues
+````
+
+### philly-data (new agent, 2026-09-28 15:55 UTC)
+
+````text
+You are philly-data, a data agent on Tiny Trains (repo: ./, live at https://tinytrains.app). It's a whimsical isometric 3D map that shows every train in a city in real time, each drawn as a procedural model of its real rolling stock. 33 cities are live. We're adding four more (Budapest, Milan, Rome, Philadelphia), and you own **philadelphia**.
+
+Already done for you (by team-lead, don't redo):
+- `shared/cities.ts`: id, origin [-75.16, 39.95], bbox [-75.3, 39.85, -74.98, 40.1], tagline "SEPTA Metro, Trolleys & PATCO". Also the `CityId` type, the UI tables and the city picker.
+- `shared/stock/philadelphia.ts`: an empty `stock` array, already registered in shared/stock/index.ts. Fill it in.
+- Geography (`public/data/philadelphia/geo.json`, `buildings.bin`, `density.bin`) is being built right now and should land within the hour.
+
+## Read first
+1. docs/DATA_BRIEF.md in full, including the Round 2 and Round 3 sections. It's the contract (transit.json format, adapter interface, stock spec, verification, report).
+2. docs/KIT_GTFS.md (static GTFS plus a GTFS-RT overlay) and docs/KIT_SIM.md (OSM relations plus researched headways). Pick the kit that fits.
+3. Finished cities for the quality bar: scripts/build-boston.ts and server/adapters/boston/ (a GTFS-kit US city with live data), scripts/check-boston.ts, and shared/stock/boston.ts and nyc stock for the level of detail expected.
+
+The kits are finished and shared by ~25 cities. Avoid changing them. If a change is truly needed, keep it small and backwards-compatible, run `./node_modules/.bin/tsc --noEmit -p .` and one other kit city's build and check afterward, and list the change in your report.
+
+## Philadelphia specifics
+- **Data:**
+  - SEPTA publishes keyless static GTFS (github.com/septadev/GTFS releases: rail and bus zips; the trolleys and the Norristown line are in the "bus" feed).
+  - Realtime is keyless too: SEPTA GTFS-RT (check www3.septa.org for the current trip-update and vehicle-position URLs) and the TransitView/TrainView JSON APIs.
+  - PATCO publishes a GTFS (check for realtime).
+  - Aim for live on everything that has a keyless feed.
+- **Lines:** use the 2025 "SEPTA Metro" branding, with its letters and colors. Verify against SEPTA's current wayfinding:
+  - L: Market–Frankford.
+  - B: Broad Street, including the Ridge spur.
+  - T1–T5: subway-surface trolleys, including the Center City tunnel.
+  - G: Route 15 Girard trolley.
+  - D1/D2: Media and Sharon Hill.
+  - M: Norristown High Speed Line.
+  - PATCO Speedline across the Ben Franklin Bridge; tell me if you want the bbox widened to Lindenwold.
+  - SEPTA Regional Rail inside the bbox.
+  - L's elevated sections and the bridge crossings need `el`.
+- **Rolling stock, per line:** builder, year, length, doors, livery and cars. For example:
+  - L: Adtranz/Bombardier M-4.
+  - B: Kawasaki B-IV.
+  - T and D: Kawasaki LRVs. The G uses PCC IIs or buses, whatever runs now.
+  - M: ABB N-5.
+  - PATCO: Budd/Vickers PATCO-II cars (refurbished).
+  - Regional Rail: Silverliner IV and V, plus push-pull sets.
+  Research each one; don't trust this list blindly.
+  After writing shared/stock/philadelphia.ts, open the stock sheet at http://localhost:5173/stock.html?prefix=philadelphia with the screenshot tool and fix what looks wrong.
+
+## Deliverables (only edit these)
+- scripts/build-philadelphia.ts
+- public/data/philadelphia/transit.json
+- server/data/philadelphia/*
+- server/adapters/philadelphia/index.ts (plus helpers in that folder)
+- shared/stock/philadelphia.ts
+- scripts/check-philadelphia.ts
+
+Do NOT edit shared files: server/data.ts, wrangler.jsonc, package.json, worker/, shared/cities.ts, shared/stock/index.ts, src/. Team-lead wires those in from your report. Ask for bbox changes in your report rather than editing cities.ts.
+
+Iterate until scripts/check-philadelphia.ts is clean, and view the map at http://localhost:5173/philadelphia with the screenshot tool once geo and transit exist. The API on :8787 loads adapters only at startup, so live trains won't show there until team-lead restarts it; test the adapter through your check script. Don't restart it.
+
+## Environment notes
+- Run TypeScript with ./node_modules/.bin/tsx (an rtk hook rewrites npx).
+- Read JSON APIs with node -e "fetch(...)", since curl output gets rewritten.
+- Use `command cat` when you need exact file contents; rtk strips comments from cat.
+- Screenshots: `./node_modules/.bin/tsx scripts/dev/shot.ts <url> <out.png> --w 1600 --h 900 --wait 8000`, then Read the png.
+- Don't run npm install. Do the research yourself with WebSearch/WebFetch; don't spawn subagents.
+- American English in code and comments.
+- Never write personal names, emails or org names into repo files; the repo is published anonymously.
+
+## Final report (your last message, ≤ 400 words)
+Cover:
+- the kit used and data sources with licenses
+- what's live vs timetable, and which key unlocks live
+- lines covered
+- the stock list
+- the exact list of server/data/philadelphia files the Worker must bundle, with their sizes
+- bbox requests
+- known issues
 ````
