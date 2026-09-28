@@ -142,6 +142,14 @@ Typos are left as typed. Screenshots and reference images that came with a promp
 
 > Make sure that screenshot feature includes the full url for the app.
 
+### 34. 2026-09-28 17:02 UTC
+
+> Tour CTA is in a bad location (should be centered near the bottom of the screen) like a floating action button.   Theme selector should just be a dropdown instead of having a image for all of them. (there are too many now).  Remove the reference to SimCity 2000 in the theme text.
+
+### 35. 2026-09-28 17:03 UTC
+
+> Id also add a "Noir" theme that's like sin city (mostly black and white and only a couple things have a SPLASH of saturated color)
+
 ## Briefs given to agents
 
 ### nyc-data (new agent, 2026-09-24 17:48 UTC)

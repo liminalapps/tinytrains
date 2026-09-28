@@ -116,7 +116,7 @@ export class UI {
       <header class="brand">
         <button class="logo" aria-label="Tiny Trains: back to the city overview">${TRAIN_SVG}<div><h1>Tiny&nbsp;Trains</h1><p class="tagline"></p></div></button>
         <div class="style-wrap">
-          <div class="style-bar" role="radiogroup" aria-label="Theme"></div>
+          <div class="style-bar"></div>
           <div class="themes panel" hidden role="dialog" aria-label="Themes"></div>
         </div>
         <div class="pills">
@@ -169,14 +169,7 @@ export class UI {
     `;
     this.tipEl = this.$<HTMLDivElement>('.tip');
     this.renderTickets();
-    this.$('.style-bar').addEventListener('click', (e) => {
-      const el = e.target as HTMLElement;
-      const chip = el.closest<HTMLElement>('[data-style]');
-      if (chip) {
-        if (chip.dataset.style !== activeTheme().id) this.applyTheme(themeById(chip.dataset.style));
-        if (soundOn()) sfx.pop();
-      } else if (el.closest('.sb-name, .sb-label')) this.toggleThemes();
-    });
+    this.$('.style-bar').addEventListener('click', () => this.toggleThemes());
     this.$('.city-switch').addEventListener('click', () => this.togglePicker());
     this.$('.picker').addEventListener('click', (e) => {
       const b = (e.target as HTMLElement).closest<HTMLElement>('[data-city]');
@@ -343,13 +336,10 @@ export class UI {
     this.applyTheme(THEMES[(i + 1) % THEMES.length], true);
   }
 
-  /** The header's theme switcher: one swatch per theme (one click to switch) and the current name (opens the gallery). */
+  /** The header's theme switcher: a compact dropdown showing the current theme (opens the list). */
   private renderStyleBar() {
     const cur = activeTheme();
-    this.$('.style-bar').innerHTML = `<span class="sb-label">${PALETTE_SVG}<span>Theme</span></span>${THEMES.map(
-      (t) =>
-        `<button class="sb-chip ${t.id === cur.id ? 'on' : ''}" role="radio" aria-checked="${t.id === cur.id}" data-style="${t.id}" title="${esc(t.name)}: ${esc(t.blurb)}" aria-label="${esc(t.name)}"><i style="background:${t.swatch}"></i></button>`,
-    ).join('')}<button class="sb-name" aria-haspopup="dialog" title="All themes (V)">${esc(cur.name)}${CHEV}</button>`;
+    this.$('.style-bar').innerHTML = `<button class="sb-name" aria-haspopup="listbox" title="Themes (V)">${PALETTE_SVG}<span class="sb-label">Theme</span><i style="background:${cur.swatch}"></i><b>${esc(cur.name)}</b>${CHEV}</button>`;
   }
 
   private toggleThemes(open?: boolean) {
@@ -362,17 +352,15 @@ export class UI {
   private renderThemes() {
     const cur = activeTheme().id;
     const p = this.$('.themes');
-    p.innerHTML = `<h3>Themes <kbd>V</kbd></h3><div class="theme-grid">${THEMES.map(
-      (t, i) => `<button class="theme-card ${t.id === cur ? 'on' : ''}" data-theme-id="${t.id}" style="--i:${i}">
-        <span class="th-swatch" style="background:${t.swatch}"></span>
-        <span class="th-name">${esc(t.name)}</span>
-        <span class="th-blurb">${esc(t.blurb)}</span>
+    p.innerHTML = `<div class="theme-list" role="listbox">${THEMES.map(
+      (t) => `<button class="theme-row ${t.id === cur ? 'on' : ''}" role="option" aria-selected="${t.id === cur}" data-theme-id="${t.id}">
+        <i style="background:${t.swatch}"></i><span><b>${esc(t.name)}</b><small>${esc(t.blurb)}</small></span>
       </button>`,
-    ).join('')}</div>`;
+    ).join('')}</div><p class="theme-hint">Press <kbd>V</kbd> to cycle</p>`;
     p.querySelectorAll<HTMLElement>('[data-theme-id]').forEach((b) =>
       b.addEventListener('click', () => {
         this.applyTheme(themeById(b.dataset.themeId));
-        if (isPhone()) this.toggleThemes(false);
+        this.toggleThemes(false);
       }),
     );
   }

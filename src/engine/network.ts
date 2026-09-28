@@ -175,6 +175,7 @@ export class Network implements Layer {
           /* glsl */ `#include <color_fragment>
           vec3 lineCol = diffuseColor.rgb;
           vec3 inkCol = mix(lineCol, vec3(1.0), uLk_lineWhite);
+          inkCol = mix(vec3(dot(inkCol, vec3(0.3, 0.59, 0.11))), inkCol, uLk_lineSat);
           float a = abs(vSide);
           vec3 far = mix(inkCol, inkCol * 0.78, smoothstep(0.78, 1.0, a));
           // Diagram styles case each line: at least ~1.3 px (or 12% of the ribbon) of casing color along both edges,

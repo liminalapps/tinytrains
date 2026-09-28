@@ -19,7 +19,7 @@ now. At night the windows light up.
 
 ## Themes
 
-The live data and the map are one model; how they're drawn is a theme. Pick one from the Theme bar under the logo (or press `V`),
+The live data and the map are one model; how they're drawn is a theme. Pick one from the Theme menu under the logo (or press `V`),
 or add `?theme=` to any link:
 
 | | |
@@ -29,9 +29,10 @@ or add `?theme=` to any link:
 | **Blueprint** (`blueprint`) | Drafted in white ink on engineer's blue: outlined buildings, a ruled grid, lines in colored pencil. |
 | **NYC Subway** (`subway`) | The New York City Subway's signage: black signs with a thin white rule, Helvetica, route bullets, and a diagram-clean map with white-cased lines. |
 | **Neon** (`neon`) | A synthwave night: lines and trains lit from within, the coast traced in pink, a soft bloom. |
-| **Pixel** (`pixel`) | A SimCity 2000 city: SVGA pixels, grass tiles, asphalt roads with lane dashes, a black void and gray bevelled windows. |
+| **Pixel** (`pixel`) | A 90s city-builder: SVGA pixels, grass tiles, asphalt roads with lane dashes, a black void and gray bevelled windows. |
 | **Voxel** (`voxel`) | The whole city rebuilt in bright blocks, Minecraft Dungeons style: stepped coasts, block parks, cube houses and trees. Buildings keep their real angles; the ground's blocks grow as you zoom out. |
 | **Monet** (`monet`) | An impressionist painting: brushstrokes that stay the same size at every zoom, lilac shadows, water-lily blues. |
+| **Noir** (`noir`) | A black-and-white city in hard light, where only the trains and their lines carry color. |
 | **Cubism** (`cubism`) | The city broken into planes, in ochre, olive and slate, with dark outlines and cut-paper panels. |
 
 A theme is a *look*, not a filter: every material (ground, water, roads, buildings, houses, trees, landmarks, lines,

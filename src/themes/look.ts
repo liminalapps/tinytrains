@@ -7,7 +7,7 @@ import * as THREE from 'three';
 const c = (hex: string) => new THREE.Color(hex);
 
 /** Style ids used by shader branches. */
-export const STYLE = { toy: 0, clay: 1, blueprint: 2, neon: 3, pixel: 4, voxel: 5, subway: 6, monet: 7, cubism: 8 } as const;
+export const STYLE = { toy: 0, clay: 1, blueprint: 2, neon: 3, pixel: 4, voxel: 5, subway: 6, monet: 7, cubism: 8, noir: 9 } as const;
 
 export interface LookConfig {
   style: number;
@@ -76,6 +76,8 @@ export interface LookConfig {
   lineWhite: number;
   lineGlow: number;
   lineDetail: number;
+  /** Line color saturation (1 = true color; noir drains it so only the trains carry color). */
+  lineSat: number;
   /** A casing along both edges of every line (the white gaps between parallel routes on a transit diagram). */
   lineCase: string;
   lineCaseK: number;
@@ -135,6 +137,7 @@ export const TOY_LOOK: LookConfig = {
   lineWhite: 0,
   lineGlow: 0,
   lineDetail: 1,
+  lineSat: 1,
   lineCase: '#ffffff',
   lineCaseK: 0,
   trainGlow: 0,
