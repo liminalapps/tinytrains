@@ -57,7 +57,8 @@
     { "binding": "DUBAI", "service": "tinytrains-dubai" },
     { "binding": "MONTREAL", "service": "tinytrains-montreal" },
     { "binding": "LISBON", "service": "tinytrains-lisbon" },
-    { "binding": "BARCELONA", "service": "tinytrains-barcelona" }
+    { "binding": "BARCELONA", "service": "tinytrains-barcelona" },
+    { "binding": "ISTANBUL", "service": "tinytrains-istanbul" }
   ],
   "observability": { "enabled": true }
 }

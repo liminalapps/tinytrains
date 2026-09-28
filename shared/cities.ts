@@ -466,7 +466,7 @@ export const CITIES: Record<CityId, CityConfig> = {
     country: 'Türkiye',
     tz: 'Europe/Istanbul',
     origin: [29.0, 41.03],
-    bbox: [28.78, 40.93, 29.25, 41.15],
+    bbox: [28.74, 40.86, 29.33, 41.15],
     view: { center: [28.978, 41.015], span: 2600 },
     tagline: 'Metro, Marmaray & Trams',
   },

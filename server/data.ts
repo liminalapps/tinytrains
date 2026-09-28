@@ -65,4 +65,5 @@ export const CITY_DATA: Record<string, string[]> = {
   montreal: ['server/data/montreal/schedule.json', 'server/data/montreal/sim.json'],
   lisbon: ['server/data/lisbon/schedule.json'],
   barcelona: ['server/data/barcelona/schedule.json'],
+  istanbul: ['server/data/istanbul/sim.json'],
 };

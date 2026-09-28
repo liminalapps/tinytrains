@@ -1,4 +1,210 @@
-import type { StockSpec } from '../types.ts';
+import type { StockSpec, StockStripe } from '../types.ts';
 
-// Filled in by the istanbul data build.
-export const stock: StockSpec[] = [];
+// Istanbul's metro, trams, funiculars and Marmaray. M2 and M6 take 750 V from a third rail; the other metro lines,
+// Marmaray and the trams run under wires, except T5, which draws power from a ground-level rail. Dimensions from
+// builders' figures where published (M5: 128.8 m for six cars; F1: 34.55 m two-car sets, 2.90 m wide), colors from
+// photos. The M2 Alstom, M5, M8 and M11 liveries are simplified.
+const STAINLESS = '#C7CBCF';
+const WHITE = '#EEF0F2';
+const ROOF = '#9AA0A6';
+const GLASS = '#1A1F26';
+const DARK = '#23272D';
+const band = (color: StockStripe['color'], from: number, to: number): StockStripe => ({ color, from, to });
+
+const metroCar = { width: 2.9, height: 3.7, doors: 4, profile: 'box' as const };
+
+export const stock: StockSpec[] = [
+  // ---------------------------------------------------------------- metro
+  {
+    id: 'istanbul-abb', name: 'M1 ABB light metro car', maker: 'ABB / SGP', introduced: 1989,
+    blurb: "Built in Austria for Istanbul's first metro, which opened in 1989 from Aksaray. These cars still run every M1 train.",
+    length: 23, width: 2.65, height: 3.5, doors: 3, profile: 'box', nose: 'flat',
+    finish: 'stainless', body: STAINLESS, roof: ROOF, front: STAINLESS, doorColor: STAINLESS, windowColor: GLASS,
+    skirt: '#2F6DB5', stripes: [band('#2F6DB5', 0.16, 0.25), band('#F29A2E', 0.25, 0.34)],
+    frontStripes: [band('#2F6DB5', 0.16, 0.25), band('#F29A2E', 0.25, 0.34), band(GLASS, 0.5, 0.88)],
+    pantograph: true,
+  },
+  {
+    id: 'istanbul-m2-rotem', name: 'M2 Hyundai Rotem train', maker: 'Hyundai Rotem', introduced: 2009,
+    blurb: "M2's main fleet crosses the Golden Horn on a cable-stayed bridge with a station in mid-river, the only open-air stop on the line.",
+    length: 22.5, ...metroCar, nose: 'rounded',
+    finish: 'stainless', body: STAINLESS, roof: ROOF, front: DARK, doorColor: STAINLESS, windowColor: GLASS,
+    stripes: [band('line', 0.3, 0.37)],
+    frontStripes: [band('line', 0.22, 0.3)],
+    pantograph: false,
+  },
+  {
+    id: 'istanbul-m2-alstom', name: 'Alstom M2 train', maker: 'Alstom', introduced: 2000,
+    blurb: "M2's original trains, derived from Caracas Metro cars. Most now shuttle up and down M6, Istanbul's 3 km 'mini metro'.",
+    length: 22.5, ...metroCar, nose: 'flat',
+    finish: 'stainless', body: STAINLESS, roof: ROOF, front: '#D9C27A', doorColor: STAINLESS, windowColor: GLASS,
+    stripes: [band('#C8342B', 0.3, 0.35)],
+    frontStripes: [band('#C8342B', 0.3, 0.35), band(GLASS, 0.5, 0.88)],
+    pantograph: false,
+  },
+  {
+    id: 'istanbul-m3-metropolis', name: 'Alstom Metropolis', maker: 'Alstom', introduced: 2013,
+    blurb: "Close cousins of Budapest's M2 and M4 trains, but these draw power from overhead wires. They also work the M9 line.",
+    length: 22, ...metroCar, nose: 'rounded',
+    finish: 'paint', body: WHITE, roof: ROOF, front: '#D0242B', doorColor: WHITE, windowColor: GLASS,
+    stripes: [band('#D0242B', 0.08, 0.14)],
+    frontStripes: [band(GLASS, 0.45, 0.9)],
+    pantograph: true,
+  },
+  {
+    id: 'istanbul-m4-caf', name: 'CAF M4 train', maker: 'CAF', introduced: 2012,
+    blurb: "Istanbul's first metro on the Asian side. Its 36 CAF trains come in four different exterior designs.",
+    length: 22, ...metroCar, nose: 'slant',
+    finish: 'paint', body: '#2E7FC4', roof: ROOF, front: '#1D5E9E', doorColor: '#2E7FC4', windowColor: GLASS,
+    stripes: [band('#8FD0F0', 0.38, 0.44), band('#1D5E9E', 0, 0.2)],
+    frontStripes: [band(GLASS, 0.45, 0.9)],
+    pantograph: true,
+  },
+  {
+    id: 'istanbul-m5-caf', name: 'CAF driverless train', maker: 'CAF / Mitsubishi', introduced: 2017,
+    blurb: "Turkey's first driverless metro. At 128.8 m, its six-car trains are the longest on the Istanbul Metro.",
+    length: 21.5, ...metroCar, nose: 'rounded',
+    finish: 'paint', body: WHITE, roof: ROOF, front: DARK, doorColor: WHITE, windowColor: GLASS,
+    stripes: [band('line', 0.3, 0.38)],
+    frontStripes: [band('line', 0.24, 0.32)],
+    pantograph: true,
+  },
+  {
+    id: 'istanbul-m7-rotem', name: 'Hyundai Rotem driverless train', maker: 'Hyundai Rotem', introduced: 2020,
+    blurb: 'Driverless trains that surface only twice, on viaducts at Kağıthane and Alibeyköy; the other 15 stations are underground.',
+    length: 22, ...metroCar, nose: 'rounded',
+    finish: 'paint', body: WHITE, roof: ROOF, front: DARK, doorColor: WHITE, windowColor: GLASS,
+    stripes: [band('#1AA3DD', 0.1, 0.18), band('#1D5E9E', 0.18, 0.22)],
+    frontStripes: [band('#1AA3DD', 0.1, 0.2)],
+    pantograph: true,
+  },
+  {
+    id: 'istanbul-m8-rotem', name: 'Hyundai Rotem M8 train', maker: 'Hyundai Rotem', introduced: 2023,
+    blurb: 'Ten driverless four-car trains link Bostancı on the Marmara shore with Dudullu and Parseller.',
+    length: 20, ...metroCar, nose: 'rounded',
+    finish: 'paint', body: WHITE, roof: ROOF, front: DARK, doorColor: WHITE, windowColor: GLASS,
+    stripes: [band('line', 0.1, 0.18)],
+    frontStripes: [band('line', 0.1, 0.2)],
+    pantograph: true,
+  },
+  {
+    id: 'istanbul-m11-crrc', name: 'CRRC Zhuzhou airport metro', maker: 'CRRC Zhuzhou', introduced: 2023,
+    blurb: 'The first 120 km/h automated metro trains China exported. They reach Istanbul Airport through 69 km of line.',
+    length: 22, ...metroCar, nose: 'rounded',
+    finish: 'paint', body: WHITE, roof: ROOF, front: DARK, doorColor: WHITE, windowColor: GLASS,
+    stripes: [band('line', 0.28, 0.36)],
+    frontStripes: [band('line', 0.22, 0.3)],
+    pantograph: true,
+  },
+  // ---------------------------------------------------------------- TCDD
+  {
+    id: 'istanbul-e32000', name: 'E32000 (Marmaray)', maker: 'Hyundai Rotem / Eurotem', introduced: 2013,
+    blurb: 'Crosses between Europe and Asia in an immersed tube 60 m below the Bosphorus, the deepest of its kind when it opened.',
+    length: 22.5, width: 2.9, height: 3.9, doors: 4, profile: 'box', nose: 'rounded',
+    finish: 'paint', body: WHITE, roof: ROOF, front: WHITE, doorColor: '#A9AFB5', windowColor: GLASS,
+    skirt: '#6B7178', stripes: [band('#C8102E', 0.2, 0.26)],
+    frontStripes: [band(GLASS, 0.45, 0.88), band('#C8102E', 0.2, 0.26)],
+    pantograph: true,
+  },
+  // ---------------------------------------------------------------- trams
+  {
+    id: 'istanbul-citadis', name: 'Alstom Citadis X04', maker: 'Alstom', introduced: 2011,
+    blurb: 'Run in pairs through the old city, past Hagia Sophia and the Blue Mosque at Sultanahmet, then over the Galata Bridge.',
+    length: 32.8, width: 2.65, height: 3.4, doors: 6, profile: 'tram', nose: 'rounded', sections: 5,
+    finish: 'paint', body: '#C9CDD1', roof: '#E6E8EA', front: '#D0242B', doorColor: '#9DA3A9', windowColor: GLASS,
+    skirt: '#D0242B', stripes: [band('#D0242B', 0, 0.1)],
+    frontStripes: [band(GLASS, 0.4, 0.92)],
+    pantograph: true,
+  },
+  {
+    id: 'istanbul-flexity', name: 'Bombardier Flexity Swift A32', maker: 'Bombardier', introduced: 2003,
+    blurb: 'Bought for the modern tramway, these trams still run coupled in pairs on T1 alongside the newer Citadis.',
+    length: 29, width: 2.65, height: 3.4, doors: 4, profile: 'tram', nose: 'flat', sections: 3,
+    finish: 'paint', body: WHITE, roof: '#D8DCE0', front: '#1E5AA8', doorColor: '#1E5AA8', windowColor: GLASS,
+    skirt: '#1E5AA8', stripes: [band('#1E5AA8', 0, 0.16)],
+    frontStripes: [band(GLASS, 0.45, 0.9)],
+    pantograph: true,
+  },
+  {
+    id: 'istanbul-t4-rotem', name: 'Hyundai Rotem LRV', maker: 'Hyundai Rotem', introduced: 2007,
+    blurb: 'High-floor light rail cars for T4, which dives into tunnels for seven of its 22 stations.',
+    length: 29, width: 2.65, height: 3.6, doors: 4, profile: 'box', nose: 'flat', sections: 2,
+    finish: 'paint', body: '#3FA3DC', roof: ROOF, front: '#3FA3DC', doorColor: '#8E959C', windowColor: GLASS,
+    skirt: '#6B7178', stripes: [band('#8E959C', 0, 0.36), band('#E03A3E', 0.36, 0.4)],
+    frontStripes: [band('#8E959C', 0, 0.36), band(GLASS, 0.5, 0.9)],
+    pantograph: true,
+  },
+  {
+    id: 'istanbul-b100', name: 'Duewag B100 Stadtbahn car', maker: 'Duewag', introduced: 2008,
+    blurb: 'Second-hand German Stadtbahn cars, repainted in Istanbul blue and given a new life climbing the T4 hills.',
+    length: 28.5, width: 2.65, height: 3.5, doors: 4, profile: 'box', nose: 'flat', sections: 2,
+    finish: 'paint', body: '#4CB0E4', roof: ROOF, front: '#4CB0E4', doorColor: '#4CB0E4', windowColor: GLASS,
+    skirt: WHITE, stripes: [band(WHITE, 0, 0.3), band('#1D5E9E', 0.3, 0.34)],
+    frontStripes: [band(WHITE, 0, 0.3), band(GLASS, 0.5, 0.9)],
+    pantograph: true,
+  },
+  {
+    id: 'istanbul-t4-yerli', name: 'İstanbul tram', maker: 'Metro İstanbul', introduced: 2017,
+    blurb: 'Designed and built in-house by Metro İstanbul, the first tram the city made itself. Eighteen serve on T4.',
+    length: 29, width: 2.65, height: 3.6, doors: 4, profile: 'box', nose: 'rounded', sections: 2,
+    finish: 'paint', body: WHITE, roof: ROOF, front: '#E03A3E', doorColor: WHITE, windowColor: GLASS,
+    stripes: [band('#E03A3E', 0.08, 0.16), band('#1D5E9E', 0.16, 0.2)],
+    frontStripes: [band(GLASS, 0.45, 0.9)],
+    pantograph: true,
+  },
+  {
+    id: 'istanbul-panorama', name: 'Durmazlar Panorama', maker: 'Durmazlar', introduced: 2021,
+    blurb: 'Turkish-built trams that run wire-free along the Golden Horn, fed from a rail that is live only beneath them.',
+    length: 33, width: 2.65, height: 3.4, doors: 4, profile: 'tram', nose: 'rounded', sections: 5,
+    finish: 'paint', body: WHITE, roof: '#E6E8EA', front: '#1B2E5A', doorColor: '#1B2E5A', windowColor: GLASS,
+    skirt: '#1B2E5A', stripes: [band('#1B2E5A', 0, 0.18), band('#E03A3E', 0.18, 0.22)],
+    frontStripes: [band(GLASS, 0.45, 0.92)],
+    pantograph: false,
+  },
+  // ---------------------------------------------------------------- nostalgic lines and funiculars
+  {
+    id: 'istanbul-heritage', name: 'Taksim–Tünel heritage tram', maker: 'restored by IETT', introduced: 1990,
+    blurb: 'Pre-1966 Istanbul tramcars, restored and back on İstiklal Avenue since 1990. At busy times a trailer rides behind.',
+    length: 11, width: 2.2, height: 3.3, doors: 2, profile: 'streetcar', nose: 'flat',
+    finish: 'paint', body: '#C4252C', roof: '#7E8388', front: '#C4252C', doorColor: '#C4252C', windowColor: GLASS,
+    skirt: '#3A2A25', stripes: [band('#F1E6CF', 0.4, 0.9)],
+    frontStripes: [band('#F1E6CF', 0.4, 0.5), band(GLASS, 0.5, 0.88)],
+    pantograph: false, trolleyPole: true,
+  },
+  {
+    id: 'istanbul-gotha', name: 'Gotha two-axle tram', maker: 'Gothaer Waggonfabrik', introduced: 2003,
+    blurb: 'Second-hand East German trams that circle one way round Kadıköy and Moda, loosely following the old route 20.',
+    length: 11, width: 2.2, height: 3.3, doors: 2, profile: 'streetcar', nose: 'flat',
+    finish: 'paint', body: '#EFE6CC', roof: '#8E959C', front: '#EFE6CC', doorColor: '#1F3354', windowColor: GLASS,
+    skirt: '#1F3354', stripes: [band('#1F3354', 0, 0.36)],
+    frontStripes: [band('#1F3354', 0, 0.36), band(GLASS, 0.5, 0.88)],
+    pantograph: true,
+  },
+  {
+    id: 'istanbul-tunel', name: 'Tünel car', maker: 'IETT', introduced: 2007,
+    blurb: 'Tünel opened in 1875, the second-oldest underground railway after London. Its rubber-tyred cars take 1.5 minutes up the hill.',
+    length: 19, width: 2.7, height: 3.3, doors: 3, profile: 'box', nose: 'flat',
+    finish: 'paint', body: '#B8252B', roof: '#7E8388', front: '#B8252B', doorColor: '#B8252B', windowColor: GLASS,
+    skirt: '#3A2A25', stripes: [band('#F1E6CF', 0.36, 0.42)],
+    frontStripes: [band(GLASS, 0.45, 0.88)],
+    pantograph: false,
+  },
+  {
+    id: 'istanbul-f1', name: 'Taksim–Kabataş funicular', maker: 'Doppelmayr Garaventa', introduced: 2006,
+    blurb: 'Two driverless two-car sets climb 75 m from the ferry piers at Kabataş to Taksim Square in about two and a half minutes.',
+    length: 17.3, width: 2.9, height: 3.4, doors: 4, profile: 'box', nose: 'slant',
+    finish: 'paint', body: '#C9CDD1', roof: ROOF, front: '#2A6EB5', doorColor: '#C9CDD1', windowColor: GLASS,
+    stripes: [band('#2A6EB5', 0.08, 0.16)],
+    frontStripes: [band(GLASS, 0.3, 0.92)],
+    pantograph: false,
+  },
+  {
+    id: 'istanbul-f4', name: 'Aşiyan funicular car', maker: 'various', introduced: 2022,
+    blurb: "Drops 800 m from Boğaziçi University to the Bosphorus shore. Istanbul chose its 'sea blue' paint in a public vote.",
+    length: 16, width: 2.7, height: 3.3, doors: 3, profile: 'box', nose: 'slant',
+    finish: 'paint', body: '#1C8FC0', roof: ROOF, front: '#1C8FC0', doorColor: '#1C8FC0', windowColor: GLASS,
+    stripes: [band(WHITE, 0.08, 0.14)],
+    frontStripes: [band(GLASS, 0.3, 0.9)],
+    pantograph: false,
+  },
+];
