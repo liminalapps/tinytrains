@@ -33,7 +33,7 @@ or add `?theme=` to any link:
 | **Voxel** (`voxel`) | The whole city rebuilt in bright blocks, Minecraft Dungeons style: stepped coasts, block parks, cube houses and trees. Buildings keep their real angles; the ground's blocks grow as you zoom out. |
 | **Monet** (`monet`) | An impressionist painting: brushstrokes that stay the same size at every zoom, lilac shadows, water-lily blues. |
 | **Circuit** (`circuit`) | Inside the machine: a black circuit board of cyan traces, buildings as outlined chips, trains as packets of light. |
-| **Cel Shaded** (`cel`) | A Saturday-morning cartoon: bold flat colors, two-tone shading with hard shadows, and ink outlines that fade out at a distance. |
+| **Cel Shaded** (`cel`) | A cel-shaded island adventure: lush grass, cream houses with terracotta roofs, a deep blue sea ringed with white foam, flat banded shading with hard shadows, and ink outlines that fade out at a distance. |
 | **Noir** (`noir`) | A black-and-white city in hard light, where only the trains and their lines carry color. |
 | **Cubism** (`cubism`) | The city broken into planes, in ochre, olive and slate, with dark outlines and cut-paper panels. |
 

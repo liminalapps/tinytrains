@@ -927,10 +927,10 @@ body[data-theme='cel'] {
 }
 body[data-theme='cel'] :is(.panel, .logo, .sb-name, .pill-btn, .live:not(.badge), .clock, .controls button, .ticket, .theme-card, .lbl.station, .city-switch, .dock, .tour-pill) { border: 2.5px solid #2b1414; backdrop-filter: none; -webkit-backdrop-filter: none; }
 body[data-theme='cel'] .logo h1 { color: #e8452c; text-shadow: 2px 2px 0 #2b1414; font-weight: 800; }
-body[data-theme='cel'] .city-switch { background: #ffd23f; }
+body[data-theme='cel'] .city-switch { background: #8fcd5e; }
 body[data-theme='cel'] .lbl.station { box-shadow: 2px 2px 0 #2b1414; font-weight: 700; }
 body[data-theme='cel'] .lbl.geo { color: #2b1414; font-weight: 800; text-shadow: 0 0 3px #fffaf0, 0 0 6px #fffaf0; }
 body[data-theme='cel'] .tour-cta { background: #e8452c; border: 2.5px solid #2b1414; box-shadow: 4px 4px 0 #2b1414; font-weight: 800; }
-body[data-theme='cel'] .loader { background: radial-gradient(circle at 50% 42%, #ffd23f 0 14%, transparent 14.5%), #3aa8ff; }
+body[data-theme='cel'] .loader { background: radial-gradient(ellipse at 50% 115%, #1e5fc4 0 30%, transparent 30.5%), radial-gradient(ellipse at 50% 88%, #8fcd5e 0 26%, transparent 26.5%), linear-gradient(#3f98ee, #c4ebff); }
 body[data-theme='cel'] .loop { border: 6px solid #2b1414; border-right-color: #e8452c; }
 body[data-theme='cel'] .loader-text { color: #2b1414; font-weight: 800; }

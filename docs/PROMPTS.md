@@ -180,6 +180,10 @@ Typos are left as typed. Screenshots and reference images that came with a promp
 
 > also add São Paulo as a city. And a new theme: CEL SHADED. make the colors at least this saturated: [image]
 
+### 43. 2026-09-29 04:27 UTC
+
+> celshading colors are bad for the land/etc (bright yellow looks bad). try again. think windwaker/etc.
+
 ## Briefs given to agents
 
 ### nyc-data (new agent, 2026-09-24 17:48 UTC)
