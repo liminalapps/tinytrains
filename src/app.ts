@@ -11,6 +11,7 @@ import { geoLabelSpecs, Labels, type LabelSpec } from './engine/labels.ts';
 import { Network } from './engine/network.ts';
 import { Clouds, Precipitation, weatherKind, type Weather } from './engine/sky.ts';
 import { TrainLayer, type LiveTrain } from './engine/trains.ts';
+import { PlaneLayer, type LivePlane } from './engine/planes.ts';
 import { World } from './engine/world.ts';
 import { esc as escapeHtml, UI } from './ui/ui.ts';
 import { parseRoute, routePath, sameSelection, viewHash, type Route, type View } from './router.ts';
@@ -34,6 +35,7 @@ interface CityScene {
   clouds: Clouds;
   landmarks: Landmarks;
   suburbs: Suburbs;
+  planes: PlaneLayer;
   group: THREE.Group;
   lastResp: TrainsResponse | null;
 }
@@ -254,9 +256,13 @@ export class App {
     const suburbs = new Suburbs(id, geoData, bldg && bldg.byteLength > 12 ? new Int16Array(bldg) : null, density, transit?.segments.map((s) => s.pts) ?? []);
     group.add(suburbs.group);
     this.world.scene.add(group);
-    const layers = [island, clouds, buildings, network, trains, landmarks, suburbs].filter(Boolean) as unknown as { update?: () => void }[];
+    const planes = new PlaneLayer(this.world, id, geoData.bounds);
+    planes.onChange = () => this.ui.planesChanged();
+    planes.setEnabled(this.planesOn);
+    group.add(planes.group);
+    const layers = [island, clouds, buildings, network, trains, landmarks, suburbs, planes].filter(Boolean) as unknown as { update?: () => void }[];
     for (const l of layers) this.world.layers.add(l as never);
-    this.city = { id, transit, geo: geoData, island, network, trains, buildings, clouds, landmarks, suburbs, group, lastResp: null };
+    this.city = { id, transit, geo: geoData, island, network, trains, buildings, clouds, landmarks, suburbs, planes, group, lastResp: null };
     this.applySceneTheme();
 
     const cfg = CITIES[id];
@@ -304,7 +310,8 @@ export class App {
     const c = this.city;
     if (!c) return;
     this.world.scene.remove(c.group);
-    for (const l of [c.island, c.clouds, c.buildings, c.network, c.trains, c.landmarks, c.suburbs]) if (l) this.world.layers.delete(l as never);
+    for (const l of [c.island, c.clouds, c.buildings, c.network, c.trains, c.landmarks, c.suburbs, c.planes]) if (l) this.world.layers.delete(l as never);
+    c.planes.dispose();
     c.trains?.dispose();
     c.network?.dispose();
     c.buildings?.dispose();
@@ -445,6 +452,11 @@ export class App {
       this.selectTrain(t);
       return;
     }
+    const p = c.planes.pick(x, y, 22);
+    if (p) {
+      this.selectPlane(p);
+      return;
+    }
     const g = this.world.rig.groundAt(x, y);
     const st = c.network?.nearestStation(g.x, g.z, this.world.rig.mpp * 16);
     if (st) {
@@ -452,6 +464,7 @@ export class App {
       return;
     }
     this.selectTrain(null);
+    this.selectPlane(null);
     this.ui.closeStation();
   }
 
@@ -463,8 +476,10 @@ export class App {
     const x = e.clientX - r.left;
     const y = e.clientY - r.top;
     const t = c.trains.pick(x, y, 16);
-    this.ui.hoverTrain(t, e.clientX, e.clientY);
-    this.world.renderer.domElement.style.cursor = t ? 'pointer' : '';
+    const p = t ? null : c.planes.pick(x, y, 16);
+    if (p) this.ui.hoverPlane(p, e.clientX, e.clientY);
+    else this.ui.hoverTrain(t, e.clientX, e.clientY);
+    this.world.renderer.domElement.style.cursor = t || p ? 'pointer' : '';
   }
 
   selectTrain(t: LiveTrain | null, follow = false) {
@@ -472,6 +487,10 @@ export class App {
     if (!c?.trains) return;
     queueMicrotask(() => this.syncUrl(!this.touring));
     if (t && (c.trains.trains.get(t.id) !== t || t.dying !== null)) t = null;
+    if (t && c.planes.selected) {
+      c.planes.select(null);
+      this.ui.showPlane(null);
+    }
     if (t && c.trains.focusLine) {
       c.trains.focusLine = null;
       this.ui.showLine(null);
@@ -483,6 +502,52 @@ export class App {
       this.follow(true);
     }
     this.ui.showTrain(t);
+  }
+
+  // -------------------------------------------------------------------------
+  // Planes
+  planesOn = (() => {
+    try {
+      return localStorage.getItem('tt-planes') !== '0';
+    } catch {
+      return true;
+    }
+  })();
+
+  setPlanes(on: boolean) {
+    this.planesOn = on;
+    try {
+      localStorage.setItem('tt-planes', on ? '1' : '0');
+    } catch {
+      /* private mode */
+    }
+    this.city?.planes.setEnabled(on);
+    this.ui.planesChanged();
+  }
+
+  selectPlane(p: LivePlane | null, follow = false) {
+    const c = this.city;
+    if (!c) return;
+    if (p && c.trains?.selected) this.selectTrain(null);
+    if (!p && c.planes.selected && this.world.rig.following) this.world.rig.setFollow(null);
+    c.planes.select(p);
+    this.ui.showPlane(p);
+    if (p && follow) this.followPlane(true);
+  }
+
+  followPlane(on: boolean) {
+    const c = this.city;
+    const p = c?.planes.selected;
+    const rig = this.world.rig;
+    if (!on || !p) {
+      rig.setFollow(null);
+      this.ui.planeFollowChanged(false);
+      return;
+    }
+    rig.flyTo({ x: p.pos.x, z: p.pos.z, span: Math.max(rig.span, 1400) }, 1.2, () => {
+      rig.setFollow(() => (c?.planes.selected === p && c.planes.planes.has(p.data.hex) ? c.planes.groundUnder(p) : null));
+    });
+    this.ui.planeFollowChanged(true);
   }
 
   follow(on: boolean) {

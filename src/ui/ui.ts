@@ -1,4 +1,6 @@
 import { setLook } from '../themes/look.ts';
+import type { LivePlane } from '../engine/planes.ts';
+import type { FlightRoute } from '../../server/planes.ts';
 import { activeTheme, loadFonts, rememberTheme, setActiveTheme, themeById, themeQuery, THEMES, type Theme } from '../themes/themes.ts';
 import { CITIES, CITY_ORDER } from '../../shared/cities.ts';
 import { READY } from '../ready.ts';
@@ -79,6 +81,11 @@ const SEARCH_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden=
 const PLAY_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>';
 const LINES_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="8" cy="7" r="2" fill="#ff5a5f"/><circle cx="15" cy="12" r="2" fill="#2fa5ff"/><circle cx="10" cy="17" r="2" fill="#2fd18b"/></svg>';
 const FLEET_SVG = '<svg viewBox="0 0 24 24" width="18" height="18"><rect x="3" y="5" width="18" height="11" rx="4" fill="currentColor"/><rect x="6" y="8" width="4" height="3" rx="1" fill="#fff"/><rect x="11" y="8" width="4" height="3" rx="1" fill="#fff"/><circle cx="8" cy="18.5" r="1.8" fill="currentColor"/><circle cx="16" cy="18.5" r="1.8" fill="currentColor"/></svg>';
+const PLANE_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M21 15.5v-1.8l-7.6-4.8V4.1c0-.8-.6-1.6-1.4-1.6s-1.4.8-1.4 1.6v4.8L3 13.7v1.8l7.6-2.3v4.5l-2.1 1.5V21l3.5-1 3.5 1v-1.8l-2.1-1.5v-4.5z" fill="currentColor"/></svg>';
+const isLight = (hex: string) => {
+  const n = parseInt(hex.slice(1), 16);
+  return ((n >> 16) & 255) * 0.3 + ((n >> 8) & 255) * 0.59 + (n & 255) * 0.11 > 170;
+};
 const CHEV = '<svg class="chev" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>';
 
 export const SHARE_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 12v6.5A2.5 2.5 0 0 0 7.5 21h9a2.5 2.5 0 0 0 2.5-2.5V12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
@@ -141,12 +148,14 @@ export class UI {
       <aside class="card train-card panel" hidden></aside>
       <aside class="card station-card panel" hidden></aside>
       <aside class="card line-card panel" hidden></aside>
+      <aside class="card plane-card panel" hidden></aside>
       <div class="controls">
         <button data-act="zin" class="zoom" title="Zoom in (+)">+</button>
         <button data-act="zout" class="zoom" title="Zoom out (−)">−</button>
         <button data-act="compass" class="compass" title="Reset view (N)"><svg viewBox="0 0 24 24"><path d="M12 3l4 9h-8z" fill="#ff5a5f"/><path d="M12 21l-4-9h8z" fill="#9fb3c8"/></svg></button>
         <button data-act="rotl" class="rot" title="Rotate (Q)">⟲</button>
         <button data-act="rotr" class="rot" title="Rotate (E)">⟳</button>
+        <button data-act="planes" class="planes-btn" title="Live planes (A)" hidden>${PLANE_SVG}</button>
         <button data-act="sky" class="sky-btn" title="Sky: live / night / day (L)"></button>
         <button data-act="sound" class="sound-btn" title="Sound (M)"></button>
         <button data-act="share" class="share-btn" title="Share this view (S)">${SHARE_SVG}</button>
@@ -231,6 +240,10 @@ export class UI {
         case 'sky':
           this.cycleSky();
           break;
+        case 'planes':
+          this.app.setPlanes(!this.app.planesOn);
+          this.toast(this.app.planesOn ? 'Live planes on' : 'Live planes off');
+          break;
         case 'postcard':
           void this.postcard();
           break;
@@ -277,6 +290,7 @@ export class UI {
       if (shown(this.$('.fleet'))) return this.toggleFleet(false);
       if (shown(this.$('.about'))) return reveal(this.$('.about'), false);
       app.selectTrain(null);
+      app.selectPlane(null);
       this.closeStation();
       app.focusLine(null, false);
     } else if (k === '+' || k === '=') rig.zoomBy(1 / 1.5);
@@ -284,8 +298,15 @@ export class UI {
     else if (k === 'q') rig.rotateBy(Math.PI / 4);
     else if (k === 'e') rig.rotateBy(-Math.PI / 4);
     else if (k === 'n') app.home();
-    else if (k === 'f') app.follow(!rig.following);
+    else if (k === 'f') {
+      if (app.city?.planes.selected) app.followPlane(!rig.following);
+      else app.follow(!rig.following);
+    }
     else if (k === 'l') this.cycleSky();
+    else if (k === 'a') {
+      this.app.setPlanes(!this.app.planesOn);
+      this.toast(this.app.planesOn ? 'Live planes on' : 'Live planes off');
+    }
     else if (k === 'v') this.cycleTheme();
     else if (k === 'r') this.randomTrain();
     else if (k === 'g') this.toggleFleet();
@@ -422,7 +443,8 @@ export class UI {
     this.showLine(null);
     this.$('.tagline').textContent = CITIES[c.id].tagline;
     const lead = c.transit?.attribution.find((a) => /TfL|MTA|BART|ODPT|Île-de-France|IDFM|VBB|BVG|CRTM|Metro de Madrid|Renfe|Seoul|Korail|MTR/.test(a));
-    this.$('.credit-line').textContent = [lead, '© OpenStreetMap contributors'].filter(Boolean).join(' · ');
+    this.creditLead = lead ?? '';
+    this.renderCredits();
     this.app.selectTrain(null);
     this.closeStation();
     this.renderLegend();
@@ -564,6 +586,7 @@ export class UI {
     if (card.classList.contains('train-card')) this.app.selectTrain(null);
     else if (card.classList.contains('station-card')) this.closeStation();
     else if (card.classList.contains('line-card')) this.app.focusLine(null);
+    else if (card.classList.contains('plane-card')) this.app.selectPlane(null);
   }
 
   tourChanged(on: boolean, text = '') {
@@ -826,6 +849,109 @@ export class UI {
     this.tipEl.classList.add('shown');
     this.tipEl.innerHTML = `${bullet(t.line, c.id, 20, t.state.service === 'Express' && c.id === 'nyc')}<span>to <b>${esc(t.state.dest)}</b></span><small>${esc(t.spec.name)}</small>`;
     this.tipEl.style.transform = `translate(${x + 14}px, ${y + 12}px)`;
+  }
+
+  private creditLead = '';
+  private renderCredits() {
+    const src = this.app.planesOn ? this.app.city?.planes.source : '';
+    const planes = src === 'adsb.lol' ? 'Aircraft: adsb.lol (ODbL)' : src === 'adsb.fi' ? 'Aircraft: adsb.fi' : src === 'opensky' ? 'Aircraft: The OpenSky Network' : '';
+    this.$('.credit-line').textContent = [this.creditLead, planes, '© OpenStreetMap contributors'].filter(Boolean).join(' · ');
+  }
+
+  /** Called on each plane poll and selection change. */
+  planesChanged() {
+    const btn = this.$('.planes-btn');
+    btn.classList.toggle('on', this.app.planesOn);
+    // The button appears once plane data has reached this browser (so it never offers an empty layer).
+    if (this.app.city?.planes.source || !this.app.planesOn) btn.hidden = false;
+    this.renderCredits();
+    const p = this.app.city?.planes.selected;
+    if (p && shown(this.$('.plane-card'))) this.updatePlaneCard(p);
+  }
+
+  hoverPlane(p: LivePlane, x: number, y: number) {
+    if (p === this.app.city?.planes.selected) {
+      this.tipEl.classList.remove('shown');
+      return;
+    }
+    const d = p.data;
+    this.tipEl.hidden = false;
+    this.tipEl.classList.add('shown');
+    this.tipEl.innerHTML = `<span class="tip-plane">${PLANE_SVG}</span><span><b>${esc(d.cs || d.reg || d.hex.toUpperCase())}</b> ${d.gnd ? 'on the ground' : `${Math.round(d.alt).toLocaleString()} ft`}</span><small>${esc(p.type.name)}${p.livery.name ? ` · ${esc(p.livery.name)}` : ''}</small>`;
+    this.tipEl.style.transform = `translate(${x + 14}px, ${y + 12}px)`;
+  }
+
+  private routes = new Map<string, Promise<FlightRoute | null>>();
+
+  showPlane(p: LivePlane | null) {
+    const card = this.$('.plane-card');
+    this.tipEl.classList.remove('shown');
+    if (!p) {
+      reveal(card, false);
+      if (!this.stationId && !shown(this.$('.train-card'))) document.body.classList.remove('card-open');
+      return;
+    }
+    this.closeStation();
+    if (soundOn()) sfx.pop();
+    const d = p.data;
+    const lv = p.livery;
+    card.style.setProperty('--line', lv.name ? lv.tail : '#3b4a63');
+    card.style.setProperty('--line-text', lv.name && isLight(lv.tail) ? '#1c2433' : '#ffffff');
+    const title = d.cs || d.reg || d.hex.toUpperCase();
+    card.innerHTML = `
+      <div class="tc-head">
+        <button class="x" aria-label="Close">×</button>
+        <div class="tc-line"><span class="pc-icon">${PLANE_SVG}</span><div><div class="tc-linename">${esc(lv.name || 'Aircraft')} <span class="mono">${esc(title)}</span></div>
+        <div class="tc-sub">${esc(p.type.name)} <span class="badge live">● live</span></div></div></div>
+        <div class="tc-dest pc-route"><span>&nbsp;</span></div>
+      </div>
+      <div class="tc-facts">
+        <div><b class="pc-alt">—</b><span>altitude</span></div>
+        <div><b class="pc-spd">—</b><span>speed</span></div>
+        <div><b class="pc-vs">—</b><span>climb</span></div>
+      </div>
+      <div class="tc-facts pc-ids">
+        <div><b class="mono">${esc(d.reg || '—')}</b><span>registration</span></div>
+        <div><b class="mono">${esc(d.t || '—')}</b><span>type code</span></div>
+        <div><b class="mono">${esc(d.hex.toUpperCase())}</b><span>ICAO address</span></div>
+      </div>
+      <p class="tc-blurb pc-note">Live from ADS-B radio receivers run by volunteers. Its height here is compressed so a cruising jet stays in view; the shadow marks where it is over the ground.</p>
+      <div class="tc-actions"><button class="follow">Follow</button></div>
+    `;
+    card.querySelector('.x')!.addEventListener('click', () => this.app.selectPlane(null));
+    card.querySelector('.follow')!.addEventListener('click', () => this.app.followPlane(!this.app.world.rig.following));
+    if (shown(card)) replay(card, 'swap');
+    reveal(card, true);
+    document.body.classList.add('card-open');
+    this.updatePlaneCard(p);
+    // Origin and destination, looked up once per callsign.
+    if (d.cs && /^[A-Z]{3}\d/.test(d.cs)) {
+      let r = this.routes.get(d.cs);
+      if (!r) this.routes.set(d.cs, (r = fetch(`/api/route/${d.cs}`).then((x) => (x.ok ? (x.json() as Promise<FlightRoute | null>) : null)).catch(() => null)));
+      void r.then((route) => {
+        if (this.app.city?.planes.selected !== p || !route?.from || !route.to) return;
+        const ap = (a: NonNullable<FlightRoute['from']>) => `<b>${esc(a.iata || a.icao)}</b> <small>${esc(a.city || a.name)}</small>`;
+        card.querySelector('.pc-route')!.innerHTML = `${ap(route.from)} <span class="pc-arrow">→</span> ${ap(route.to)}`;
+        if (route.airline && !lv.name) card.querySelector('.tc-linename')!.firstChild!.textContent = `${route.airline} `;
+      });
+    }
+  }
+
+  private updatePlaneCard(p: LivePlane) {
+    const card = this.$('.plane-card');
+    const d = p.data;
+    const set = (sel: string, v: string) => ((card.querySelector(sel) as HTMLElement).textContent = v);
+    set('.pc-alt', d.gnd ? 'ground' : `${Math.round(d.alt).toLocaleString()} ft`);
+    set('.pc-spd', `${d.gs} kt`);
+    set('.pc-vs', Math.abs(d.vr) < 200 ? 'level' : `${d.vr > 0 ? '↑' : '↓'} ${Math.abs(Math.round(d.vr / 100) * 100).toLocaleString()}`);
+  }
+
+  planeFollowChanged(on: boolean) {
+    const b = this.root.querySelector('.plane-card .follow');
+    if (b) {
+      b.classList.toggle('on', on);
+      b.textContent = on ? 'Following' : 'Follow';
+    }
   }
 
   showTrain(t: LiveTrain | null) {
@@ -1331,7 +1457,7 @@ export class UI {
     a.innerHTML = `<button class="x" aria-label="Close">×</button>
       <h2>Tiny Trains</h2>
       <p>Every dot is a real train, placed from live arrival predictions and vehicle feeds and animated along the actual track. The sky, sun, moon and weather match each city right now.</p>
-      <p><b>Keys:</b> 1–9 cities · C city picker · / search · Q/E rotate · +/− zoom · F follow · T tour · R surprise train · G fleet · L sky · V theme · M sound · S share · P postcard · Esc close</p>
+      <p><b>Keys:</b> 1–9 cities · C city picker · / search · Q/E rotate · +/− zoom · F follow · T tour · R surprise train · G fleet · L sky · A planes · V theme · M sound · S share · P postcard · Esc close</p>
       <h3>Data</h3><ul>${attr.map((x) => `<li>${esc(x)}</li>`).join('')}<li>Map data © OpenStreetMap contributors · OpenMapTiles · OpenFreeMap</li><li>Weather: Open-Meteo</li></ul>
       <p class="muted">Schedules marked "timetable" are simulated from official timetables where no public live feed exists (or an API key isn't configured).</p>`;
     a.querySelector('.x')!.addEventListener('click', () => reveal(a, false));

@@ -3,6 +3,7 @@
 import { CITIES, CITY_ORDER } from '../shared/cities.ts';
 import { STOCK } from '../shared/stock/index.ts';
 import type { CityId, TransitData } from '../shared/types.ts';
+import { fetchPlanes, fetchRoute } from '../server/planes.ts';
 
 interface Env {
   ASSETS: Fetcher;
@@ -22,6 +23,10 @@ export default {
     if (url.hostname === 'www.tinytrains.app') return Response.redirect(`${SITE}${url.pathname}${url.search}`, 301);
     const m = url.pathname.match(/^\/api\/([a-z]+)\/trains$/);
     if (m && isCity(m[1])) return trains(m[1], url, env, ctx);
+    const pm = url.pathname.match(/^\/api\/([a-z]+)\/planes$/);
+    if (pm && isCity(pm[1])) return planes(pm[1], url, ctx);
+    const rm = url.pathname.match(/^\/api\/route\/([A-Z0-9]{2,8})$/);
+    if (rm) return route(rm[1], url, ctx);
     if (url.pathname === '/api/summary') return summary(url, env, ctx);
     if (url.pathname === '/api/health') return Response.json({ ok: true });
     if (url.pathname.startsWith('/api/')) return new Response('not found', { status: 404 });
@@ -55,6 +60,34 @@ async function trains(city: CityId, url: URL, env: Env, ctx: ExecutionContext): 
   out.headers.set('x-recv', String(recv));
   out.headers.set('x-now', String(Date.now()));
   return out;
+}
+
+/** Live aircraft over a city: one upstream poll per Cloudflare location every 8 s, shared by all visitors. */
+async function planes(city: CityId, url: URL, ctx: ExecutionContext): Promise<Response> {
+  const cache = caches.default;
+  const key = new Request(`${url.origin}/__cache/planes/${city}`);
+  const hit = await cache.match(key);
+  if (hit) return hit;
+  try {
+    const body = await fetchPlanes(city);
+    const res = Response.json(body, { headers: { 'cache-control': 'public, max-age=8' } });
+    ctx.waitUntil(cache.put(key, res.clone()));
+    return res;
+  } catch (err) {
+    return Response.json({ error: String(err) }, { status: 502, headers: { 'cache-control': 'no-store' } });
+  }
+}
+
+/** Airline and origin/destination for a callsign (changes rarely: cache for 6 hours). */
+async function route(callsign: string, url: URL, ctx: ExecutionContext): Promise<Response> {
+  const cache = caches.default;
+  const key = new Request(`${url.origin}/__cache/route/${callsign}`);
+  const hit = await cache.match(key);
+  if (hit) return hit;
+  const body = await fetchRoute(callsign).catch(() => null);
+  const res = Response.json(body, { headers: { 'cache-control': `public, max-age=${body ? 21600 : 1800}` } });
+  ctx.waitUntil(cache.put(key, res.clone()));
+  return res;
 }
 
 /** Live train counts for every city (the city picker). */

@@ -841,3 +841,16 @@ body[data-theme='circuit'] .tour-cta { background: #ffa51f; color: #000; border-
 body[data-theme='circuit'] .loader { background: linear-gradient(rgba(25, 230, 255, 0.12) 1px, transparent 1px) 0 0 / 28px 28px, linear-gradient(90deg, rgba(25, 230, 255, 0.12) 1px, transparent 1px) 0 0 / 28px 28px, #000; }
 body[data-theme='circuit'] .loop { border: 3px solid #19e6ff; border-left-color: transparent; filter: drop-shadow(0 0 6px #19e6ff); }
 body[data-theme='circuit'] .loader-text { color: #19e6ff; }
+
+/* ---------------------------------------------------------------- planes */
+.planes-btn.on { color: var(--accent-ink, #1c2433); background: #ffe9a8 !important; }
+.plane-card .pc-icon { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: rgba(255, 255, 255, 0.22); flex: none; }
+.plane-card .pc-icon svg { width: 22px; height: 22px; transform: rotate(45deg); }
+.plane-card .tc-line { display: flex; align-items: center; gap: 10px; }
+.plane-card .pc-route { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; min-height: 22px; }
+.plane-card .pc-route b { font: 600 20px var(--display); }
+.plane-card .pc-route small { font: 700 11px var(--body); opacity: 0.8; }
+.plane-card .pc-arrow { opacity: 0.7; }
+.plane-card .pc-ids b { font-size: 13px; }
+.plane-card .pc-note { font-size: 12px; }
+.tip .tip-plane svg { width: 16px; height: 16px; transform: rotate(45deg); vertical-align: -3px; }

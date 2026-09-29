@@ -35,8 +35,8 @@ function fgcRealtime(): RealtimeSource {
         seriesAt = nowMs;
         jobs.push(
           politeFetch(`${FGC_DATA}/posicionament-dels-trens/records?limit=100&select=ut,tipus_unitat`, {}, { perMinute: 4 })
-            .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
-            .then((j: { results: { ut: string; tipus_unitat: string }[] }) => {
+            .then((r) => (r.ok ? (r.json() as Promise<{ results: { ut: string; tipus_unitat: string }[] }>) : Promise.reject(new Error(`HTTP ${r.status}`))))
+            .then((j) => {
               series = new Map(j.results.map((x) => [x.ut, x.tipus_unitat]));
               raw = undefined;
             })

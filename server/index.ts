@@ -6,6 +6,7 @@ import { CITY_ORDER } from '../shared/cities.ts';
 import type { CityId } from '../shared/types.ts';
 import { Hub } from './hub.ts';
 import type { Adapter, AdapterEnv, AdapterFactory } from './adapters/types.ts';
+import { fetchPlanes, fetchRoute, type FlightRoute, type PlanesResponse } from './planes.ts';
 
 const ROOT = resolve(import.meta.dirname, '..');
 if (existsSync(join(ROOT, '.env'))) process.loadEnvFile(join(ROOT, '.env'));
@@ -69,6 +70,9 @@ createServer((req, res) => {
   });
 }).listen(PORT, () => console.log(`[server] listening on http://localhost:${PORT}${PROD ? '' : ' (api only; vite serves the app on :5173)'}`));
 
+const planeCache = new Map<CityId, { at: number; body: PlanesResponse }>();
+const routeCache = new Map<string, FlightRoute | null>();
+
 async function handle(req: IncomingMessage, res: ServerResponse) {
   const recv = Date.now();
   const url = new URL(req.url ?? '/', 'http://localhost');
@@ -95,6 +99,35 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
       res.writeHead(500, { 'content-type': 'application/json' });
       res.end(JSON.stringify({ error: String(err) }));
     }
+    return;
+  }
+  const pm = url.pathname.match(/^\/api\/([a-z]+)\/planes$/);
+  if (pm && (CITY_ORDER as string[]).includes(pm[1])) {
+    const city = pm[1] as CityId;
+    const hit = planeCache.get(city);
+    let body: PlanesResponse | { error: string };
+    if (hit && Date.now() - hit.at < 8000) body = hit.body;
+    else {
+      try {
+        body = await fetchPlanes(city);
+        planeCache.set(city, { at: Date.now(), body });
+      } catch (err) {
+        body = { error: String(err) };
+      }
+    }
+    res.writeHead('error' in body ? 502 : 200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+    res.end(JSON.stringify(body));
+    return;
+  }
+  const rm = url.pathname.match(/^\/api\/route\/([A-Z0-9]{2,8})$/);
+  if (rm) {
+    let r = routeCache.get(rm[1]);
+    if (r === undefined) {
+      r = await fetchRoute(rm[1]).catch(() => null);
+      routeCache.set(rm[1], r);
+    }
+    res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+    res.end(JSON.stringify(r));
     return;
   }
   if (url.pathname === '/api/summary') {
