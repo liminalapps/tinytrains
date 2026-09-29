@@ -153,6 +153,8 @@ export class Clouds implements Layer {
     // Fade clouds out when zoomed in so they don't smother the city; shadows stay.
     const vis = THREE.MathUtils.smoothstep(f.mpp, 9, 22);
     this.mat.opacity = 0.97 * vis;
+    // Fully faded in they're all but opaque: write depth so screen passes (cel's ink) see them over the city.
+    this.mat.depthWrite = vis > 0.95;
     // Moonlit slate at night, bright white by day.
     this.mat.emissiveIntensity = 0.3 * (1 - f.night);
     this.mat.color.copy(this.dayColor).lerp(NIGHT_CLOUD, f.night * 0.75);

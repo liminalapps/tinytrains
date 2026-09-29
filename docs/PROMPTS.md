@@ -184,6 +184,10 @@ Typos are left as typed. Screenshots and reference images that came with a promp
 
 > celshading colors are bad for the land/etc (bright yellow looks bad). try again. think windwaker/etc.
 
+### 44. 2026-09-29 04:30 UTC
+
+> the outlines are really messy in the cel shading (should be in screenspace or whatever, have a senior graphics engineer/architect figure it out)
+
 ## Briefs given to agents
 
 ### nyc-data (new agent, 2026-09-24 17:48 UTC)
@@ -1633,4 +1637,85 @@ Send the report to team-lead with SendMessage when done, ≤ 400 words. Cover:
 - key env vars to add
 - bbox requests
 - known issues
+````
+
+### cel-outlines (new agent, 2026-09-29 04:31 UTC)
+
+````text
+You are a senior graphics engineer and rendering architect working on Tiny Trains (repo: ./, live at https://tinytrains.app). It's a Three.js (r186, WebGL2) isometric map with an orthographic camera. Your task: make the ink outlines of the "Cel Shaded" theme (theme id `cel`) clean, consistent and screen-space. The user says "the outlines are really messy in the cel shading (should be in screenspace or whatever)".
+
+## Current implementation
+- **Theme values:** src/themes/themes.ts (`id: 'cel'`) sets look values in src/themes/look.ts:
+  - `toon: 1`: cel banding via `TOON_GLSL`/`applyToon`, injected into the lit materials.
+  - `bEdgeK 0.8`, `bEdgePx 1.3`, `bEdge #2b1d14`: in-shader silhouette edges on buildings, in src/engine/buildings.ts. It draws edges from each box's local coordinates and `fwidth`, and fades them when a building is under ~7 px.
+  - `lineCase`/`lineCaseK`: dark casing on transit line ribbons, in src/engine/network.ts. This part is fine.
+- **Post pass:** `post: 'cel'` runs a screen pass in src/themes/post.ts (the `cel` shader).
+  - It renders the scene into a MSAA HalfFloat target with a DepthTexture.
+  - It draws a line where the max 4-neighbor linear-depth jump exceeds `3 + uMpp*7` meters, and fades out between uMpp 5 and 12.
+  - uMpp is meters per CSS pixel; uPx is target pixels per CSS pixel.
+  - The Post class also serves the `neon` bloom and the `pixel` downsample. World.setPost/World.draw live in src/engine/world.ts.
+
+## What's wrong
+Look at a close-up yourself:
+
+```
+./node_modules/.bin/tsx scripts/dev/views.ts london .cache/contact/x "-0.0860,51.5140,450" "-0.1180,51.5030,1200" --w 1100 --h 700 --theme cel
+```
+
+Then Read the pngs. Problems visible now:
+- Double lines: the in-shader building edges plus the depth post trace the same silhouettes.
+- Inconsistent weight from edge to edge.
+- Missing outlines: low adjacent buildings and roofs against walls fall under the depth threshold, so there are no crease lines between faces.
+- Broken, jaggy lines on diagonals, and speckle on the ground.
+- Behavior that depends on camera distance in ways that read as random.
+
+## Goal
+Crisp, uniform, anti-aliased ink lines of constant screen width (about 1.5 CSS px, scaled by devicePixelRatio). They should appear on:
+- silhouettes: object against ground, object against object, the island against the sky
+- creases, where face normals change: box edges between roof and wall, and wall and wall
+
+And NOT on:
+- flat ground
+- texture detail
+- the ground's own flat shading or cast-shadow boundaries
+
+Treat it as a production screen-space edge-detection pass. For example:
+- Render view-space normals (and/or object/instance IDs) into a second target, via MRT or a cheap override pass with MeshNormalMaterial-style output. Instanced meshes and all custom onBeforeCompile materials must still write correct normals and positions: the buildings use an instanced snap (`lkSnap`) in the vertex shader. The trains, ribbons and ground planes all have custom shaders.
+- Combine a Sobel/Roberts edge on normals with a depth edge whose threshold is relative to depth (not absolute meters), so it works at every zoom of an orthographic camera.
+- Anti-alias the result, and keep the width constant in CSS pixels.
+- Keep the distance fade so the far city view doesn't turn into hatching: past a zoom where buildings are only a few pixels, outlines should thin and fade out.
+
+Whatever you choose, it must:
+- Drop the doubled in-shader building edges for `cel`. Set bEdgeK to 0 in the theme if the post pass covers them; the other themes (blueprint, pixel, noir, circuit) still use bEdge, so don't break it.
+- Keep transparent layers (clouds, the sky/alpha around the floating island) correct. The canvas is transparent (premultiplied) over a CSS sky gradient.
+- Not regress performance badly: mid-range laptops and phones, and the scene already has several thousand instanced buildings. One extra lightweight pass is fine; keep the MRT/normal target at canvas resolution with no MSAA, or reuse depth smartly.
+- Not break the other post kinds (neon, pixel), or the no-post themes that draw straight to the screen.
+
+## Verify visually and iterate
+Use contact sheets at three zooms, in London and San Francisco (the Golden Gate is a good silhouette test), until the lines look like hand-inked cel animation: clean, even, continuous.
+
+```
+./node_modules/.bin/tsx scripts/dev/contact.ts london .cache/contact/out.png --themes cel --views "-0.0860,51.5140,450;-0.1180,51.5030,1200;-0.1000,51.5100,2600"
+./node_modules/.bin/tsx scripts/dev/contact.ts sf .cache/contact/out-sf.png --themes cel,toy --views "-0.4783,37.8199,900"
+```
+
+Fix the second command's views to the Golden Gate at -122.4783,37.8199. Also check that neon and pixel still render.
+
+## Rules
+- Run `./node_modules/.bin/tsc --noEmit -p .` before finishing.
+- Edit only what's needed: src/themes/post.ts, src/engine/world.ts, the cel entry in src/themes/themes.ts, and material code only if you need normals output.
+- Don't deploy, commit or push. Team-lead will ship it.
+- Run TypeScript with ./node_modules/.bin/tsx.
+- The dev servers are already running: vite on [::1]:5173 (use http://[::1]:5173, not localhost) and the API on 8787. Don't restart them.
+- Use `command cat` for exact file contents.
+- American English in code and comments; match the surrounding code style and comment density.
+- Don't spawn subagents.
+
+## Final message
+Report ≤ 300 words:
+- the technique
+- the files changed
+- the performance cost (extra passes and targets)
+- before/after observations
+- the paths to your final contact sheets
 ````

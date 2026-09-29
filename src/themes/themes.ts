@@ -638,9 +638,8 @@ export const THEMES: Theme[] = [
       bSat: 1.25,
       bPop: 0.3,
       bWin: 0.55,
-      bEdge: '#2b1d14',
-      bEdgeK: 0.8,
-      bEdgePx: 1.3,
+      // Building outlines come from the post pass's ink (one line per edge, not a second one in the shader).
+      bEdgeK: 0,
       suburbWall: '#f5e9d0',
       suburbRoof: '#c9503a',
       suburbK: 0.55,
