@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { groundUniforms } from './island.ts';
-import { LOOK_PARS, lookUniforms } from '../themes/look.ts';
+import { LOOK_PARS, lookUniforms, applyToon } from '../themes/look.ts';
 
 // The toy-landmark modeling kit: primitives in a local frame (x east, y up, z south, meters), merged into one
 // solid mesh plus one that glows at night.
@@ -100,6 +100,7 @@ export class Kit {
       mat.onBeforeCompile = (sh) => {
         sh.uniforms.uNight = groundUniforms.uNight;
         Object.assign(sh.uniforms, lookUniforms);
+        applyToon(sh);
         sh.fragmentShader = sh.fragmentShader
           .replace('#include <common>', `#include <common>\nuniform float uNight;\n${LOOK_PARS}`)
           .replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.rgb = mix(diffuseColor.rgb, uLk_landmark * (0.55 + 0.6 * dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11))), uLk_landmarkK);')

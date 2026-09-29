@@ -3,7 +3,7 @@ import { BUILDING_STRIDE, type CityId } from '../../shared/types.ts';
 import { groundUniforms } from './island.ts';
 import { rng } from './raster.ts';
 import { OCCLUDER_STENCIL } from './stockModel.ts';
-import { LOOK_PARS, lookUniforms } from '../themes/look.ts';
+import { LOOK_PARS, lookUniforms, applyToon } from '../themes/look.ts';
 import type { FrameInfo, Layer } from './world.ts';
 
 const PALETTES: Record<CityId, string[]> = {
@@ -215,6 +215,7 @@ function makeMaterial(city: CityId) {
   Object.assign(m, OCCLUDER_STENCIL);
   m.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, groundUniforms, lookUniforms);
+    applyToon(sh);
     sh.vertexShader = sh.vertexShader
       .replace(
         '#include <common>',
@@ -247,6 +248,13 @@ function makeMaterial(city: CityId) {
         '#include <color_fragment>',
         `#include <color_fragment>
         vec3 wall = mix(diffuseColor.rgb, uLk_bTint * (0.95 + 0.1 * vSeed), uLk_bTintK);
+        // Cartoon palette (cel): each building takes one of a few bold flat colors, chosen by its seed.
+        if (uLk_bPop > 0.001) {
+          float pk = floor(vSeed * 7.0);
+          vec3 pc = pk < 1.0 ? vec3(1.0, 0.42, 0.28) : pk < 2.0 ? vec3(1.0, 0.78, 0.25) : pk < 3.0 ? vec3(0.36, 0.78, 0.92)
+                  : pk < 4.0 ? vec3(0.62, 0.86, 0.42) : pk < 5.0 ? vec3(0.95, 0.5, 0.55) : pk < 6.0 ? vec3(0.72, 0.6, 0.9) : vec3(0.97, 0.95, 0.9);
+          wall = mix(wall, pc * pc, uLk_bPop);
+        }
         float lit = 0.0;
         vec3 litCol = uLk_bLitCol;
         float V = uLk_voxel;
@@ -316,6 +324,7 @@ export function voxelDepthMaterial() {
   const m = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking });
   m.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, lookUniforms);
+    applyToon(sh);
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', `#include <common>\n${LOOK_PARS}\n${VOXEL_SNAP_GLSL}`)
       .replace('#include <begin_vertex>', 'mat4 bim = lkSnap(instanceMatrix);\n#define instanceMatrix bim\n#include <begin_vertex>');

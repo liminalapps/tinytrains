@@ -7,7 +7,7 @@ import * as THREE from 'three';
 const c = (hex: string) => new THREE.Color(hex);
 
 /** Style ids used by shader branches. */
-export const STYLE = { toy: 0, clay: 1, blueprint: 2, neon: 3, pixel: 4, voxel: 5, subway: 6, monet: 7, cubism: 8, noir: 9, circuit: 10 } as const;
+export const STYLE = { toy: 0, clay: 1, blueprint: 2, neon: 3, pixel: 4, voxel: 5, subway: 6, monet: 7, cubism: 8, noir: 9, circuit: 10, cel: 11 } as const;
 
 export interface LookConfig {
   style: number;
@@ -62,6 +62,8 @@ export interface LookConfig {
   bEdgePx: number;
   /** Saturation of buildings and houses (1 = as painted; voxel pushes it up). */
   bSat: number;
+  /** Repaint buildings in a bold cartoon palette (cel). */
+  bPop: number;
   // Everything else
   suburbWall: string;
   suburbRoof: string;
@@ -81,6 +83,8 @@ export interface LookConfig {
   /** A casing along both edges of every line (the white gaps between parallel routes on a transit diagram). */
   lineCase: string;
   lineCaseK: number;
+  /** Cel shading: lighting snaps to flat bands (lit, shade, shadow) on every lit surface. */
+  toon: number;
   /** Trains glow (neon). */
   trainGlow: number;
 }
@@ -125,6 +129,7 @@ export const TOY_LOOK: LookConfig = {
   bEdgeK: 0,
   bEdgePx: 1,
   bSat: 1,
+  bPop: 0,
   suburbWall: '#ffffff',
   suburbRoof: '#ffffff',
   suburbK: 0,
@@ -140,6 +145,7 @@ export const TOY_LOOK: LookConfig = {
   lineSat: 1,
   lineCase: '#ffffff',
   lineCaseK: 0,
+  toon: 0,
   trainGlow: 0,
 };
 
@@ -198,4 +204,20 @@ export function tickLook(dt: number) {
     }
   }
   if (settled) current = target;
+}
+
+/**
+ * Cel shading for lit materials: the lit color's brightness relative to the flat color picks one of three flat
+ * bands (sun, shade, shadow), so cast shadows and shaded faces become hard-edged areas of flat color. Hook it in
+ * with applyToon(shader) from onBeforeCompile (the shader must declare LOOK_PARS).
+ */
+export const TOON_GLSL = /* glsl */ `#include <opaque_fragment>
+if (uLk_toon > 0.001) {
+  float tBase = max(dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11)), 1e-3);
+  float tLit = dot(outgoingLight - totalEmissiveRadiance, vec3(0.3, 0.59, 0.11)) / tBase;
+  float tBand = tLit > 0.95 ? 1.08 : tLit > 0.58 ? 0.8 : 0.56;
+  gl_FragColor.rgb = mix(gl_FragColor.rgb, diffuseColor.rgb * tBand + totalEmissiveRadiance, uLk_toon);
+}`;
+export function applyToon(sh: { fragmentShader: string }) {
+  sh.fragmentShader = sh.fragmentShader.replace('#include <opaque_fragment>', TOON_GLSL);
 }

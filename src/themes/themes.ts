@@ -6,7 +6,7 @@ import { STYLE, type LookConfig } from './look.ts';
 //   2. Texture and linework fade to flat fills as you zoom out, so the far view stays calm.
 //   3. The style lives in the materials, not in a filter over the finished frame.
 
-export type ThemeId = 'toy' | 'clay' | 'blueprint' | 'subway' | 'neon' | 'pixel' | 'voxel' | 'monet' | 'cubism' | 'noir' | 'circuit';
+export type ThemeId = 'toy' | 'clay' | 'blueprint' | 'subway' | 'neon' | 'pixel' | 'voxel' | 'monet' | 'cubism' | 'noir' | 'circuit' | 'cel';
 
 /** A theme's own sky and light, in place of the real sun (see Atmosphere.style). */
 export interface SkyStyle {
@@ -42,7 +42,7 @@ export interface Theme {
   /** Google Fonts families to load on first use. */
   fonts?: string;
   /** Post-processing: none (draw straight to the screen) or a named effect. */
-  post: null | 'neon' | 'pixel';
+  post: null | 'neon' | 'pixel' | 'cel';
 }
 
 export const THEMES: Theme[] = [
@@ -600,6 +600,54 @@ export const THEMES: Theme[] = [
     },
     fonts: 'Share+Tech+Mono',
     post: 'neon',
+  },
+  {
+    id: 'cel',
+    name: 'Cel Shaded',
+    blurb: 'A Saturday-morning cartoon: bold flat colors, hard shadows and ink outlines',
+    swatch:
+      'linear-gradient(90deg, #2b1414 0 6%, #e8452c 6% 30%, #2b1414 30% 34%, #2f8fc0 34% 62%, #2b1414 62% 66%, #ffd23f 66% 94%, #2b1414 94%)',
+    sky: 'day',
+    skyStyle: { top: '#3aa8ff', bottom: '#b8e6ff', sun: '#fff6e2', sunI: 3.0, hemiSky: '#e4f4ff', hemiGround: '#7a6a4a', hemiI: 1.45, shadows: true },
+    clouds: true,
+    shadowRadius: 0.5,
+    trees: 'blob',
+    look: {
+      style: STYLE.cel,
+      land: '#f3d677',
+      land2: '#f3d677',
+      park: '#56c948',
+      green: '#35ad44',
+      sand: '#ffd98a',
+      airport: '#dccf8e',
+      runway: '#7c7e88',
+      waterDeep: '#1d78b4',
+      waterShallow: '#2f9bd2',
+      foam: '#e6f8ff',
+      road: '#a4a8b0',
+      motorway: '#8d929c',
+      rail: '#7a5640',
+      shore: '#fff1bd',
+      detail: 0.12,
+      nightK: 0,
+      roadGlowK: 0,
+      bSat: 1.5,
+      bPop: 0.8,
+      bWin: 0.6,
+      bEdge: '#2b1414',
+      bEdgeK: 0.85,
+      bEdgePx: 1.3,
+      tree: '#2fae3c',
+      treeK: 0.45,
+      slab: '#b0673a',
+      slabK: 0.6,
+      lineDetail: 0,
+      lineCase: '#2b1414',
+      lineCaseK: 1,
+      toon: 1,
+    },
+    fonts: 'Baloo+2:wght@600;700;800',
+    post: 'cel',
   },
 ];
 

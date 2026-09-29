@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { LOOK_PARS, lookUniforms } from '../themes/look.ts';
+import { LOOK_PARS, lookUniforms, applyToon } from '../themes/look.ts';
 import type { CityId, GeoData } from '../../shared/types.ts';
 import { groundUniforms } from './island.ts';
 import { makeGrid, rasterize, rng, sampleMask, type Grid } from './raster.ts';
@@ -575,6 +575,7 @@ function roofMaterial() {
   const m = new THREE.MeshLambertMaterial({ color: '#ffffff', flatShading: true });
   m.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, lookUniforms);
+    applyToon(sh);
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', `#include <common>\n${LOOK_PARS}`)
       .replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.rgb = mix(diffuseColor.rgb, uLk_suburbRoof * (0.8 + 0.4 * dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11))), uLk_suburbK);\ndiffuseColor.rgb = mix(vec3(dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11))), diffuseColor.rgb, uLk_bSat);');
@@ -588,6 +589,7 @@ function windowMaterial() {
   m.onBeforeCompile = (sh) => {
     sh.uniforms.uNight = groundUniforms.uNight;
     Object.assign(sh.uniforms, lookUniforms);
+    applyToon(sh);
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', '#include <common>\nvarying float vLitSeed;\nvarying vec3 vLocal;')
       .replace('#include <common>', `#include <common>\n${LOOK_PARS}\n${VOXEL_SNAP_GLSL}`)

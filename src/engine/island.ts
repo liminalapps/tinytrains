@@ -4,7 +4,7 @@ import { buildRibbons, RIBBON_VERT_PARS } from './ribbon.ts';
 import { makeGrid, rasterize, rng, sampleMask, signedDistance, type Grid } from './raster.ts';
 import type { FrameInfo, Layer } from './world.ts';
 import { LOW } from './quality.ts';
-import { LOOK_PARS, lookUniforms, STYLE } from '../themes/look.ts';
+import { LOOK_PARS, lookUniforms, STYLE, applyToon } from '../themes/look.ts';
 
 /** Shared, per-frame uniforms for all ground materials. */
 export const groundUniforms = {
@@ -261,6 +261,7 @@ function groundMaterial(color: string, patch: (sh: THREE.WebGLProgramParametersW
   m.customProgramCacheKey = () => key;
   m.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, groundUniforms, lookUniforms);
+    applyToon(sh);
     sh.vertexShader = sh.vertexShader.replace('#include <common>', WORLD_VARY_VERT[0]).replace('#include <worldpos_vertex>', WORLD_VARY_VERT[1]);
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', `#include <common>\nvarying vec3 vWorld;\n${NOISE_GLSL}`)
@@ -427,6 +428,7 @@ function ribbonMaterial(opts: { color?: string; vertexColors?: boolean; transpar
   m.customProgramCacheKey = () => key;
   m.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, groundUniforms, roadUniforms, lookUniforms, { uHalfW: { value: 1 }, uLaneW: { value: 0 }, uElevH: { value: 0 } });
+    applyToon(sh);
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', `#include <common>\n${RIBBON_VERT_PARS}\nuniform vec4 uRoadW;\nuniform float uMpp;`)
       .replace('#include <beginnormal_vertex>', 'vec3 objectNormal = vec3(0.0, 1.0, 0.0);')
@@ -614,6 +616,7 @@ export class Island implements Layer {
     const slabMat = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true, side: THREE.DoubleSide });
     slabMat.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, lookUniforms);
+      applyToon(sh);
       sh.fragmentShader = sh.fragmentShader
         .replace('#include <common>', `#include <common>\n${LOOK_PARS}`)
         .replace(
@@ -796,6 +799,7 @@ export class Island implements Layer {
     const mat = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true });
     mat.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, groundUniforms, lookUniforms);
+      applyToon(sh);
       sh.vertexShader = sh.vertexShader
         .replace('#include <common>', `#include <common>\nuniform float uTime;\n${LOOK_PARS}`)
         .replace(

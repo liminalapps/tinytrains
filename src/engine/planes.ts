@@ -4,7 +4,7 @@ import { aircraftFor, liveryFor, type AircraftType, type Livery } from '../../sh
 import { makeProjection } from '../../shared/geo.ts';
 import type { CityId } from '../../shared/types.ts';
 import type { Plane } from '../../server/planes.ts';
-import { LOOK_PARS, lookUniforms } from '../themes/look.ts';
+import { LOOK_PARS, lookUniforms, applyToon } from '../themes/look.ts';
 import type { FrameInfo, Layer, World } from './world.ts';
 
 // Live aircraft over the city, from community ADS-B receivers. Each plane is a little procedural model of its
@@ -216,6 +216,7 @@ export class PlaneLayer implements Layer {
     // Glowing themes (neon, circuit) light the planes a little, like the trains.
     this.bodyMat.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, lookUniforms);
+      applyToon(sh);
       sh.fragmentShader = sh.fragmentShader
         .replace('#include <common>', `#include <common>\n${LOOK_PARS}`)
         .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\ntotalEmissiveRadiance += diffuseColor.rgb * uLk_trainGlow * 0.35;');

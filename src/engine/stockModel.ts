@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { LOOK_PARS, lookUniforms } from '../themes/look.ts';
+import { LOOK_PARS, lookUniforms, applyToon } from '../themes/look.ts';
 import type { StockSpec, StockStripe } from '../../shared/types.ts';
 
 // Procedural rolling stock: a lofted body from a cross-section profile, a hand-painted livery atlas
@@ -786,6 +786,7 @@ function makeMaterial(map: THREE.Texture, emissiveMap: THREE.Texture) {
     sh.uniforms.uFar = trainUniforms.uFar;
     sh.uniforms.uTime = trainUniforms.uTime;
     Object.assign(sh.uniforms, lookUniforms);
+    applyToon(sh);
     // aMode: 0 normal, 1 selected, 2 on the focused line, 3 dimmed (another line is focused).
     // Geometry without the attribute (previews, portraits) reads the default 0.
     sh.vertexShader = sh.vertexShader

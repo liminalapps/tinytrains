@@ -78,6 +78,28 @@ void main() {
   gl_FragColor = vec4(c, 1.0);
 }`,
 
+  // Cel shading's ink: a dark line wherever depth jumps (silhouettes: buildings on the street, trains on the
+  // track, the island against the sky), about 1.5 CSS px wide. It fades out at far zoom, where every building
+  // is a few pixels and outlines would only add noise.
+  cel: /* glsl */ `
+void main() {
+  vec4 t = texture2D(tColor, vUv);
+  float a = clamp(t.a, 0.0, 1.0);
+  vec3 c = a > 0.0 ? srgb(t.rgb / a) : vec3(0.0);
+  vec2 px = uPx * 1.3 / uRes;
+  float z = depthM(vUv);
+  float zx0 = depthM(vUv - vec2(px.x, 0.0)), zx1 = depthM(vUv + vec2(px.x, 0.0));
+  float zy0 = depthM(vUv - vec2(0.0, px.y)), zy1 = depthM(vUv + vec2(0.0, px.y));
+  float jump = max(max(abs(zx1 - z), abs(z - zx0)), max(abs(zy1 - z), abs(z - zy0)));
+  float thresh = 3.0 + uMpp * 7.0;
+  float ink = smoothstep(thresh, thresh * 1.6, jump) * (1.0 - smoothstep(5.0, 12.0, uMpp));
+  // Against the empty sky, the outline sits on the object's side only.
+  float edgeA = max(a, ink * step(0.5, max(max(texture2D(tColor, vUv - vec2(px.x, 0.0)).a, texture2D(tColor, vUv + vec2(px.x, 0.0)).a), max(texture2D(tColor, vUv - vec2(0.0, px.y)).a, texture2D(tColor, vUv + vec2(0.0, px.y)).a))));
+  vec3 inkCol = vec3(0.17, 0.08, 0.08);
+  c = mix(c, inkCol, ink * 0.92);
+  gl_FragColor = vec4(c * edgeA, edgeA);
+}`,
+
   // Hi-fi pixel art: the scene drawn at one texel per two CSS pixels (antialiased inside each texel, so the
   // far view stays calm), scaled up with hard edges. Up close, sprites get a one-texel dark outline.
   pixel: /* glsl */ `

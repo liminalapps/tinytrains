@@ -176,6 +176,10 @@ Typos are left as typed. Screenshots and reference images that came with a promp
 > 
 > On Mobile, the controls get messed up if you follow a train, etc.   Also the lines panel doesnt show and when you're following a train hte train card taeks up teh full screen. basically mobile needs some work to ensure that it works properly.
 
+### 42. 2026-09-29 04:12 UTC
+
+> also add São Paulo as a city. And a new theme: CEL SHADED. make the colors at least this saturated: [image]
+
 ## Briefs given to agents
 
 ### nyc-data (new agent, 2026-09-24 17:48 UTC)
