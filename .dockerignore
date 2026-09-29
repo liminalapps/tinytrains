@@ -1,0 +1,6 @@
+*
+!relay/package.json
+!relay/main.ts
+!shared/cities.ts
+!shared/types.ts
+!server/planes.ts

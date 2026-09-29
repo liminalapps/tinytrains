@@ -7,7 +7,10 @@ import { fetchPlanes, fetchRoute } from '../server/planes.ts';
 
 interface Env {
   ASSETS: Fetcher;
-  [binding: string]: Fetcher;
+  /** The plane relay (relay/main.ts on Fly.io) and its shared token; the ADS-B feeds block Cloudflare. */
+  PLANES_RELAY?: string;
+  PLANES_RELAY_TOKEN?: string;
+  [binding: string]: Fetcher | string | undefined;
 }
 
 /** Every visitor in a Cloudflare location shares one snapshot per city for this long. */
@@ -24,9 +27,9 @@ export default {
     const m = url.pathname.match(/^\/api\/([a-z]+)\/trains$/);
     if (m && isCity(m[1])) return trains(m[1], url, env, ctx);
     const pm = url.pathname.match(/^\/api\/([a-z]+)\/planes$/);
-    if (pm && isCity(pm[1])) return planes(pm[1], url, ctx);
+    if (pm && isCity(pm[1])) return planes(pm[1], url, env, ctx);
     const rm = url.pathname.match(/^\/api\/route\/([A-Z0-9]{2,8})$/);
-    if (rm) return route(rm[1], url, ctx);
+    if (rm) return route(rm[1], url, env, ctx);
     if (url.pathname === '/api/summary') return summary(url, env, ctx);
     if (url.pathname === '/api/health') return Response.json({ ok: true });
     if (url.pathname.startsWith('/api/')) return new Response('not found', { status: 404 });
@@ -63,13 +66,21 @@ async function trains(city: CityId, url: URL, env: Env, ctx: ExecutionContext): 
 }
 
 /** Live aircraft over a city: one upstream poll per Cloudflare location every 8 s, shared by all visitors. */
-async function planes(city: CityId, url: URL, ctx: ExecutionContext): Promise<Response> {
+/** Through the relay when it's configured, else straight to the feeds (which works outside Cloudflare's network). */
+async function viaRelay<T>(env: Env, path: string, direct: () => Promise<T>): Promise<T> {
+  if (!env.PLANES_RELAY || !env.PLANES_RELAY_TOKEN) return direct();
+  const r = await fetch(`${env.PLANES_RELAY}${path}`, { headers: { 'x-relay-token': env.PLANES_RELAY_TOKEN }, signal: AbortSignal.timeout(9000) });
+  if (!r.ok) throw new Error(`relay: HTTP ${r.status}`);
+  return (await r.json()) as T;
+}
+
+async function planes(city: CityId, url: URL, env: Env, ctx: ExecutionContext): Promise<Response> {
   const cache = caches.default;
   const key = new Request(`${url.origin}/__cache/planes/${city}`);
   const hit = await cache.match(key);
   if (hit) return hit;
   try {
-    const body = await fetchPlanes(city);
+    const body = await viaRelay(env, `/planes/${city}`, () => fetchPlanes(city));
     const res = Response.json(body, { headers: { 'cache-control': 'public, max-age=8' } });
     ctx.waitUntil(cache.put(key, res.clone()));
     return res;
@@ -79,12 +90,12 @@ async function planes(city: CityId, url: URL, ctx: ExecutionContext): Promise<Re
 }
 
 /** Airline and origin/destination for a callsign (changes rarely: cache for 6 hours). */
-async function route(callsign: string, url: URL, ctx: ExecutionContext): Promise<Response> {
+async function route(callsign: string, url: URL, env: Env, ctx: ExecutionContext): Promise<Response> {
   const cache = caches.default;
   const key = new Request(`${url.origin}/__cache/route/${callsign}`);
   const hit = await cache.match(key);
   if (hit) return hit;
-  const body = await fetchRoute(callsign).catch(() => null);
+  const body = await viaRelay(env, `/route/${callsign}`, () => fetchRoute(callsign)).catch(() => null);
   const res = Response.json(body, { headers: { 'cache-control': `public, max-age=${body ? 21600 : 1800}` } });
   ctx.waitUntil(cache.put(key, res.clone()));
   return res;
