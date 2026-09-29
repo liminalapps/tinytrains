@@ -6,6 +6,50 @@ let out: GainNode | null = null;
 let enabled = false;
 let noiseBuf: AudioBuffer | null = null;
 
+// Finer sound preferences (the settings panel): volume, spoken announcements, and the ride's rumble.
+const readPref = (k: string, d: string) => {
+  try {
+    return localStorage.getItem(k) ?? d;
+  } catch {
+    return d;
+  }
+};
+const writePref = (k: string, v: string) => {
+  try {
+    localStorage.setItem(k, v);
+  } catch {
+    /* storage unavailable */
+  }
+};
+let volume = Number(readPref('tt-volume', '0.8'));
+let voiceOn = readPref('tt-voice', '1') === '1';
+let rumbleOn = readPref('tt-rumble', '1') === '1';
+export const soundPrefs = {
+  get volume() {
+    return volume;
+  },
+  set volume(v: number) {
+    volume = Math.min(1, Math.max(0, v));
+    writePref('tt-volume', String(volume));
+    if (out) out.gain.value = 0.7 * volume;
+  },
+  get voice() {
+    return voiceOn;
+  },
+  set voice(on: boolean) {
+    voiceOn = on;
+    writePref('tt-voice', on ? '1' : '0');
+    if (!on) stopSpeech();
+  },
+  get rumble() {
+    return rumbleOn;
+  },
+  set rumble(on: boolean) {
+    rumbleOn = on;
+    writePref('tt-rumble', on ? '1' : '0');
+  },
+};
+
 export function audio() {
   if (!ctx) {
     ctx = new AudioContext();
@@ -13,7 +57,7 @@ export function audio() {
     comp.threshold.value = -14;
     comp.ratio.value = 3;
     out = ctx.createGain();
-    out.gain.value = 0.55;
+    out.gain.value = 0.7 * volume;
     out.connect(comp).connect(ctx.destination);
   }
   if (ctx.state === 'suspended') void ctx.resume();
@@ -457,7 +501,7 @@ export function isSpeaking() {
 
 /** Queue spoken lines; resolves when they've all been read. */
 export function speak(lines: Line[], onState?: (on: boolean) => void): Promise<void> {
-  if (!enabled || typeof speechSynthesis === 'undefined' || !lines.length) return Promise.resolve();
+  if (!enabled || !voiceOn || typeof speechSynthesis === 'undefined' || !lines.length) return Promise.resolve();
   if (!voices.length) loadVoices();
   return new Promise((resolve) => {
     let left = lines.length;
@@ -476,7 +520,7 @@ export function speak(lines: Line[], onState?: (on: boolean) => void): Promise<v
       if (v) u.voice = v;
       u.rate = l.rate ?? 1;
       u.pitch = l.pitch ?? 1;
-      u.volume = 0.95;
+      u.volume = 0.95 * volume;
       u.onend = done;
       u.onerror = done;
       speechSynthesis.speak(u);

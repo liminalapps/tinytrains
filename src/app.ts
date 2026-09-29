@@ -299,10 +299,15 @@ export class App {
   }
 
   /** The parts of the active theme that live on a city's scene objects (tree shape, clouds). */
+  /** Settings: real-weather clouds and precipitation; touring by itself when the map is idle. */
+  weatherOn = true;
+  autoTour = true;
+
   applySceneTheme() {
     const t = activeTheme();
+    this.precip.group.visible = !t.skyStyle && this.weatherOn;
     this.city?.island.setTreeShape(t.trees);
-    this.city?.clouds.setShown(t.clouds);
+    this.city?.clouds.setShown(t.clouds && this.weatherOn);
     this.city?.suburbs?.setRoofs(t.roofs ?? true);
   }
 
@@ -629,7 +634,7 @@ export class App {
     if (this.touring) this.toggleTour(false);
     clearTimeout(this.idleTimer);
     this.idleTimer = window.setTimeout(() => {
-      if (!document.hidden && !this.touring && !this.city?.trains?.selected && !document.querySelector('.picker.shown, .search.shown, .fleet.shown')) this.toggleTour(true);
+      if (this.autoTour && !document.hidden && !this.touring && !this.city?.trains?.selected && !document.querySelector('.picker.shown, .search.shown, .fleet.shown')) this.toggleTour(true);
     }, 120_000);
   };
 

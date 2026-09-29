@@ -15,7 +15,7 @@ import { StockPreview } from './stockPreview.ts';
 import { StockPortraits } from './fleet.ts';
 import { makePostcard } from './postcard.ts';
 import { routePath, viewHash, type Route } from '../router.ts';
-import { restoreSound, setSound, sfx, soundOn } from './sound.ts';
+import { restoreSound, setSound, sfx, soundOn, soundPrefs } from './sound.ts';
 import { Soundscape } from './soundscape.ts';
 import { isPhone, makeSheet, TOUCH } from './sheet.ts';
 import { replay, reveal, shown, tweenNumber } from './anim.ts';
@@ -86,6 +86,8 @@ const isLight = (hex: string) => {
   const n = parseInt(hex.slice(1), 16);
   return ((n >> 16) & 255) * 0.3 + ((n >> 8) & 255) * 0.59 + (n & 255) * 0.11 > 170;
 };
+const GEAR_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 8.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8zm8.2 4.8-.1-2.8 2-1.6-2-3.5-2.4.9a8 8 0 0 0-2.4-1.4L14.9 2.5h-4l-.4 2.5A8 8 0 0 0 8.1 6.4l-2.4-.9-2 3.5 2 1.6a8 8 0 0 0 0 2.8l-2 1.6 2 3.5 2.4-.9a8 8 0 0 0 2.4 1.4l.4 2.5h4l.4-2.5a8 8 0 0 0 2.4-1.4l2.4.9 2-3.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+const EYE_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>';
 const CHEV = '<svg class="chev" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>';
 
 export const SHARE_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 12v6.5A2.5 2.5 0 0 0 7.5 21h9a2.5 2.5 0 0 0 2.5-2.5V12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
@@ -159,6 +161,7 @@ export class UI {
         <button data-act="sky" class="sky-btn" title="Sky: live / night / day (L)"></button>
         <button data-act="sound" class="sound-btn" title="Sound (M)"></button>
         <button data-act="share" class="share-btn" title="Share this view (S)">${SHARE_SVG}</button>
+        <button data-act="settings" class="settings-btn" title="Settings (,)">${GEAR_SVG}</button>
         <button data-act="postcard" class="postcard-btn" title="Save a postcard (P)"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="6" width="18" height="13" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12.5" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 6l1.5-2h5L16 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
       </div>
       <nav class="dock" aria-label="Tools">
@@ -166,6 +169,7 @@ export class UI {
         <button data-dock="fleet">${FLEET_SVG}<span>Fleet</span></button>
         <button data-dock="search">${SEARCH_SVG}<span>Search</span></button>
         <button data-dock="share">${SHARE_SVG}<span>Share</span></button>
+        <button data-dock="settings">${GEAR_SVG}<span>Settings</span></button>
       </nav>
       <div class="tour-pill" hidden><span class="tp-dot"></span><span class="tp-text">Touring</span><button class="tp-stop">Stop</button></div>
       <div class="clock"></div>
@@ -174,6 +178,8 @@ export class UI {
       <footer class="credits"><button class="about-btn">About & data</button><span class="credit-line"></span></footer>
       <div class="about panel" hidden></div>
       <div class="fleet panel" hidden></div>
+      <aside class="settings panel" hidden role="dialog" aria-label="Settings"></aside>
+      <button class="ui-show" title="Show the interface (H)" aria-label="Show the interface">${EYE_SVG}</button>
       <div class="tip" hidden></div>
       <div class="loader"><div class="loader-inner"><div class="loop"><div class="toy">${TRAIN_SVG}</div></div><p class="loader-text"></p></div></div>
     `;
@@ -205,8 +211,11 @@ export class UI {
       else if (act === 'tour') app.toggleTour();
       else if (act === 'search') this.openSearch();
       else if (act === 'share') void this.share();
+      else if (act === 'settings') this.toggleSettings();
     });
     this.$('.tp-stop').addEventListener('click', () => app.toggleTour(false));
+    this.$('.ui-show').addEventListener('click', () => this.setUiHidden(false));
+    this.applyViewPrefs();
     this.$('.tour-cta').addEventListener('click', () => {
       this.dismissHint();
       app.toggleTour(true);
@@ -239,6 +248,9 @@ export class UI {
           break;
         case 'sky':
           this.cycleSky();
+          break;
+        case 'settings':
+          this.toggleSettings();
           break;
         case 'planes':
           this.app.setPlanes(!this.app.planesOn);
@@ -285,6 +297,8 @@ export class UI {
     const n = Number(e.key);
     if (n >= 1 && n <= CITY_ORDER.length) void app.go({ city: CITY_ORDER[n - 1] });
     else if (k === 'escape') {
+      if (document.body.classList.contains('ui-hidden')) return this.setUiHidden(false);
+      if (shown(this.$('.settings'))) return this.toggleSettings(false);
       if (shown(this.$('.themes'))) return this.toggleThemes(false);
       if (shown(this.$('.picker'))) return this.togglePicker(false);
       if (shown(this.$('.fleet'))) return this.toggleFleet(false);
@@ -303,6 +317,8 @@ export class UI {
       else app.follow(!rig.following);
     }
     else if (k === 'l') this.cycleSky();
+    else if (k === ',') this.toggleSettings();
+    else if (k === 'h') this.setUiHidden(!document.body.classList.contains('ui-hidden'));
     else if (k === 'a') {
       this.app.setPlanes(!this.app.planesOn);
       this.toast(this.app.planesOn ? 'Live planes on' : 'Live planes off');
@@ -340,8 +356,6 @@ export class UI {
     setLook(t.look, instant);
     this.app.world.atmosphere.style = t.skyStyle;
     this.app.world.atmosphere.key.shadow.radius = t.shadowRadius ?? 3;
-    // Themes with their own sky skip the real weather's rain and snow.
-    this.app.precip.group.visible = !t.skyStyle;
     this.app.applySceneTheme();
     this.skyMode = t.sky ?? 'live';
     this.app.world.atmosphere.forced = t.sky;
@@ -349,6 +363,7 @@ export class UI {
     document.body.dataset.theme = t.id;
     this.renderStyleBar();
     if (shown(this.$('.themes'))) this.renderThemes();
+    if (shown(this.$('.settings'))) this.renderSettings();
     this.app.syncUrl();
     if (announce) this.toast(`${t.name}: ${t.blurb}`);
   }
@@ -387,10 +402,160 @@ export class UI {
     );
   }
 
-  private cycleSky() {
-    this.skyMode = this.skyMode === 'live' ? 'night' : this.skyMode === 'night' ? 'day' : 'live';
-    this.app.world.atmosphere.forced = this.skyMode === 'live' ? null : this.skyMode;
+  // -------------------------------------------------------------------------
+  // Settings
+
+  private pref(k: string, d: boolean) {
+    try {
+      const v = localStorage.getItem(k);
+      return v === null ? d : v === '1';
+    } catch {
+      return d;
+    }
+  }
+  private setPref(k: string, v: boolean) {
+    try {
+      localStorage.setItem(k, v ? '1' : '0');
+    } catch {
+      /* private mode */
+    }
+  }
+
+  /** Map-label and weather preferences, as body classes and scene switches. */
+  applyViewPrefs() {
+    document.body.classList.toggle('no-station-labels', !this.pref('tt-station-labels', true));
+    document.body.classList.toggle('no-place-labels', !this.pref('tt-place-labels', true));
+    this.app.weatherOn = this.pref('tt-weather', true);
+    this.app.autoTour = this.pref('tt-autotour', true);
+    this.app.applySceneTheme();
+  }
+
+  setUiHidden(on: boolean) {
+    document.body.classList.toggle('ui-hidden', on);
+    if (on) {
+      this.toggleSettings(false);
+      this.toast('Interface hidden · press H or tap the eye to bring it back');
+    }
+  }
+
+  private setSky(mode: 'live' | 'night' | 'day') {
+    this.skyMode = mode;
+    this.app.world.atmosphere.forced = mode === 'live' ? null : mode;
     this.renderSkyBtn();
+  }
+
+  toggleSettings(open?: boolean) {
+    const p = this.$('.settings');
+    const show = open ?? !shown(p);
+    if (show) this.renderSettings();
+    reveal(p, show);
+    document.body.classList.toggle('settings-open', show);
+  }
+
+  private renderSettings() {
+    const p = this.$('.settings');
+    const cur = activeTheme();
+    const sw = (key: string, label: string, on: boolean, hint = '') =>
+      `<label class="set-row"><span><b>${label}</b>${hint ? `<small>${hint}</small>` : ''}</span><input type="checkbox" role="switch" data-set="${key}" ${on ? 'checked' : ''}/><i class="switch"></i></label>`;
+    const seg = (key: string, opts: [string, string][], val: string) =>
+      `<div class="set-seg" role="radiogroup" data-seg="${key}">${opts.map(([v, l]) => `<button role="radio" aria-checked="${v === val}" class="${v === val ? 'on' : ''}" data-v="${v}">${l}</button>`).join('')}</div>`;
+    const themed = !!cur.sky;
+    p.innerHTML = `
+      <div class="set-head"><h2>Settings</h2><button class="x" aria-label="Close">×</button></div>
+      <section><h3>Theme</h3><div class="set-themes">${THEMES.map(
+        (t) => `<button class="set-theme ${t.id === cur.id ? 'on' : ''}" data-theme-id="${t.id}" title="${esc(t.blurb)}"><i style="background:${t.swatch}"></i><span>${esc(t.name)}</span></button>`,
+      ).join('')}</div></section>
+      <section><h3>Sky</h3>
+        ${seg('sky', [['live', 'Live'], ['day', 'Day'], ['night', 'Night']], this.skyMode)}
+        ${themed ? `<p class="set-note">${esc(cur.name)} sets its own sky.</p>` : '<p class="set-note">Live follows the real sun, moon and weather over the city.</p>'}
+        ${sw('weather', 'Clouds &amp; weather', this.app.weatherOn, 'Clouds, rain and snow from the real forecast')}
+      </section>
+      <section><h3>Map</h3>
+        ${sw('planes', 'Live planes', this.app.planesOn, 'Real aircraft overhead, as models of their type')}
+        ${sw('station-labels', 'Station names', this.pref('tt-station-labels', true))}
+        ${sw('place-labels', 'Place names', this.pref('tt-place-labels', true), 'Neighborhoods, parks and water')}
+      </section>
+      <section><h3>Interface</h3>
+        ${sw('ui', 'Show interface', !document.body.classList.contains('ui-hidden'), 'Off: just the map (H)')}
+        ${sw('autotour', 'Tour when idle', this.app.autoTour, 'Ride along from train to train if the map is left alone')}
+      </section>
+      <section><h3>Sound</h3>
+        ${sw('sound', 'Sound', soundOn(), 'Plays when you pick a train')}
+        <label class="set-row set-range ${soundOn() ? '' : 'off'}"><span><b>Volume</b></span><input type="range" min="0" max="1" step="0.05" value="${soundPrefs.volume}" data-set="volume"/></label>
+        ${sw('voice', 'Announcements', soundPrefs.voice, 'Spoken in each city’s own language and style')}
+        ${sw('rumble', 'Ride sounds', soundPrefs.rumble, 'The rumble, whine and clatter of the train you follow')}
+      </section>
+      ${TOUCH ? '' : `<section><h3>Keys</h3><dl class="set-keys">${[
+        ['1–9', 'cities'], ['C', 'city picker'], ['/', 'search'], ['T', 'tour'], ['F', 'follow'], ['R', 'surprise train'], ['G', 'fleet'], ['A', 'planes'],
+        ['L', 'sky'], ['V', 'theme'], ['M', 'sound'], ['H', 'hide interface'], ['S', 'share'], ['P', 'postcard'], ['Q / E', 'rotate'], ['N', 'reset view'],
+      ].map(([k, d]) => `<div><dt><kbd>${k}</kbd></dt><dd>${d}</dd></div>`).join('')}</dl></section>`}
+      <p class="set-foot"><button class="set-about">About &amp; data</button></p>`;
+    p.querySelector('.x')!.addEventListener('click', () => this.toggleSettings(false));
+    p.querySelector('.set-about')!.addEventListener('click', () => {
+      this.toggleSettings(false);
+      (this.$('.about-btn') as HTMLButtonElement).click();
+    });
+    p.querySelectorAll<HTMLElement>('[data-theme-id]').forEach((b) =>
+      b.addEventListener('click', () => {
+        this.applyTheme(themeById(b.dataset.themeId));
+        this.renderSettings();
+      }),
+    );
+    p.querySelectorAll<HTMLElement>('[data-seg="sky"] button').forEach((b) =>
+      b.addEventListener('click', () => {
+        this.setSky(b.dataset.v as 'live' | 'night' | 'day');
+        this.renderSettings();
+      }),
+    );
+    p.querySelectorAll<HTMLInputElement>('input[data-set]').forEach((inp) =>
+      inp.addEventListener(inp.type === 'range' ? 'input' : 'change', () => {
+        const on = inp.checked;
+        switch (inp.dataset.set) {
+          case 'weather':
+            this.setPref('tt-weather', on);
+            this.applyViewPrefs();
+            break;
+          case 'planes':
+            this.app.setPlanes(on);
+            break;
+          case 'station-labels':
+            this.setPref('tt-station-labels', on);
+            this.applyViewPrefs();
+            break;
+          case 'place-labels':
+            this.setPref('tt-place-labels', on);
+            this.applyViewPrefs();
+            break;
+          case 'ui':
+            this.setUiHidden(!on);
+            break;
+          case 'autotour':
+            this.setPref('tt-autotour', on);
+            this.applyViewPrefs();
+            break;
+          case 'sound':
+            setSound(on);
+            this.renderSoundBtn();
+            if (on) sfx.pop();
+            p.querySelector('.set-range')!.classList.toggle('off', !on);
+            break;
+          case 'volume':
+            soundPrefs.volume = Number(inp.value);
+            break;
+          case 'voice':
+            soundPrefs.voice = on;
+            break;
+          case 'rumble':
+            soundPrefs.rumble = on;
+            break;
+        }
+      }),
+    );
+  }
+
+  private cycleSky() {
+    this.setSky(this.skyMode === 'live' ? 'night' : this.skyMode === 'night' ? 'day' : 'live');
+    if (shown(this.$('.settings'))) this.renderSettings();
   }
 
   private toggleSound() {
@@ -852,6 +1017,7 @@ export class UI {
   }
 
   private creditLead = '';
+  private wasFollowing = false;
   private renderCredits() {
     const src = this.app.planesOn ? this.app.city?.planes.source : '';
     const planes = src === 'adsb.lol' ? 'Aircraft: adsb.lol (ODbL)' : src === 'adsb.fi' ? 'Aircraft: adsb.fi' : src === 'opensky' ? 'Aircraft: The OpenSky Network' : '';
@@ -947,6 +1113,7 @@ export class UI {
   }
 
   planeFollowChanged(on: boolean) {
+    document.body.classList.toggle('following', on);
     const b = this.root.querySelector('.plane-card .follow');
     if (b) {
       b.classList.toggle('on', on);
@@ -1010,6 +1177,7 @@ export class UI {
   }
 
   followChanged(on: boolean) {
+    document.body.classList.toggle('following', on);
     const b = this.root.querySelector('.train-card .follow');
     if (b) {
       b.classList.toggle('on', on);
@@ -1457,7 +1625,7 @@ export class UI {
     a.innerHTML = `<button class="x" aria-label="Close">×</button>
       <h2>Tiny Trains</h2>
       <p>Every dot is a real train, placed from live arrival predictions and vehicle feeds and animated along the actual track. The sky, sun, moon and weather match each city right now.</p>
-      <p><b>Keys:</b> 1–9 cities · C city picker · / search · Q/E rotate · +/− zoom · F follow · T tour · R surprise train · G fleet · L sky · A planes · V theme · M sound · S share · P postcard · Esc close</p>
+      <p><b>Keys:</b> 1–9 cities · C city picker · / search · Q/E rotate · +/− zoom · F follow · T tour · R surprise train · G fleet · L sky · A planes · V theme · H hide interface · , settings · M sound · S share · P postcard · Esc close</p>
       <h3>Data</h3><ul>${attr.map((x) => `<li>${esc(x)}</li>`).join('')}<li>Map data © OpenStreetMap contributors · OpenMapTiles · OpenFreeMap</li><li>Weather: Open-Meteo</li></ul>
       <p class="muted">Schedules marked "timetable" are simulated from official timetables where no public live feed exists (or an API key isn't configured).</p>`;
     a.querySelector('.x')!.addEventListener('click', () => reveal(a, false));
@@ -1507,6 +1675,13 @@ export class UI {
       for (const card of this.root.querySelectorAll<HTMLElement>('.card:not([hidden])')) shift = Math.max(shift, card.getBoundingClientRect().height / 2);
     }
     this.app.world.rig.shiftY = shift;
+    // Follow can end without a click (a drag, a deselect): keep the buttons and the compact sheet in step.
+    const following = this.app.world.rig.following;
+    if (following !== this.wasFollowing) {
+      this.wasFollowing = following;
+      this.followChanged(following);
+      this.planeFollowChanged(following);
+    }
     this.placeEtas();
     this.placePins();
     const rig = this.app.world.rig;

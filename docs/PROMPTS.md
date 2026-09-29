@@ -166,6 +166,16 @@ Typos are left as typed. Screenshots and reference images that came with a promp
 
 > Add Prague and Naples, and think about 5 more cities with notable train systems we haven't added yet. Also think about how we're categorizing and sorting the cities in the city selector. Maybe add a small visual for each city to help distringuish it.
 
+### 40. 2026-09-29 00:49 UTC
+
+> Add planes to the visualization, use LIVE plane data to have ACTUAL planes (ideally with actual models, etc.) this idea can eventually be expanded to tinytransit.app :)
+
+### 41. 2026-09-29 02:29 UTC
+
+> Add a sidepanel for all common settings (can still have quicks ettings for things like sound, etc. but a side panel that has a list of all the settings (theme, time of day, sound, background ambient train sound, Show UI (toggle), etc.)) people have a lot of side.   
+> 
+> On Mobile, the controls get messed up if you follow a train, etc.   Also the lines panel doesnt show and when you're following a train hte train card taeks up teh full screen. basically mobile needs some work to ensure that it works properly.
+
 ## Briefs given to agents
 
 ### nyc-data (new agent, 2026-09-24 17:48 UTC)

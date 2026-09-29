@@ -3,7 +3,7 @@ import type { App } from '../app.ts';
 import type { LiveTrain } from '../engine/trains.ts';
 import type { FrameInfo } from '../engine/world.ts';
 import { PHRASEBOOKS, type Phrasebook, type Say } from './phrasebooks.ts';
-import { Rolling, sfx, soundOn, speak, stopSpeech, type Line, type RollingStyle } from './sound.ts';
+import { Rolling, sfx, soundOn, soundPrefs, speak, stopSpeech, type Line, type RollingStyle } from './sound.ts';
 
 // The selected train's soundscape: spoken announcements, door chimes, departure melodies and the
 // rumble of the ride, in the style of each system. All phrasing here is our own.
@@ -176,7 +176,7 @@ export class Soundscape {
     this.prevSpeed = smooth;
     const near = Math.max(0, Math.min(1, (10 - f.mpp) / 8));
     const level = (this.app.world.rig.following ? 1 : 0.55) * near;
-    this.rolling.duck = this.busy ? 0.45 : 1;
+    this.rolling.duck = (this.busy ? 0.45 : 1) * (soundPrefs.rumble ? 1 : 0);
     this.rolling.update(smooth, accel, f.dt, pack === 'book' ? PHRASEBOOKS[c.id]!.roll : ROLL[pack], level);
   }
 

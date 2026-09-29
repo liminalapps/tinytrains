@@ -151,11 +151,14 @@ Each URL gets its own preview card (title, description and a poster of the city)
 Drag to pan · scroll or pinch to zoom · right-drag (or two-finger twist) to rotate · click a train or station.
 
 Keys: `1–9` cities · `C` city picker · `/` or `⌘K` search · `Q/E` rotate · `+/−` zoom · `F` follow (ride along) ·
-`T` tour · `R` surprise train · `G` fleet guide · `L` sky (live / night / day) · `V` theme · `S` share · `P` save a postcard ·
+`T` tour · `R` surprise train · `G` fleet guide · `L` sky (live / night / day) · `A` live planes · `V` theme · `H` hide the interface · `,` settings · `S` share · `P` save a postcard ·
 `M` sound · `N` reset view · `Esc` close
 
-On phones the panels become bottom sheets (drag up to expand, down to dismiss) and a dock holds Lines, Fleet,
-Tour, Search and Share.
+Every setting (theme, sky, clouds and weather, planes, labels, sound, volume, announcements, ride sounds, hiding
+the interface, touring when idle) is in the Settings panel (the gear, or `,`); the toolbar keeps quick toggles.
+
+On phones the panels become bottom sheets (drag up to expand, down to dismiss), and a dock holds Lines, Fleet, Search,
+Share and Settings. Following a train shrinks its card so the train stays in view.
 
 Things to try:
 
