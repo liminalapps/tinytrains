@@ -21,6 +21,7 @@ const DEFAULT_AZ: Record<CityId, number> = { nyc: -0.52, sf: -0.35, london: -0.5
   washington: -0.5, chicago: -0.45, boston: -0.5, mexicocity: -0.5, saopaulo: -0.45, moscow: -0.5, stockholm: -0.45, vienna: -0.5, helsinki: -0.45, amsterdam: -0.5, oslo: -0.4, cairo: -0.5, delhi: -0.5, shanghai: 1.95, beijing: -0.4, guangzhou: -0.35, shenzhen: -0.4, chengdu: -0.45, hangzhou: -0.5, wuhan: -0.45, chongqing: -0.5, osaka: -0.45, taipei: -0.45, singapore: -0.35, sydney: 2.8,
   budapest: -0.45, milan: -0.5, rome: -0.5, philadelphia: -0.5,
   prague: -0.45, naples: -0.3, barcelona: -0.5, lisbon: -0.4, istanbul: -0.5, montreal: -0.5, dubai: -0.45,
+  bangkok: -0.45, toulouse: -0.5, manchester: -0.5,
 };
 const POLL_MS = 15_000;
 

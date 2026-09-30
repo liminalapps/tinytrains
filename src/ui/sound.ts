@@ -474,6 +474,7 @@ const PREFERRED: Record<string, string[]> = {
   'ca-ES': ['Montse', 'Microsoft Joana', 'Jordi'],
   'pt-PT': ['Joana', 'Catarina', 'Microsoft Raquel', 'Google português'],
   'tr-TR': ['Yelda', 'Google Türkçe', 'Microsoft Emel', 'Cem'],
+  'th-TH': ['Kanya', 'Narisa', 'Google ไทย', 'Microsoft Premwadee'],
   'ar-AE': ['Maged', 'Majed', 'Microsoft Fatima', 'Google العربية', 'Laila'],
 };
 

@@ -185,6 +185,17 @@ export const PHRASEBOOKS: Partial<Record<CityId, Phrasebook>> = {
     chimeStep: 0.3,
     roll: OLD,
   }),
+  // Metrolink: "This is…", "The next stop is…".
+  manchester: english({
+    lang: 'en-GB',
+    intro: (s) => `This tram is for ${s.dest}. The next stop is ${s.stop}.`,
+    approach: (s) => `The next stop is ${s.stop}.`,
+    arrive: (s) => `This is ${s.stop}.`,
+    terminal: (s) => `This is ${s.stop}. This tram terminates here.`,
+    chime: [12, 16],
+    chimeStep: 0.3,
+    roll: LIGHT,
+  }),
   sydney: english({
     lang: 'en-AU',
     intro: (s) => `This train goes to ${s.dest}. The next station is ${s.stop}.`,
@@ -336,6 +347,26 @@ export const PHRASEBOOKS: Partial<Record<CityId, Phrasebook>> = {
     chime: [19, 16],
     chimeStep: 0.25,
     roll: METRO,
+  },
+  // BTS and MRT: "สถานีต่อไป" (next station); station names in Thai.
+  bangkok: {
+    lang: 'th-TH',
+    intro: (s) => `สถานีต่อไป ${s.stopL}`,
+    approach: (s) => `สถานีต่อไป ${s.stopL}`,
+    terminal: (s) => `สถานีปลายทาง ${s.stopL}`,
+    chime: [16, 12, 16],
+    chimeStep: 0.22,
+    roll: METRO,
+  },
+  toulouse: {
+    lang: 'fr-FR',
+    intro: (s) => `Direction ${s.dest}. Prochaine station : ${s.stop}.`,
+    approach: (s) => `Prochaine station : ${s.stop}.`,
+    terminal: (s) => `${s.stop}. Terminus.`,
+    chime: [14, 17],
+    chimeStep: 0.25,
+    chimeKind: 'beep',
+    roll: LIGHT,
   },
   amsterdam: {
     lang: 'nl-NL',

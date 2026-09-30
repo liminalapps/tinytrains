@@ -492,14 +492,45 @@ export const CITIES: Record<CityId, CityConfig> = {
     view: { center: [55.275, 25.197], span: 2600 },
     tagline: 'Metro & Tram',
   },
+  bangkok: {
+    id: 'bangkok',
+    name: 'Bangkok',
+    nameLocal: 'กรุงเทพฯ',
+    country: 'Thailand',
+    tz: 'Asia/Bangkok',
+    origin: [100.55, 13.75],
+    bbox: [100.36, 13.555, 100.8, 13.97],
+    view: { center: [100.535, 13.745], span: 2600 },
+    tagline: 'BTS, MRT & Airport Rail Link',
+  },
+  toulouse: {
+    id: 'toulouse',
+    name: 'Toulouse',
+    country: 'France',
+    tz: 'Europe/Paris',
+    origin: [1.44, 43.6],
+    bbox: [1.33, 43.53, 1.53, 43.67],
+    view: { center: [1.444, 43.605], span: 2600 },
+    tagline: 'Métro, Tram & Téléo',
+  },
+  manchester: {
+    id: 'manchester',
+    name: 'Manchester',
+    country: 'United Kingdom',
+    tz: 'Europe/London',
+    origin: [-2.24, 53.48],
+    bbox: [-2.42, 53.355, -2.05, 53.63],
+    view: { center: [-2.241, 53.48], span: 2600 },
+    tagline: 'Metrolink',
+  },
 };
 
 /** The original nine first (keys 1–9), then the rest grouped by region. */
 export const CITY_ORDER: CityId[] = [
   'nyc', 'sf', 'london', 'paris', 'berlin', 'madrid', 'tokyo', 'seoul', 'hongkong',
   'washington', 'chicago', 'boston', 'philadelphia', 'montreal', 'mexicocity', 'saopaulo',
-  'moscow', 'stockholm', 'vienna', 'helsinki', 'amsterdam', 'oslo', 'budapest', 'milan', 'rome', 'prague', 'naples', 'barcelona', 'lisbon', 'istanbul',
+  'moscow', 'stockholm', 'vienna', 'helsinki', 'amsterdam', 'oslo', 'budapest', 'milan', 'rome', 'prague', 'naples', 'toulouse', 'manchester', 'barcelona', 'lisbon', 'istanbul',
   'cairo', 'dubai', 'delhi',
-  'shanghai', 'beijing', 'guangzhou', 'shenzhen', 'chengdu', 'hangzhou', 'wuhan', 'chongqing', 'osaka', 'taipei', 'singapore',
+  'shanghai', 'beijing', 'guangzhou', 'shenzhen', 'chengdu', 'hangzhou', 'wuhan', 'chongqing', 'osaka', 'taipei', 'singapore', 'bangkok',
   'sydney',
 ];

@@ -47,7 +47,10 @@ export type CityId =
   | 'lisbon'
   | 'istanbul'
   | 'montreal'
-  | 'dubai';
+  | 'dubai'
+  | 'bangkok'
+  | 'toulouse'
+  | 'manchester';
 
 /** Flat coordinate list: [x0, y0, x1, y1, ...] in meters. */
 export type Flat = number[];

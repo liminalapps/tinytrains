@@ -100,6 +100,7 @@ const FIRST_TRAIN: Record<CityId, number> = { nyc: 0, sf: 5, london: 5, paris: 5
   washington: 5, chicago: 0, boston: 5, mexicocity: 5, saopaulo: 4.67, moscow: 5.5, stockholm: 0, vienna: 5, helsinki: 5.5, amsterdam: 6, oslo: 5.5, cairo: 5, delhi: 5.5, shanghai: 5.5, beijing: 5, guangzhou: 6, shenzhen: 6.5, chengdu: 6, hangzhou: 6, wuhan: 6, chongqing: 6.5, osaka: 5, taipei: 6, singapore: 5.5, sydney: 4.5,
   budapest: 4.5, milan: 5.5, rome: 5.5, philadelphia: 5,
   prague: 4.75, naples: 6, barcelona: 5, lisbon: 6.5, istanbul: 6, montreal: 5.5, dubai: 5,
+  bangkok: 5.5, toulouse: 5, manchester: 6,
 };
 const asleepNow = (city: CityId) => {
   const h = localHour(city, Date.now());
@@ -825,9 +826,9 @@ export class UI {
     // Four regions, cities alphabetical within each (the keys 1–9 still reach the original nine).
     const regions: [string, CityId[]][] = [
       ['Americas', ['nyc', 'sf', 'washington', 'chicago', 'boston', 'philadelphia', 'montreal', 'mexicocity', 'saopaulo']],
-      ['Europe', ['london', 'paris', 'berlin', 'madrid', 'barcelona', 'lisbon', 'moscow', 'stockholm', 'vienna', 'helsinki', 'amsterdam', 'oslo', 'budapest', 'prague', 'milan', 'rome', 'naples', 'istanbul']],
+      ['Europe', ['london', 'paris', 'berlin', 'madrid', 'barcelona', 'lisbon', 'moscow', 'stockholm', 'vienna', 'helsinki', 'amsterdam', 'oslo', 'budapest', 'prague', 'milan', 'rome', 'naples', 'istanbul', 'toulouse', 'manchester']],
       ['Middle East & Africa', ['cairo', 'dubai']],
-      ['Asia-Pacific', ['tokyo', 'osaka', 'seoul', 'taipei', 'hongkong', 'shanghai', 'beijing', 'guangzhou', 'shenzhen', 'chengdu', 'hangzhou', 'wuhan', 'chongqing', 'singapore', 'delhi', 'sydney']],
+      ['Asia-Pacific', ['tokyo', 'osaka', 'seoul', 'taipei', 'hongkong', 'shanghai', 'beijing', 'guangzhou', 'shenzhen', 'chengdu', 'hangzhou', 'wuhan', 'chongqing', 'singapore', 'bangkok', 'delhi', 'sydney']],
     ];
     for (const r of regions) r[1].sort((a, b) => CITIES[a].name.localeCompare(CITIES[b].name));
     const total = Object.values(this.summary).reduce((n, x) => n + x.trains, 0);

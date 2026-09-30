@@ -638,7 +638,11 @@ function museumOfTheFuture() {
   return k.build();
 }
 
-export const ROUND4_LANDMARKS: Record<'budapest' | 'milan' | 'rome' | 'philadelphia' | 'prague' | 'naples' | 'barcelona' | 'lisbon' | 'istanbul' | 'montreal' | 'dubai', Placed[]> = {
+export const ROUND4_LANDMARKS: Record<'budapest' | 'milan' | 'rome' | 'philadelphia' | 'prague' | 'naples' | 'barcelona' | 'lisbon' | 'istanbul' | 'montreal' | 'dubai' | 'bangkok' | 'toulouse' | 'manchester', Placed[]> = {
+  bangkok: [],
+  toulouse: [],
+  manchester: [],
+
   prague: [
     { build: praguecastle, at: [14.40043, 50.09046], face: [14.4004, 50.0960], clear: 140 },
     { build: charlesBridge, at: [14.41143, 50.08649], toward: [14.41436, 50.08641], cutHalf: 270 },
