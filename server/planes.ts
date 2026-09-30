@@ -161,6 +161,8 @@ export interface Airport {
   name: string;
   city: string;
   country: string;
+  lat: number | null;
+  lon: number | null;
 }
 export interface FlightRoute {
   callsign: string;
@@ -179,6 +181,16 @@ export async function fetchRoute(callsign: string): Promise<FlightRoute | null> 
   const f = typeof j.response === 'object' ? j.response.flightroute : undefined;
   if (!f) return null;
   const ap = (x: any): Airport | null =>
-    x ? { iata: x.iata_code ?? '', icao: x.icao_code ?? '', name: x.name ?? '', city: x.municipality ?? '', country: x.country_name ?? '' } : null;
+    x
+      ? {
+          iata: x.iata_code ?? '',
+          icao: x.icao_code ?? '',
+          name: x.name ?? '',
+          city: x.municipality ?? '',
+          country: x.country_name ?? '',
+          lat: typeof x.latitude === 'number' ? x.latitude : null,
+          lon: typeof x.longitude === 'number' ? x.longitude : null,
+        }
+      : null;
   return { callsign, airline: f.airline?.name ?? null, airlineIata: f.airline?.iata ?? null, from: ap(f.origin), to: ap(f.destination) };
 }

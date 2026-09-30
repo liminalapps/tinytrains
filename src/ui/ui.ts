@@ -1,5 +1,6 @@
 import { setLook } from '../themes/look.ts';
 import type { LivePlane } from '../engine/planes.ts';
+import { PlanePreview } from './planePreview.ts';
 import type { FlightRoute } from '../../server/planes.ts';
 import { activeTheme, loadFonts, rememberTheme, setActiveTheme, themeById, themeQuery, THEMES, type Theme } from '../themes/themes.ts';
 import { CITIES, CITY_ORDER } from '../../shared/cities.ts';
@@ -111,6 +112,7 @@ export class UI {
   private root = document.getElementById('ui')!;
   private $ = <T extends HTMLElement = HTMLElement>(sel: string) => this.root.querySelector(sel) as T;
   private preview = new StockPreview(320, 128);
+  private planePreview = new PlanePreview(320, 128);
   private tipEl!: HTMLDivElement;
   private lastSec = 0;
   private stationId: string | null = null;
@@ -1055,6 +1057,7 @@ export class UI {
     this.tipEl.classList.remove('shown');
     if (!p) {
       reveal(card, false);
+      setTimeout(() => !shown(card) && this.planePreview.stop(), 360);
       if (!this.stationId && !shown(this.$('.train-card'))) document.body.classList.remove('card-open');
       return;
     }
@@ -1072,6 +1075,8 @@ export class UI {
         <div class="tc-sub">${esc(p.type.name)} <span class="badge live">● live</span></div></div></div>
         <div class="tc-dest pc-route"><span>&nbsp;</span></div>
       </div>
+      <div class="tc-stock pc-model"></div>
+      <div class="tc-spec"><b>${esc(p.type.name)}</b><span>${p.type.len.toFixed(1)} m long · ${p.type.span.toFixed(1)} m span</span></div>
       <div class="tc-facts">
         <div><b class="pc-alt">—</b><span>altitude</span></div>
         <div><b class="pc-spd">—</b><span>speed</span></div>
@@ -1085,6 +1090,8 @@ export class UI {
       <p class="tc-blurb pc-note">Live from ADS-B radio receivers run by volunteers. Its height here is compressed so a cruising jet stays in view; the shadow marks where it is over the ground.</p>
       <div class="tc-actions"><button class="follow">Follow</button></div>
     `;
+    card.querySelector('.pc-model')!.appendChild(this.planePreview.canvas);
+    this.planePreview.show(p.type, p.livery);
     card.querySelector('.x')!.addEventListener('click', () => this.app.selectPlane(null));
     card.querySelector('.follow')!.addEventListener('click', () => this.app.followPlane(!this.app.world.rig.following));
     if (shown(card)) replay(card, 'swap');
@@ -1097,6 +1104,7 @@ export class UI {
       if (!r) this.routes.set(d.cs, (r = fetch(`/api/route/${d.cs}`).then((x) => (x.ok ? (x.json() as Promise<FlightRoute | null>) : null)).catch(() => null)));
       void r.then((route) => {
         if (this.app.city?.planes.selected !== p || !route?.from || !route.to) return;
+        this.app.city.planes.setDestination(route.to.lon, route.to.lat);
         const ap = (a: NonNullable<FlightRoute['from']>) => `<b>${esc(a.iata || a.icao)}</b> <small>${esc(a.city || a.name)}</small>`;
         card.querySelector('.pc-route')!.innerHTML = `${ap(route.from)} <span class="pc-arrow">→</span> ${ap(route.to)}`;
         if (route.airline && !lv.name) card.querySelector('.tc-linename')!.firstChild!.textContent = `${route.airline} `;

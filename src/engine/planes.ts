@@ -13,6 +13,8 @@ import type { FrameInfo, Layer, World } from './world.ts';
 // stays in the frame; a shadow on the ground marks where it really is.
 
 const POLL_MS = 10_000;
+/** Trail samples per plane (one per ~0.5 s of flight): about 70 s of history behind each plane. */
+const TRAIL_N = 140;
 /** Map height for a pressure altitude in feet: approach heights nearly true, cruise compressed. */
 export const displayY = (ft: number) => 6 + 950 * (1 - Math.exp(-(ft * 0.3048) / 3200));
 
@@ -34,6 +36,9 @@ export interface LivePlane {
   fade: number; // 0..1 entrance/exit
   missing: number; // polls without this plane
   phase: number;
+  /** Where it has been, oldest first (map x, height, map z), sampled every ~0.5 s. */
+  trail: THREE.Vector3[];
+  trailAt: number;
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -76,13 +81,13 @@ function wingPair(xLE: number, y: number, c: number, ct: number, b: number, swee
   return [slab(half(1), t, y), slab(half(-1).reverse(), t, y)];
 }
 
-interface Built {
+export interface Built {
   body: THREE.BufferGeometry;
   lights: THREE.BufferGeometry;
   strobe: THREE.BufferGeometry;
 }
 
-function buildModel(ty: AircraftType, lv: Livery): Built {
+export function buildModel(ty: AircraftType, lv: Livery): Built {
   const L = ty.len;
   const B = ty.span / 2;
   const lay = ty.layout;
@@ -197,6 +202,15 @@ export class PlaneLayer implements Layer {
   private bodyMat: THREE.MeshLambertMaterial;
   private lightMat = new THREE.MeshBasicMaterial({ vertexColors: true });
   private shadowMat = new THREE.MeshBasicMaterial({ color: '#0b1a2a', transparent: true, opacity: 0.18, depthWrite: false });
+  /** Contrails: one ribbon per plane, fading toward the tail, rebuilt each frame into a single mesh. */
+  private trails: THREE.Mesh;
+  private trailGeo = new THREE.BufferGeometry();
+  private trailPos = new Float32Array(0);
+  private trailCol = new Float32Array(0);
+  /** The selected plane's route: flown track (solid) and the great-circle leg ahead to its destination (dashed). */
+  private path: THREE.Mesh;
+  private pathGeo = new THREE.BufferGeometry();
+  private dest: THREE.Vector3 | null = null;
   private ring: THREE.Mesh;
   private timer = 0;
   private project: (lon: number, lat: number) => [number, number];
@@ -225,6 +239,13 @@ export class PlaneLayer implements Layer {
     this.ring = new THREE.Mesh(new THREE.TorusGeometry(1, 0.06, 6, 40).rotateX(Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#ffd23f' }));
     this.ring.visible = false;
     this.group.add(this.ring);
+    this.trails = new THREE.Mesh(this.trailGeo, new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false, side: THREE.DoubleSide }));
+    this.trails.frustumCulled = false;
+    this.trails.renderOrder = 5;
+    this.path = new THREE.Mesh(this.pathGeo, new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false, side: THREE.DoubleSide }));
+    this.path.frustumCulled = false;
+    this.path.renderOrder = 6;
+    this.group.add(this.trails, this.path);
     this.group.renderOrder = 4;
     void this.poll();
   }
@@ -298,7 +319,7 @@ export class PlaneLayer implements Layer {
     this.group.add(group, shadow);
     const heading = Math.PI / 2 - (p.trk * Math.PI) / 180;
     const pos = new THREE.Vector3(fix.x, displayY(p.alt), -fix.y);
-    return { data: p, type, livery, group, body, strobe, shadow, fix, pos, heading, bank: 0, pitch: 0, fade: 0, missing: 0, phase: Math.random() * 10 };
+    return { data: p, type, livery, group, body, strobe, shadow, fix, pos, heading, bank: 0, pitch: 0, fade: 0, missing: 0, phase: Math.random() * 10, trail: [], trailAt: 0 };
   }
 
   private remodel(lp: LivePlane, p: Plane) {
@@ -313,7 +334,7 @@ export class PlaneLayer implements Layer {
 
   /** The plane's size multiplier at this zoom (toy exaggeration, like the trains). */
   static scaleFor(mpp: number) {
-    return THREE.MathUtils.clamp(mpp * 1.15, 1.8, 10);
+    return THREE.MathUtils.clamp(mpp * 1.3, 1.8, 18);
   }
 
   update(f: FrameInfo) {
@@ -352,6 +373,13 @@ export class PlaneLayer implements Layer {
         continue;
       }
       const sc = s * (0.001 + lp.fade * 0.999);
+      const last = lp.trail[lp.trail.length - 1];
+      if (f.time - lp.trailAt > 0.5 && lp.fade > 0.5 && (!last || last.distanceToSquared(lp.pos) > 400)) {
+        lp.trailAt = f.time;
+        lp.trail.push(lp.pos.clone());
+        const max = lp === this.selected ? 1800 : TRAIL_N;
+        if (lp.trail.length > max) lp.trail.splice(0, lp.trail.length - max);
+      }
       lp.group.position.copy(lp.pos);
       lp.group.rotation.set(lp.bank, lp.heading, lp.pitch, 'YZX');
       lp.group.scale.setScalar(sc);
@@ -363,6 +391,8 @@ export class PlaneLayer implements Layer {
       lp.shadow.rotation.set(0, lp.heading, 0);
       lp.shadow.scale.set(sc * (1 + hFrac * 0.4), 0.02, sc * (1 + hFrac * 0.4));
     }
+    this.buildTrails(f);
+    this.buildPath(f);
     this.shadowMat.opacity = 0.2 * (1 - f.night * 0.6);
     const sel = this.selected;
     this.ring.visible = !!sel;
@@ -371,6 +401,129 @@ export class PlaneLayer implements Layer {
       this.ring.scale.setScalar(Math.max(sel.type.span, sel.type.len) * 0.75 * s);
       (this.ring.material as THREE.MeshBasicMaterial).color.setHSL(0.13, 1, 0.55 + 0.1 * Math.sin(t * 5));
     }
+  }
+
+  /** Ribbons behind every plane: widest and brightest at the plane, fading over ~70 s of history. */
+  private buildTrails(f: FrameInfo) {
+    const w = Math.max(6, f.mpp * 6.5);
+    let n = 0;
+    for (const lp of this.planes.values()) if (lp.trail.length > 1 && lp !== this.selected) n += Math.min(lp.trail.length, TRAIL_N) + 1; // + the plane itself
+    const need = n * 2 * 3;
+    if (this.trailPos.length < need) {
+      this.trailPos = new Float32Array(need * 1.5);
+      this.trailCol = new Float32Array((need / 3) * 4 * 1.5);
+      this.trailGeo.setAttribute('position', new THREE.BufferAttribute(this.trailPos, 3));
+      this.trailGeo.setAttribute('color', new THREE.BufferAttribute(this.trailCol, 4));
+    }
+    const idx: number[] = [];
+    let v = 0;
+    // A sky-blue vapor by day (white would vanish on pale land), pale silver at night.
+    const white = f.night > 0.5 ? [0.85, 0.9, 1] : [0.2, 0.42, 0.86];
+    for (const lp of this.planes.values()) {
+      if (lp.trail.length < 2 || lp === this.selected) continue;
+      const pts = lp.trail.slice(-TRAIL_N);
+      pts.push(lp.pos);
+      const start = v;
+      for (let i = 0; i < pts.length; i++) {
+        const a = pts[Math.max(0, i - 1)];
+        const b = pts[Math.min(pts.length - 1, i + 1)];
+        let dx = b.x - a.x;
+        let dz = b.z - a.z;
+        const len = Math.hypot(dx, dz) || 1;
+        dx /= len;
+        dz /= len;
+        const t = i / (pts.length - 1); // 0 oldest .. 1 at the plane
+        const hw = w * (0.25 + 0.75 * t) * 0.5;
+        const p = pts[i];
+        for (const side of [-1, 1]) {
+          this.trailPos.set([p.x - dz * hw * side, p.y, p.z + dx * hw * side], v * 3);
+          this.trailCol.set([white[0], white[1], white[2], (0.15 + 0.75 * t) * lp.fade], v * 4);
+          v++;
+        }
+        if (i > 0) {
+          const q = start + (i - 1) * 2;
+          idx.push(q, q + 1, q + 2, q + 1, q + 3, q + 2);
+        }
+      }
+    }
+    this.trailGeo.setIndex(idx);
+    this.trailGeo.setDrawRange(0, idx.length);
+    if (this.trailGeo.getAttribute('position')) {
+      (this.trailGeo.getAttribute('position') as THREE.BufferAttribute).needsUpdate = true;
+      (this.trailGeo.getAttribute('color') as THREE.BufferAttribute).needsUpdate = true;
+    }
+    this.trails.visible = idx.length > 0;
+  }
+
+  /** Where to draw the selected flight heading: its destination airport, if known (map coordinates). */
+  setDestination(lon: number | null, lat: number | null) {
+    if (lon === null || lat === null) {
+      this.dest = null;
+      return;
+    }
+    const [x, y] = this.project(lon, lat);
+    this.dest = new THREE.Vector3(x, 0, -y);
+  }
+
+  /** The selected plane's path: everything flown since it was picked (a solid ribbon in the livery's color) and a
+   * dashed line ahead to its destination, descending to the ground there. */
+  private buildPath(f: FrameInfo) {
+    const sel = this.selected;
+    if (!sel) {
+      this.path.visible = false;
+      return;
+    }
+    const w = Math.max(6, f.mpp * 4.5);
+    const col = new THREE.Color(sel.livery.name ? sel.livery.tail : '#ffd23f');
+    if (col.getHSL({ h: 0, s: 0, l: 0 }).l > 0.85) col.set('#ffd23f');
+    const pos: number[] = [];
+    const cols: number[] = [];
+    const idx: number[] = [];
+    const ribbon = (pts: THREE.Vector3[], alpha: (t: number, i: number) => number) => {
+      const start = pos.length / 3;
+      for (let i = 0; i < pts.length; i++) {
+        const a = pts[Math.max(0, i - 1)];
+        const b = pts[Math.min(pts.length - 1, i + 1)];
+        let dx = b.x - a.x;
+        let dz = b.z - a.z;
+        const len = Math.hypot(dx, dz) || 1;
+        dx /= len;
+        dz /= len;
+        const p = pts[i];
+        const al = alpha(i / Math.max(1, pts.length - 1), i);
+        for (const side of [-1, 1]) {
+          pos.push(p.x - dz * w * 0.5 * side, p.y, p.z + dx * w * 0.5 * side);
+          cols.push(col.r, col.g, col.b, al);
+        }
+        if (i > 0) {
+          const q = start + (i - 1) * 2;
+          idx.push(q, q + 1, q + 2, q + 1, q + 3, q + 2);
+        }
+      }
+    };
+    // Behind: the recorded track.
+    const behind = [...sel.trail, sel.pos];
+    if (behind.length > 1) ribbon(behind, (t) => 0.25 + 0.6 * t);
+    // Ahead: a great circle is close to straight at this scale; descend toward the airport, dashed.
+    if (this.dest) {
+      const ahead: THREE.Vector3[] = [];
+      const from = sel.pos;
+      const d = Math.hypot(this.dest.x - from.x, this.dest.z - from.z);
+      const reach = Math.min(d, 160_000);
+      const steps = Math.max(8, Math.min(200, Math.round(reach / (f.mpp * 10))));
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const x = from.x + ((this.dest.x - from.x) * t * reach) / d;
+        const z = from.z + ((this.dest.z - from.z) * t * reach) / d;
+        const y = reach < d ? from.y : from.y * (1 - t) + 6 * t;
+        ahead.push(new THREE.Vector3(x, y, z));
+      }
+      ribbon(ahead, (t, i) => (i % 2 === 0 ? 0.8 : 0.0) * (1 - t * 0.6));
+    }
+    this.pathGeo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    this.pathGeo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 4));
+    this.pathGeo.setIndex(idx);
+    this.path.visible = idx.length > 0;
   }
 
   pick(px: number, py: number, radiusPx = 20): LivePlane | null {
@@ -391,6 +544,7 @@ export class PlaneLayer implements Layer {
   }
 
   select(lp: LivePlane | null) {
+    if (lp !== this.selected) this.dest = null;
     this.selected = lp;
     this.onChange();
   }
