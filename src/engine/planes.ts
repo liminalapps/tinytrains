@@ -41,6 +41,8 @@ export interface LivePlane {
   /** When it was at each trail point (server epoch ms). */
   trailT: number[];
   trailAt: number;
+  /** How far the model reaches below its origin (wings, engines, gear), in model meters. */
+  bottom: number;
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -198,6 +200,12 @@ export function buildModel(ty: AircraftType, lv: Livery): Built {
   return { body: mergeGeometries(parts), lights: pts(steady), strobe: pts(blink) };
 }
 
+/** Depth of a model below its origin (positive meters). */
+function modelBottom(g: THREE.BufferGeometry) {
+  g.computeBoundingBox();
+  return Math.max(0, -(g.boundingBox?.min.y ?? 0));
+}
+
 let glowTex: THREE.Texture | null = null;
 /** A soft round light: additive, a constant size on screen, colored per point. */
 export function glowMaterial(px: number) {
@@ -350,7 +358,7 @@ export class PlaneLayer implements Layer {
     this.group.add(group, shadow);
     const heading = Math.PI / 2 - (p.trk * Math.PI) / 180;
     const pos = new THREE.Vector3(fix.x, displayY(p.alt), -fix.y);
-    return { data: p, type, livery, group, body, strobe, shadow, fix, pos, heading, bank: 0, pitch: 0, fade: 0, missing: 0, phase: Math.random() * 10, trail: [], trailT: [], trailAt: 0 };
+    return { data: p, type, livery, group, body, strobe, shadow, fix, pos, heading, bank: 0, pitch: 0, fade: 0, missing: 0, phase: Math.random() * 10, trail: [], trailT: [], trailAt: 0, bottom: modelBottom(m.body) };
   }
 
   private remodel(lp: LivePlane, p: Plane) {
@@ -361,6 +369,7 @@ export class PlaneLayer implements Layer {
     (lp.group.children[1] as THREE.Points).geometry = m.lights;
     lp.strobe.geometry = m.strobe;
     lp.shadow.geometry = m.body;
+    lp.bottom = modelBottom(m.body);
   }
 
   /** The plane's size multiplier at this zoom (toy exaggeration, like the trains). */
@@ -384,7 +393,10 @@ export class PlaneLayer implements Layer {
       const tx = lp.fix.x + Math.sin(trk) * v * dtS;
       const ty = lp.fix.y + Math.cos(trk) * v * dtS;
       const alt = d.gnd ? 0 : Math.max(0, d.alt + (d.vr / 60) * dtS);
-      const target = new THREE.Vector3(tx, d.gnd ? 4 : displayY(alt), -ty);
+      // On the ground, rest the model's lowest point just above the runways and roads (the tallest ground layer
+      // sits at 1.4 m). A fixed height let the scaled-up wings sink into the runway and z-fight with it.
+      const groundY = 2.5 + lp.bottom * s;
+      const target = new THREE.Vector3(tx, d.gnd ? groundY : Math.max(displayY(alt), groundY), -ty);
       if (lp.fade === 0) lp.pos.copy(target);
       else lp.pos.lerp(target, k);
       // Heading eases toward the track; the difference becomes a bank.
@@ -392,8 +404,8 @@ export class PlaneLayer implements Layer {
       let dh = want - lp.heading;
       dh = Math.atan2(Math.sin(dh), Math.cos(dh));
       lp.heading += dh * k;
-      lp.bank += (THREE.MathUtils.clamp(-dh * 1.8, -0.45, 0.45) - lp.bank) * k;
-      const climb = v > 20 ? Math.atan2(d.vr * 0.00508, v) * 1.6 : 0;
+      lp.bank += ((d.gnd ? 0 : THREE.MathUtils.clamp(-dh * 1.8, -0.45, 0.45)) - lp.bank) * k;
+      const climb = v > 20 && !d.gnd ? Math.atan2(d.vr * 0.00508, v) * 1.6 : 0;
       lp.pitch += (THREE.MathUtils.clamp(climb, -0.2, 0.25) - lp.pitch) * k;
       // Fade in on arrival; out when the feed has lost it for two polls.
       const gone = lp.missing >= 2;
@@ -425,7 +437,7 @@ export class PlaneLayer implements Layer {
       lp.strobe.visible = ((t + lp.phase) % 1.2) < 0.08;
       // Shadow: flattened onto the ground under the plane, fainter the higher it flies.
       const hFrac = THREE.MathUtils.clamp(lp.pos.y / 900, 0, 1);
-      lp.shadow.visible = hFrac < 0.95;
+      lp.shadow.visible = hFrac < 0.95 && !d.gnd;
       lp.shadow.position.set(lp.pos.x, 3, lp.pos.z);
       lp.shadow.rotation.set(0, lp.heading, 0);
       lp.shadow.scale.set(sc * (1 + hFrac * 0.4), 0.02, sc * (1 + hFrac * 0.4));
