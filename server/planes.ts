@@ -21,6 +21,8 @@ export interface Plane {
   vr: number; // vertical rate, ft/min
   age: number; // seconds since the position was received
   cat?: string; // ADS-B emitter category (A1 light … A5 heavy, A7 rotorcraft)
+  /** Where it was recently, oldest first: [seconds before now, lat, lon, altitude ft] (see PlaneHistory). */
+  hist?: [number, number, number, number][];
 }
 
 export interface PlanesResponse {
@@ -193,4 +195,40 @@ export async function fetchRoute(callsign: string): Promise<FlightRoute | null> 
         }
       : null;
   return { callsign, airline: f.airline?.name ?? null, airlineIata: f.airline?.iata ?? null, from: ap(f.origin), to: ap(f.destination) };
+}
+
+/**
+ * Recent positions of every plane over the cities being watched, so a fresh page can draw where each plane has
+ * come from instead of starting its trail empty. Fed by each poll; keeps about two and a half minutes.
+ */
+export class PlaneHistory {
+  private cities = new Map<CityId, Map<string, [number, number, number, number][]>>();
+  private readonly keepMs = 150_000;
+
+  /** Record this poll and attach each plane's history (sampled at least 8 s apart). Returns the same object. */
+  apply(r: PlanesResponse): PlanesResponse {
+    let m = this.cities.get(r.city);
+    if (!m) this.cities.set(r.city, (m = new Map()));
+    const now = r.now;
+    const seen = new Set<string>();
+    for (const p of r.planes) {
+      seen.add(p.hex);
+      const t = now - p.age * 1000;
+      let h = m.get(p.hex);
+      if (!h) m.set(p.hex, (h = []));
+      const last = h[h.length - 1];
+      if (!last || t - last[0] > 2000) h.push([t, p.lat, p.lon, p.alt]);
+      while (h.length && now - h[0][0] > this.keepMs) h.shift();
+      const out: [number, number, number, number][] = [];
+      let prev = -Infinity;
+      for (const [ht, lat, lon, alt] of h) {
+        if (now - ht < 3000 || ht - prev < 8000) continue;
+        prev = ht;
+        out.push([Math.round((now - ht) / 100) / 10, lat, lon, alt]);
+      }
+      if (out.length) p.hist = out;
+    }
+    for (const [hex, h] of m) if (!seen.has(hex) && (!h.length || now - h[h.length - 1][0] > this.keepMs)) m.delete(hex);
+    return r;
+  }
 }

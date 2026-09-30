@@ -13,8 +13,8 @@ import type { FrameInfo, Layer, World } from './world.ts';
 // stays in the frame; a shadow on the ground marks where it really is.
 
 const POLL_MS = 10_000;
-/** Trail samples per plane (one per ~0.5 s of flight): about 70 s of history behind each plane. */
-const TRAIL_N = 140;
+/** Trails fade out over this long (seconds); the selected plane keeps its whole path. */
+const TRAIL_S = 75;
 /** Map height for a pressure altitude in feet: approach heights nearly true, cruise compressed. */
 export const displayY = (ft: number) => 6 + 950 * (1 - Math.exp(-(ft * 0.3048) / 3200));
 
@@ -24,7 +24,7 @@ export interface LivePlane {
   livery: Livery;
   group: THREE.Group;
   body: THREE.Mesh;
-  strobe: THREE.Mesh;
+  strobe: THREE.Points;
   shadow: THREE.Mesh;
   /** Where the latest fix puts the plane (map x, map y) and when (server ms). */
   fix: { x: number; y: number; t: number };
@@ -38,6 +38,8 @@ export interface LivePlane {
   phase: number;
   /** Where it has been, oldest first (map x, height, map z), sampled every ~0.5 s. */
   trail: THREE.Vector3[];
+  /** When it was at each trail point (server epoch ms). */
+  trailT: number[];
   trailAt: number;
 }
 
@@ -101,6 +103,8 @@ export function buildModel(ty: AircraftType, lv: Livery): Built {
   const engine = lv.full ? lv.accent : '#d8dce2';
   const dark = '#2b2f36';
 
+  let tip = { x: 0, y: r * 1.4, z: B * 0.95 };
+  const topY = r * (lay === 'a380' ? 1.35 : 1.05);
   if (lay === 'heli') {
     add(new THREE.SphereGeometry(1, 12, 8).scale(L * 0.28, r * 1.1, r).translate(L * 0.12, 0, 0), body);
     add(tube(r * 0.18, r * 0.35, L * 0.5, -L * 0.25, r * 0.35, 0, 6), body);
@@ -129,6 +133,7 @@ export function buildModel(ty: AircraftType, lv: Livery): Built {
     const sweep = jet && lay !== 'lifter' ? B * 0.5 : B * 0.05;
     const xLE = L * (lay === 'aft' ? 0.1 : 0.14);
     const wy = high ? r * 0.8 : -r * 0.6;
+    tip = { x: xLE - sweep - ct * 0.35, y: wy + 0.2, z: B };
     for (const w of wingPair(xLE, wy, c, ct, B, sweep, Math.max(0.25, r * 0.16))) add(w, body === lv.tail && lv.full ? lv.body : lv.full ? lv.tail : body);
     // Winglet tips in the tail color on airliners.
     if (jet && lay !== 'lifter' && lay !== 'aft') for (const s of [1, -1]) add(fin([[xLE - sweep - ct * 0.1, 0], [xLE - sweep - ct * 0.4, r * 0.9], [xLE - sweep - ct, r * 0.9], [xLE - sweep - ct, 0]], 0.2).translate(0, wy, s * B), lv.tail);
@@ -170,22 +175,46 @@ export function buildModel(ty: AircraftType, lv: Livery): Built {
     }
   }
 
-  // Lights: red on the left wingtip, green on the right, white tail light; strobes and a red beacon blink.
-  const lp: THREE.BufferGeometry[] = [];
-  const st: THREE.BufferGeometry[] = [];
-  const ls = Math.max(0.35, ty.span * 0.018);
-  const tipX = lay === 'heli' ? 0 : L * 0.14 - (B * 0.5 * (ty.layout === 'jet' || ty.layout === 'jet4' ? 1 : 0.1)) - ty.span * 0.05;
-  const tipY = lay === 'turboprop' || lay === 'single' || lay === 'lifter' ? r * 0.8 : lay === 'heli' ? 0 : -r * 0.6;
-  const bulb = (x: number, y: number, z: number, c: string, into: THREE.BufferGeometry[], s = ls) => into.push(paint(new THREE.SphereGeometry(s, 6, 4).translate(x, y, z), c));
-  if (lay !== 'heli') {
-    bulb(tipX, tipY, -B, '#ff2a2a', lp);
-    bulb(tipX, tipY, B, '#2aff5a', lp);
-    bulb(tipX, tipY, -B, '#ffffff', st, ls * 1.3);
-    bulb(tipX, tipY, B, '#ffffff', st, ls * 1.3);
+  // Lights, as glowing points drawn at a constant screen size: red on the left wingtip, green on the right and a
+  // white tail light (steady); white wingtip strobes and a red beacon on top and belly (blinking).
+  const pts = (list: [number, number, number, string][]) => {
+    const g = new THREE.BufferGeometry();
+    const c = new THREE.Color();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(list.flatMap(([x, y, z]) => [x, y, z]), 3));
+    g.setAttribute('color', new THREE.Float32BufferAttribute(list.flatMap(([, , , h]) => c.set(h).toArray()), 3));
+    return g;
+  };
+  const steady: [number, number, number, string][] = [
+    [tip.x, tip.y, -tip.z, '#ff3030'],
+    [tip.x, tip.y, tip.z, '#30ff70'],
+    [-L * 0.5, r * 0.35, 0, '#ffffff'],
+  ];
+  const blink: [number, number, number, string][] = [
+    [tip.x - 0.3, tip.y, -tip.z, '#ffffff'],
+    [tip.x - 0.3, tip.y, tip.z, '#ffffff'],
+    [0, topY + 0.2, 0, '#ff3a2a'],
+    [0, -r * 1.05, 0, '#ff3a2a'],
+  ];
+  return { body: mergeGeometries(parts), lights: pts(steady), strobe: pts(blink) };
+}
+
+let glowTex: THREE.Texture | null = null;
+/** A soft round light: additive, a constant size on screen, colored per point. */
+export function glowMaterial(px: number) {
+  if (!glowTex) {
+    const c = document.createElement('canvas');
+    c.width = c.height = 64;
+    const g = c.getContext('2d')!;
+    const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grad.addColorStop(0, 'rgba(255,255,255,1)');
+    grad.addColorStop(0.18, 'rgba(255,255,255,0.95)');
+    grad.addColorStop(0.45, 'rgba(255,255,255,0.35)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 64, 64);
+    glowTex = new THREE.CanvasTexture(c);
   }
-  bulb(-L * 0.5, r * 0.4, 0, '#ffffff', lp);
-  bulb(0, r * (lay === 'a380' ? 1.35 : 1.05), 0, '#ff3a2a', st, ls * 1.2);
-  return { body: mergeGeometries(parts), lights: mergeGeometries(lp), strobe: mergeGeometries(st) };
+  return new THREE.PointsMaterial({ size: px, sizeAttenuation: false, map: glowTex, vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -200,7 +229,8 @@ export class PlaneLayer implements Layer {
   onChange: () => void = () => {};
   private models = new Map<string, Built>();
   private bodyMat: THREE.MeshLambertMaterial;
-  private lightMat = new THREE.MeshBasicMaterial({ vertexColors: true });
+  private lightMat = glowMaterial(7);
+  private strobeMat = glowMaterial(10);
   private shadowMat = new THREE.MeshBasicMaterial({ color: '#0b1a2a', transparent: true, opacity: 0.18, depthWrite: false });
   /** Contrails: one ribbon per plane, fading toward the tail, rebuilt each frame into a single mesh. */
   private trails: THREE.Mesh;
@@ -285,6 +315,7 @@ export class PlaneLayer implements Layer {
       let lp = this.planes.get(p.hex);
       if (!lp) {
         lp = this.create(p, fix);
+        this.seedTrail(lp, now);
         this.planes.set(p.hex, lp);
       } else {
         // A type or callsign that arrives later (or changes) rebuilds the model.
@@ -311,15 +342,15 @@ export class PlaneLayer implements Layer {
     const group = new THREE.Group();
     const body = new THREE.Mesh(m.body, this.bodyMat);
     body.castShadow = false;
-    const lights = new THREE.Mesh(m.lights, this.lightMat);
-    const strobe = new THREE.Mesh(m.strobe, this.lightMat);
+    const lights = new THREE.Points(m.lights, this.lightMat);
+    const strobe = new THREE.Points(m.strobe, this.strobeMat);
     group.add(body, lights, strobe);
     const shadow = new THREE.Mesh(m.body, this.shadowMat);
     shadow.renderOrder = 3;
     this.group.add(group, shadow);
     const heading = Math.PI / 2 - (p.trk * Math.PI) / 180;
     const pos = new THREE.Vector3(fix.x, displayY(p.alt), -fix.y);
-    return { data: p, type, livery, group, body, strobe, shadow, fix, pos, heading, bank: 0, pitch: 0, fade: 0, missing: 0, phase: Math.random() * 10, trail: [], trailAt: 0 };
+    return { data: p, type, livery, group, body, strobe, shadow, fix, pos, heading, bank: 0, pitch: 0, fade: 0, missing: 0, phase: Math.random() * 10, trail: [], trailT: [], trailAt: 0 };
   }
 
   private remodel(lp: LivePlane, p: Plane) {
@@ -327,14 +358,15 @@ export class PlaneLayer implements Layer {
     lp.livery = liveryFor(p.cs, p.hex);
     const m = this.model(lp.type, lp.livery);
     lp.body.geometry = m.body;
-    (lp.group.children[1] as THREE.Mesh).geometry = m.lights;
+    (lp.group.children[1] as THREE.Points).geometry = m.lights;
     lp.strobe.geometry = m.strobe;
     lp.shadow.geometry = m.body;
   }
 
   /** The plane's size multiplier at this zoom (toy exaggeration, like the trains). */
   static scaleFor(mpp: number) {
-    return THREE.MathUtils.clamp(mpp * 1.3, 1.8, 18);
+    // A constant ~45 px for an airliner however far out you zoom (the wings stay readable), never below true size ×1.8.
+    return Math.max(1.8, mpp * 1.3);
   }
 
   update(f: FrameInfo) {
@@ -377,8 +409,15 @@ export class PlaneLayer implements Layer {
       if (f.time - lp.trailAt > 0.5 && lp.fade > 0.5 && (!last || last.distanceToSquared(lp.pos) > 400)) {
         lp.trailAt = f.time;
         lp.trail.push(lp.pos.clone());
-        const max = lp === this.selected ? 1800 : TRAIL_N;
-        if (lp.trail.length > max) lp.trail.splice(0, lp.trail.length - max);
+        lp.trailT.push(now);
+      }
+      // Drop what has faded out (the selected plane keeps ~20 minutes, its flight path).
+      const keep = lp === this.selected ? 1_200_000 : TRAIL_S * 1000;
+      let cut = 0;
+      while (cut < lp.trailT.length && now - lp.trailT[cut] > keep) cut++;
+      if (cut) {
+        lp.trail.splice(0, cut);
+        lp.trailT.splice(0, cut);
       }
       lp.group.position.copy(lp.pos);
       lp.group.rotation.set(lp.bank, lp.heading, lp.pitch, 'YZX');
@@ -394,6 +433,11 @@ export class PlaneLayer implements Layer {
     this.buildTrails(f);
     this.buildPath(f);
     this.shadowMat.opacity = 0.2 * (1 - f.night * 0.6);
+    // Lights glow bigger after dark, and fade out when a plane is only a few pixels across.
+    const far = THREE.MathUtils.smoothstep(f.mpp, 30, 60);
+    this.lightMat.size = (5 + 4 * f.night) * (1 - far * 0.6);
+    this.strobeMat.size = (8 + 6 * f.night) * (1 - far * 0.6);
+    this.lightMat.opacity = this.strobeMat.opacity = 0.75 + 0.25 * f.night;
     const sel = this.selected;
     this.ring.visible = !!sel;
     if (sel) {
@@ -403,26 +447,31 @@ export class PlaneLayer implements Layer {
     }
   }
 
-  /** Ribbons behind every plane: widest and brightest at the plane, fading over ~70 s of history. */
+  /** Ribbons behind every plane: brightest at its tail, fading by age to nothing after TRAIL_S seconds. */
   private buildTrails(f: FrameInfo) {
     const w = Math.max(6, f.mpp * 6.5);
+    const now = f.now;
     let n = 0;
-    for (const lp of this.planes.values()) if (lp.trail.length > 1 && lp !== this.selected) n += Math.min(lp.trail.length, TRAIL_N) + 1; // + the plane itself
+    for (const lp of this.planes.values()) if (lp.trail.length > 0 && lp !== this.selected) n += lp.trail.length + 1;
     const need = n * 2 * 3;
     if (this.trailPos.length < need) {
-      this.trailPos = new Float32Array(need * 1.5);
-      this.trailCol = new Float32Array((need / 3) * 4 * 1.5);
+      this.trailPos = new Float32Array(Math.ceil(need * 1.5));
+      this.trailCol = new Float32Array(Math.ceil((need / 3) * 4 * 1.5));
       this.trailGeo.setAttribute('position', new THREE.BufferAttribute(this.trailPos, 3));
       this.trailGeo.setAttribute('color', new THREE.BufferAttribute(this.trailCol, 4));
     }
     const idx: number[] = [];
     let v = 0;
     // A sky-blue vapor by day (white would vanish on pale land), pale silver at night.
-    const white = f.night > 0.5 ? [0.85, 0.9, 1] : [0.2, 0.42, 0.86];
+    const tint = f.night > 0.5 ? [0.85, 0.9, 1] : [0.2, 0.42, 0.86];
+    const tail = new THREE.Vector3();
     for (const lp of this.planes.values()) {
-      if (lp.trail.length < 2 || lp === this.selected) continue;
-      const pts = lp.trail.slice(-TRAIL_N);
-      pts.push(lp.pos);
+      if (!lp.trail.length || lp === this.selected) continue;
+      // The ribbon ends at the plane's tail, not its center, so it never paints over the model.
+      const back = lp.type.len * 0.5 * lp.group.scale.x;
+      tail.set(lp.pos.x - Math.cos(lp.heading) * back, lp.pos.y, lp.pos.z + Math.sin(lp.heading) * back);
+      const pts = [...lp.trail, tail];
+      const ts = [...lp.trailT, now];
       const start = v;
       for (let i = 0; i < pts.length; i++) {
         const a = pts[Math.max(0, i - 1)];
@@ -432,12 +481,12 @@ export class PlaneLayer implements Layer {
         const len = Math.hypot(dx, dz) || 1;
         dx /= len;
         dz /= len;
-        const t = i / (pts.length - 1); // 0 oldest .. 1 at the plane
-        const hw = w * (0.25 + 0.75 * t) * 0.5;
+        const k = THREE.MathUtils.clamp(1 - (now - ts[i]) / (TRAIL_S * 1000), 0, 1); // 1 fresh .. 0 faded
+        const hw = w * (0.3 + 0.7 * k) * 0.5;
         const p = pts[i];
         for (const side of [-1, 1]) {
           this.trailPos.set([p.x - dz * hw * side, p.y, p.z + dx * hw * side], v * 3);
-          this.trailCol.set([white[0], white[1], white[2], (0.15 + 0.75 * t) * lp.fade], v * 4);
+          this.trailCol.set([tint[0], tint[1], tint[2], 0.85 * k * k * lp.fade], v * 4);
           v++;
         }
         if (i > 0) {
@@ -453,6 +502,45 @@ export class PlaneLayer implements Layer {
       (this.trailGeo.getAttribute('color') as THREE.BufferAttribute).needsUpdate = true;
     }
     this.trails.visible = idx.length > 0;
+  }
+
+  /** A new plane's trail, back-dated: the relay's recent history when it has one, else its course projected back. */
+  private seedTrail(lp: LivePlane, now: number) {
+    const d = lp.data;
+    const pts: { p: THREE.Vector3; t: number }[] = [];
+    for (const [ago, lat, lon, alt] of d.hist ?? []) {
+      const [x, y] = this.project(lon, lat);
+      pts.push({ p: new THREE.Vector3(x, alt > 0 ? displayY(alt) : 4, -y), t: now - ago * 1000 });
+    }
+    // Where history runs short, project the course back from the oldest known point to a minute ago.
+    if (!d.gnd && d.gs > 40) {
+      const oldest = pts[0];
+      const t0 = oldest ? oldest.t : lp.fix.t;
+      const x0 = oldest ? oldest.p.x : lp.fix.x;
+      const y0 = oldest ? -oldest.p.z : lp.fix.y;
+      const v = d.gs * 0.514444;
+      const trk = (d.trk * Math.PI) / 180;
+      const back: { p: THREE.Vector3; t: number }[] = [];
+      for (let ago = 6; now - (t0 - ago * 1000) <= 60_000; ago += 6) {
+        const alt = Math.max(0, d.alt - (d.vr / 60) * ((lp.fix.t - (t0 - ago * 1000)) / 1000));
+        back.unshift({ p: new THREE.Vector3(x0 - Math.sin(trk) * v * ago, displayY(alt), -(y0 - Math.cos(trk) * v * ago)), t: t0 - ago * 1000 });
+      }
+      pts.unshift(...back);
+    }
+    // Fill between sparse history points so the ribbon bends smoothly.
+    for (let i = 0; i < pts.length; i++) {
+      if (i > 0) {
+        const a = pts[i - 1];
+        const b = pts[i];
+        const steps = Math.min(8, Math.floor((b.t - a.t) / 1500));
+        for (let k = 1; k < steps; k++) {
+          lp.trail.push(a.p.clone().lerp(b.p, k / steps));
+          lp.trailT.push(a.t + ((b.t - a.t) * k) / steps);
+        }
+      }
+      lp.trail.push(pts[i].p);
+      lp.trailT.push(pts[i].t);
+    }
   }
 
   /** Where to draw the selected flight heading: its destination airport, if known (map coordinates). */
@@ -476,6 +564,8 @@ export class PlaneLayer implements Layer {
     const w = Math.max(6, f.mpp * 4.5);
     const col = new THREE.Color(sel.livery.name ? sel.livery.tail : '#ffd23f');
     if (col.getHSL({ h: 0, s: 0, l: 0 }).l > 0.85) col.set('#ffd23f');
+    // Dark liveries (navy, black) would vanish on the night map: lift them toward white after dark.
+    if (col.getHSL({ h: 0, s: 0, l: 0 }).l < 0.4) col.lerp(new THREE.Color('#ffffff'), 0.55 * f.night);
     const pos: number[] = [];
     const cols: number[] = [];
     const idx: number[] = [];

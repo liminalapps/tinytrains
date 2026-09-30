@@ -4,19 +4,20 @@
 import { createServer } from 'node:http';
 import { CITY_ORDER } from '../shared/cities.ts';
 import type { CityId } from '../shared/types.ts';
-import { fetchPlanes, fetchRoute, type FlightRoute, type PlanesResponse } from '../server/planes.ts';
+import { fetchPlanes, fetchRoute, PlaneHistory, type FlightRoute, type PlanesResponse } from '../server/planes.ts';
 
 const TOKEN = process.env.RELAY_TOKEN ?? '';
 const PORT = Number(process.env.PORT ?? 8080);
 if (!TOKEN) throw new Error('RELAY_TOKEN is not set');
 
 const planes = new Map<CityId, { at: number; body: Promise<PlanesResponse> }>();
+const history = new PlaneHistory();
 const routes = new Map<string, { at: number; body: Promise<FlightRoute | null> }>();
 
 function cityPlanes(city: CityId) {
   const hit = planes.get(city);
   if (hit && Date.now() - hit.at < 8000) return hit.body;
-  const body = fetchPlanes(city);
+  const body = fetchPlanes(city).then((r) => history.apply(r));
   planes.set(city, { at: Date.now(), body });
   body.catch(() => planes.delete(city));
   return body;

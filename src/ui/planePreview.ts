@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { AircraftType, Livery } from '../../shared/aircraft.ts';
-import { buildModel } from '../engine/planes.ts';
+import { buildModel, glowMaterial } from '../engine/planes.ts';
 
 /** A little turntable for the selected aircraft: its type's model in its airline's colors, banking gently. */
 export class PlanePreview {
@@ -13,7 +13,8 @@ export class PlanePreview {
   private span = 40;
   private running = false;
   private mat = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true });
-  private lightMat = new THREE.MeshBasicMaterial({ vertexColors: true });
+  private lightMat = glowMaterial(9);
+  private strobeMat = glowMaterial(13);
 
   constructor(w: number, h: number) {
     this.canvas = document.createElement('canvas');
@@ -32,10 +33,10 @@ export class PlanePreview {
     const key = `${type.name}|${livery.body}|${livery.tail}|${livery.accent}`;
     if (key !== this.key) {
       this.key = key;
-      for (const c of this.holder.children) (c as THREE.Mesh).geometry.dispose();
+      for (const c of this.holder.children) (c as THREE.Mesh | THREE.Points).geometry.dispose();
       this.holder.clear();
       const m = buildModel(type, livery);
-      this.holder.add(new THREE.Mesh(m.body, this.mat), new THREE.Mesh(m.lights, this.lightMat), new THREE.Mesh(m.strobe, this.lightMat));
+      this.holder.add(new THREE.Mesh(m.body, this.mat), new THREE.Points(m.lights, this.lightMat), new THREE.Points(m.strobe, this.strobeMat));
       this.span = Math.max(type.len, type.span) * 0.95;
     }
     if (!this.running) {

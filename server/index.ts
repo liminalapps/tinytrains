@@ -6,7 +6,7 @@ import { CITY_ORDER } from '../shared/cities.ts';
 import type { CityId } from '../shared/types.ts';
 import { Hub } from './hub.ts';
 import type { Adapter, AdapterEnv, AdapterFactory } from './adapters/types.ts';
-import { fetchPlanes, fetchRoute, type FlightRoute, type PlanesResponse } from './planes.ts';
+import { fetchPlanes, fetchRoute, PlaneHistory, type FlightRoute, type PlanesResponse } from './planes.ts';
 
 const ROOT = resolve(import.meta.dirname, '..');
 if (existsSync(join(ROOT, '.env'))) process.loadEnvFile(join(ROOT, '.env'));
@@ -71,6 +71,7 @@ createServer((req, res) => {
 }).listen(PORT, () => console.log(`[server] listening on http://localhost:${PORT}${PROD ? '' : ' (api only; vite serves the app on :5173)'}`));
 
 const planeCache = new Map<CityId, { at: number; body: PlanesResponse }>();
+const planeHistory = new PlaneHistory();
 const routeCache = new Map<string, FlightRoute | null>();
 
 async function handle(req: IncomingMessage, res: ServerResponse) {
@@ -109,7 +110,7 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
     if (hit && Date.now() - hit.at < 8000) body = hit.body;
     else {
       try {
-        body = await fetchPlanes(city);
+        body = planeHistory.apply(await fetchPlanes(city));
         planeCache.set(city, { at: Date.now(), body });
       } catch (err) {
         body = { error: String(err) };
