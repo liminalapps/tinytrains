@@ -42,6 +42,7 @@ export interface OsmLineSource {
   /**
    * Fallback when the relations are missing or have no stop members: ordered station names, one list per
    * branch and direction (a reverse list is added for you). Stations are found by name among OSM station nodes.
+   * 'Name@REF' takes the station node whose ref tag is REF (where another line's namesake would be picked).
    */
   sequences?: string[][];
 }

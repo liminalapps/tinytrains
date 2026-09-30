@@ -89,7 +89,8 @@ export interface OsmLineSource {
    * branch and direction (a reverse list is added for you). Each name resolves against the line's own relation
    * stops first, then any fetched route's stop members, then station nodes; among namesakes it takes the one nearest
    * the previous stop (for the first stop, the one nearest the next stop's namesakes). Through services whose partner
-   * relation has no stops can list the whole run here alongside `relations`.
+   * relation has no stops can list the whole run here alongside `relations`. 'Name@REF' takes the station node
+   * whose ref tag is REF, where another line's same-named stop would be picked.
    */
   sequences?: string[][];
 }

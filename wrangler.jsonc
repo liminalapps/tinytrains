@@ -61,7 +61,8 @@
     { "binding": "ISTANBUL", "service": "tinytrains-istanbul" },
     { "binding": "NAPLES", "service": "tinytrains-naples" },
     { "binding": "TOULOUSE", "service": "tinytrains-toulouse" },
-    { "binding": "MANCHESTER", "service": "tinytrains-manchester" }
+    { "binding": "MANCHESTER", "service": "tinytrains-manchester" },
+    { "binding": "BANGKOK", "service": "tinytrains-bangkok" }
   ],
   "vars": { "PLANES_RELAY": "https://tinytrains-planes.fly.dev" },
   "observability": { "enabled": true }

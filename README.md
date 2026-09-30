@@ -3,7 +3,7 @@
 **Live at [tinytrains.app](https://tinytrains.app)**
 
 Every train in the world's great metro systems, live, on a tiny isometric toy map: New York, London, Paris,
-Tokyo, Seoul, Hong Kong, Moscow, Singapore, Mexico City and more, 44 cities in all.
+Tokyo, Seoul, Hong Kong, Moscow, Singapore, Mexico City and more, 47 cities in all.
 
 Each city is a little floating island in the clouds, built from real geography, with hand-built toy landmarks
 (the Eiffel Tower, the Fernsehturm, Tower Bridge, the Star Ferries crossing Victoria Harbour). The trains are
@@ -94,6 +94,9 @@ A plain Node server works too: `npm run build && npm start` (serves dist/ and th
 | Istanbul | | Metro, Marmaray, trams, funiculars (simulated from Metro İstanbul's published departures) | |
 | Montreal | | Métro, exo; the REM simulated from its published frequencies | |
 | Dubai | | Metro, Tram (RTA GTFS), Palm Monorail (simulated) | |
+| Bangkok | | BTS, MRT (Blue, Purple, Yellow, Pink), Gold Line, Airport Rail Link, SRT Red Lines (simulated from OTP's published frequencies) | |
+| Toulouse | Tisséo GTFS-realtime when it carries rail updates | Métro A and B, tram T1, Téléo | |
+| Manchester | | Metrolink (TfGM GTFS) | `TFGM_KEY` (TfGM developer portal) makes it live |
 
 Put keys in `.env` at the repo root for local runs, and in each city Worker's secrets for production
 (`npx wrangler secret put PRIM_KEY -c worker/cities/paris.jsonc`, and so on):

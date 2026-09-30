@@ -169,9 +169,12 @@ export async function buildSimCity(cfg: SimCityConfig): Promise<void> {
     for (const seqNames of l.osm.sequences ?? []) {
       // Prefer the line's own stops, then any route's stop members, then station nodes (a same-named railway halt
       // must not pull the position away).
-      const candsOf = (name: string): RawStop[] => {
+      const candsOf = (entry: string): RawStop[] => {
+        // 'Name@REF' pins the stop to the station node with that ref tag (a namesake of another line is nearer).
+        const [name, ref] = entry.split('@');
         const key = keyOfName(name);
         const asStop = (n: OsmElement): RawStop => ({ key, x: xyOf(n)[0], y: xyOf(n)[1], inside: inBox(n.lon!, n.lat!) });
+        if (ref) return stationNodes.filter((n) => n.tags?.ref === ref).map(asStop);
         let cands: RawStop[] = rawVariants.filter((v) => v.line === l.id).flatMap((v) => v.stops).filter((st) => st.key === key);
         if (!cands.length) cands = [...nodes.values()].filter((n) => n.tags?.name && noteNames(n.tags, 0) === key).map(asStop);
         if (!cands.length) cands = stationNodes.filter((n) => noteNames(n.tags, 0) === key).map(asStop);

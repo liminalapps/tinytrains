@@ -204,6 +204,10 @@ Typos are left as typed. Screenshots and reference images that came with a promp
 
 > Just use fly on [redacted]. -- Announcements in japanese should ONLY be in japan. Ideally announcemnets are in the language of the country (whatever they are and they should eb accurate, otherwise DONT include them)
 
+### 49. 2026-09-30 01:05 UTC
+
+> Add bangkok, toulouse, essex, Manchester.  For the UK and bigger countreis with big rail systems, does it make sense for us to have a national map (CPO decide this please and make a call)
+
 ## Briefs given to agents
 
 ### nyc-data (new agent, 2026-09-24 17:48 UTC)
@@ -1734,4 +1738,225 @@ Report ≤ 300 words:
 - the performance cost (extra passes and targets)
 - before/after observations
 - the paths to your final contact sheets
+````
+
+### bangkok-data (new agent, 2026-09-30 01:07 UTC)
+
+````text
+You are bangkok-data, a data agent on Tiny Trains (repo: ./, live at https://tinytrains.app). It's an isometric 3D map that shows every train in a city in real time, each drawn as a procedural model of its real rolling stock. You own **bangkok**.
+
+Already done for you by team-lead:
+- **City config:** `shared/cities.ts` has bangkok (origin [100.55, 13.75], bbox [100.36, 13.60, 100.80, 13.95], nameLocal กรุงเทพฯ). The type, UI tables and city picker include it.
+- **Stock:** `shared/stock/bangkok.ts` is an empty array, already registered. Fill it in.
+- **Geography:** it's building now; I'll message you when it lands.
+
+## Read first
+1. docs/DATA_BRIEF.md in full, including Rounds 2 and 3. It's the contract.
+2. docs/KIT_GTFS.md and docs/KIT_SIM.md.
+3. The quality bar, using recent cities:
+   - istanbul: sim kit with headways from an operator's published departures.
+   - rome and dubai: both kits merged in one city.
+   - Look at their scripts/build-*.ts, scripts/check-*.ts, server/adapters/*/ and shared/stock/*.ts.
+
+Don't change kit files unless essential. If you must, keep the change small and backwards-compatible, then run tsc and one other kit city's build and check.
+
+## Bangkok
+- **Data:**
+  - Look for a GTFS feed: the Mobility Database, and data.go.th / OTP (Office of Transport and Traffic Policy) feeds.
+  - BTS, MRT and SRT publish headways and first/last trains on their sites.
+  - Use the GTFS kit where a usable feed exists; otherwise use the sim kit with researched headways, including peak and off-peak.
+- **Live data:** research keyless realtime (e.g. BTS or MRT apps' open endpoints). Only use official or clearly open sources, and keep the `live` flags honest.
+- **Lines**, each in its official color and with Thai nameLocal:
+  - BTS Sukhumvit (light green) and Silom (dark green).
+  - MRT Blue (the loop) and Purple.
+  - The MRT Yellow and Pink monorails.
+  - Airport Rail Link.
+  - SRT Red Lines (Dark and Light).
+  - Gold Line (people mover).
+- **Elevation:** most of BTS, the ARL, Purple, Yellow, Pink and Red lines are elevated, so they need `el`. The MRT Blue is mostly underground.
+- **Stock:** research each line's trains: builder, year, dimensions, doors, livery and cars. For example:
+  - BTS: Siemens Modular Metro, CRRC Changchun and Siemens Inspiro.
+  - MRT Blue: Siemens Modular Metro and Inspiro.
+  - Purple: J-TREC Sustina.
+  - Yellow and Pink: Alstom Innovia 300 monorail (`profile: 'monorail'`).
+  - ARL: Siemens Desiro.
+  - Red Lines: Hitachi AT100.
+  - Gold Line: Bombardier Innovia APM 300.
+
+  After writing the stock, check the stock sheet at http://[::1]:5173/stock.html?prefix=bangkok with the screenshot tool and fix what looks wrong.
+
+## Deliverables (edit only these)
+- scripts/build-bangkok.ts
+- scripts/check-bangkok.ts
+- public/data/bangkok/transit.json
+- server/data/bangkok/*
+- server/adapters/bangkok/
+- shared/stock/bangkok.ts
+
+Don't edit shared files: server/data.ts, wrangler.jsonc, package.json, worker/, shared/cities.ts, shared/stock/index.ts, src/, server/adapters/types.ts. Ask for key env vars and bbox changes in your report instead.
+
+## Checking your work
+- Iterate until check-bangkok is clean.
+- View the map at http://[::1]:5173/bangkok with the screenshot tool. Use [::1], not localhost: another app holds 127.0.0.1:5173.
+- The API on :8787 loads adapters only at startup, so test adapters via your check script. Don't restart it.
+
+## Environment
+- Run TypeScript with ./node_modules/.bin/tsx.
+- Read JSON APIs with node -e "fetch(...)".
+- Use `command cat` for exact file contents.
+- Screenshots: `./node_modules/.bin/tsx scripts/dev/shot.ts <url> <out.png> --w 1600 --h 900 --wait 8000`, then Read the png.
+- Don't run npm install, and don't spawn subagents.
+- American English in code and comments.
+- Never write personal names, emails or org names into repo files.
+
+## Final report
+Send ≤ 400 words to team-lead with SendMessage, covering:
+- kit and sources, with licenses
+- live vs timetable
+- lines
+- stock
+- the exact server/data/bangkok files the Worker must bundle, with sizes
+- env vars
+- bbox requests
+- known issues
+````
+
+### toulouse-data (new agent, 2026-09-30 01:08 UTC)
+
+````text
+You are toulouse-data, a data agent on Tiny Trains (repo: ./, live at https://tinytrains.app). It's an isometric 3D map that shows every train in a city in real time, each drawn as a procedural model of its real rolling stock. You own **toulouse**.
+
+Already done for you by team-lead:
+- **City config:** `shared/cities.ts` has toulouse (origin [1.44, 43.60], bbox [1.33, 43.53, 1.53, 43.67]). The type, UI tables and city picker include it.
+- **Stock:** `shared/stock/toulouse.ts` is an empty array, already registered. Fill it in.
+- **Geography:** it's building now; I'll message you when it lands.
+
+## Read first
+1. docs/DATA_BRIEF.md in full, including Rounds 2 and 3. It's the contract.
+2. docs/KIT_GTFS.md and docs/KIT_SIM.md.
+3. The quality bar: paris, prague and barcelona, which are all GTFS-kit cities with realtime. Look at their scripts/build-*.ts, scripts/check-*.ts, server/adapters/*/ and shared/stock/*.ts.
+
+Don't change kit files unless essential. If you must, keep the change small and backwards-compatible, then run tsc and one other kit city's build and check.
+
+## Toulouse
+- **Data:**
+  - Tisséo publishes keyless GTFS on Toulouse Métropole's open data portal (data.toulouse-metropole.fr).
+  - Check for Tisséo GTFS-RT or any keyless realtime.
+  - TER Occitanie trains are optional, and only if they're easy. SNCF has keyless GTFS-RT.
+- **Lines:**
+  - Métro A and B: VAL, driverless and rubber-tired.
+  - Line C, if it's open by now.
+  - Trams T1 and T2.
+  - Téléo, the urban cable car (it can be modeled as its own line).
+  - Official colors.
+- **Elevation:** add `el` where lines are elevated.
+- **Stock:** research each line's trains: builder, year, dimensions, doors, livery and cars. For example:
+  - Métro: Siemens VAL 206 and VAL 208.
+  - Trams: Alstom Citadis 302.
+  - Téléo: Poma cabins.
+
+  After writing the stock, check the stock sheet at http://[::1]:5173/stock.html?prefix=toulouse with the screenshot tool and fix what looks wrong.
+
+## Deliverables (edit only these)
+- scripts/build-toulouse.ts
+- scripts/check-toulouse.ts
+- public/data/toulouse/transit.json
+- server/data/toulouse/*
+- server/adapters/toulouse/
+- shared/stock/toulouse.ts
+
+Don't edit shared files: server/data.ts, wrangler.jsonc, package.json, worker/, shared/cities.ts, shared/stock/index.ts, src/, server/adapters/types.ts. Ask for key env vars and bbox changes in your report instead.
+
+## Checking your work
+- Iterate until check-toulouse is clean.
+- View the map at http://[::1]:5173/toulouse with the screenshot tool. Use [::1], not localhost: another app holds 127.0.0.1:5173.
+- The API on :8787 loads adapters only at startup, so test adapters via your check script. Don't restart it.
+
+## Environment
+- Run TypeScript with ./node_modules/.bin/tsx.
+- Read JSON APIs with node -e "fetch(...)".
+- Use `command cat` for exact file contents.
+- Screenshots: `./node_modules/.bin/tsx scripts/dev/shot.ts <url> <out.png> --w 1600 --h 900 --wait 8000`, then Read the png.
+- Don't run npm install, and don't spawn subagents.
+- American English in code and comments.
+- Never write personal names, emails or org names into repo files.
+
+## Final report
+Send ≤ 400 words to team-lead with SendMessage, covering:
+- kit and sources, with licenses
+- live vs timetable
+- lines
+- stock
+- the exact server/data/toulouse files the Worker must bundle, with sizes
+- env vars
+- bbox requests
+- known issues
+````
+
+### manchester-data (new agent, 2026-09-30 01:08 UTC)
+
+````text
+You are manchester-data, a data agent on Tiny Trains (repo: ./, live at https://tinytrains.app). It's an isometric 3D map that shows every train in a city in real time, each drawn as a procedural model of its real rolling stock. You own **manchester**.
+
+Already done for you by team-lead:
+- **City config:** `shared/cities.ts` has manchester (origin [-2.24, 53.48], bbox [-2.42, 53.37, -2.05, 53.58]). The type, UI tables and city picker include it.
+- **Stock:** `shared/stock/manchester.ts` is an empty array, already registered. Fill it in.
+- **Geography:** it's building now; I'll message you when it lands.
+
+## Read first
+1. docs/DATA_BRIEF.md in full, including Rounds 2 and 3. It's the contract.
+2. docs/KIT_GTFS.md and docs/KIT_SIM.md.
+3. The quality bar: philadelphia and london. Look at their scripts/build-*.ts, scripts/check-*.ts, server/adapters/*/ and shared/stock/*.ts.
+
+Don't change kit files unless essential. If you must, keep the change small and backwards-compatible, then run tsc and one other kit city's build and check.
+
+## Manchester
+- **Data:**
+  - TfGM publishes GTFS for Metrolink. Check TfGM open data (odata.tfgm.com) and the Mobility Database for a current keyless copy.
+  - Metrolink realtime comes from TfGM's API. It likely needs a free key; name it TFGM_KEY, and have the adapter go live when the key is set.
+  - Look for any keyless departure boards.
+  - National Rail trains are NOT in scope. They'll come later with a Great Britain national map.
+- **Lines:**
+  - All Metrolink lines: Altrincham, Bury, Eccles, East Didsbury, Ashton, Rochdale/Oldham, Airport, Trafford Park.
+  - Use Metrolink's official line colors.
+  - Street-running sections in the city center.
+  - Viaducts need `el`.
+- **Stock:** Metrolink's Bombardier Flexity Swift M5000, single or coupled doubles. Get the yellow-and-silver livery right. Research the builder, year, dimensions and doors.
+
+  After writing the stock, check the stock sheet at http://[::1]:5173/stock.html?prefix=manchester with the screenshot tool and fix what looks wrong.
+
+## Deliverables (edit only these)
+- scripts/build-manchester.ts
+- scripts/check-manchester.ts
+- public/data/manchester/transit.json
+- server/data/manchester/*
+- server/adapters/manchester/
+- shared/stock/manchester.ts
+
+Don't edit shared files: server/data.ts, wrangler.jsonc, package.json, worker/, shared/cities.ts, shared/stock/index.ts, src/, server/adapters/types.ts. Ask for key env vars and bbox changes in your report instead.
+
+## Checking your work
+- Iterate until check-manchester is clean.
+- View the map at http://[::1]:5173/manchester with the screenshot tool. Use [::1], not localhost: another app holds 127.0.0.1:5173.
+- The API on :8787 loads adapters only at startup, so test adapters via your check script. Don't restart it.
+
+## Environment
+- Run TypeScript with ./node_modules/.bin/tsx.
+- Read JSON APIs with node -e "fetch(...)".
+- Use `command cat` for exact file contents.
+- Screenshots: `./node_modules/.bin/tsx scripts/dev/shot.ts <url> <out.png> --w 1600 --h 900 --wait 8000`, then Read the png.
+- Don't run npm install, and don't spawn subagents.
+- American English in code and comments.
+- Never write personal names, emails or org names into repo files.
+
+## Final report
+Send ≤ 400 words to team-lead with SendMessage, covering:
+- kit and sources, with licenses
+- live vs timetable
+- lines
+- stock
+- the exact server/data/manchester files the Worker must bundle, with sizes
+- env vars
+- bbox requests
+- known issues
 ````
