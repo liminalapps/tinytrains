@@ -469,6 +469,12 @@ const PREFERRED: Record<string, string[]> = {
   'de-AT': ['Microsoft Ingrid', 'Anna', 'Google Deutsch'],
   'hu-HU': ['Mariska', 'Tünde', 'Google magyar', 'Microsoft Noemi', 'Microsoft Szabolcs'],
   'it-IT': ['Alice', 'Federica', 'Google italiano', 'Microsoft Elsa', 'Luca', 'Microsoft Isabella'],
+  'fr-CA': ['Amélie', 'Amelie', 'Chantal', 'Google français', 'Microsoft Sylvie'],
+  'cs-CZ': ['Zuzana', 'Google čeština', 'Microsoft Vlasta', 'Iveta'],
+  'ca-ES': ['Montse', 'Microsoft Joana', 'Jordi'],
+  'pt-PT': ['Joana', 'Catarina', 'Microsoft Raquel', 'Google português'],
+  'tr-TR': ['Yelda', 'Google Türkçe', 'Microsoft Emel', 'Cem'],
+  'ar-AE': ['Maged', 'Majed', 'Microsoft Fatima', 'Google العربية', 'Laila'],
 };
 
 let voices: SpeechSynthesisVoice[] = [];
@@ -503,6 +509,9 @@ export function isSpeaking() {
 export function speak(lines: Line[], onState?: (on: boolean) => void): Promise<void> {
   if (!enabled || !voiceOn || typeof speechSynthesis === 'undefined' || !lines.length) return Promise.resolve();
   if (!voices.length) loadVoices();
+  // Only speak a line when a voice for its language is installed: never read it in another accent.
+  lines = lines.filter((l) => voiceFor(l.lang));
+  if (!lines.length) return Promise.resolve();
   return new Promise((resolve) => {
     let left = lines.length;
     speaking++;

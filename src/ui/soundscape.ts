@@ -12,7 +12,8 @@ type Pack =
   | 'nyc' | 'tube' | 'london-rail' | 'dlr' | 'london-tram' | 'bart' | 'muni' | 'cable' | 'streetcar' | 'caltrain' | 'people-mover'
   | 'jr' | 'metro' | 'toei' | 'tokyo-tram'
   | 'paris-metro' | 'paris-rer' | 'berlin-u' | 'berlin-s' | 'berlin-tram' | 'madrid-metro' | 'madrid-rail' | 'seoul' | 'mtr'
-  | 'book'; // a city from PHRASEBOOKS
+  | 'book' // a city from PHRASEBOOKS
+  | 'none'; // no announcements we're sure of: the ride's sound only
 
 function packOf(city: CityId, line: LineDef): Pack {
   if (PHRASEBOOKS[city]) return 'book';
@@ -36,14 +37,20 @@ function packOf(city: CityId, line: LineDef): Pack {
     if (line.kind === 'tram') return 'streetcar';
     return 'muni';
   }
-  if (line.system === 'jr-east' || line.system === 'twr') return 'jr';
-  if (line.system === 'tokyo-metro') return 'metro';
-  if (line.kind === 'tram') return 'tokyo-tram';
-  if (line.system === 'toei' && line.kind === 'subway') return 'toei';
-  return 'metro';
+  if (city === 'tokyo') {
+    if (line.system === 'jr-east' || line.system === 'twr') return 'jr';
+    if (line.system === 'tokyo-metro') return 'metro';
+    if (line.kind === 'tram') return 'tokyo-tram';
+    if (line.system === 'toei' && line.kind === 'subway') return 'toei';
+    return 'metro';
+  }
+  // Japanese styles belong to Japan only. A city without its own phrasebook stays quiet rather than borrowing
+  // another country's announcements.
+  return 'none';
 }
 
 const ROLL: Record<Pack, RollingStyle> = {
+  none: { rumble: 0.8, roar: 0.5, whine: 0.9, clack: 0.7, carLen: 18 },
   nyc: { rumble: 1, roar: 1, whine: 0.6, clack: 1, carLen: 18 },
   tube: { rumble: 1, roar: 1.3, whine: 0.8, clack: 0.8, carLen: 16 },
   'london-rail': { rumble: 0.7, roar: 0.3, whine: 0.9, clack: 0.5, carLen: 20 },
@@ -149,7 +156,7 @@ export class Soundscape {
     }
     const pack = packOf(c.id, t.line);
     // Doors closing (and in Tokyo, the departure melody) just before the train leaves.
-    if (st.kind === 'dwell' && st.idx < stops.length - 1) {
+    if (pack !== 'none' && st.kind === 'dwell' && st.idx < stops.length - 1) {
       const left = at.d - now;
       const k = `${t.id}@${at.s}`;
       const lead = pack === 'book' ? (PHRASEBOOKS[c.id]!.lead ?? 4.5) : pack === 'jr' || pack === 'metro' || pack === 'toei' ? 9 : pack === 'mtr' || pack === 'seoul' || pack === 'berlin-u' || pack === 'berlin-s' ? 5 : 4.5;
@@ -159,7 +166,7 @@ export class Soundscape {
       }
     }
     // "The next stop is…" as it approaches, on longer runs.
-    if (st.kind === 'moving' && st.idx > 0) {
+    if (pack !== 'none' && st.kind === 'moving' && st.idx > 0) {
       const eta = at.a - now;
       const k = `${t.id}>${at.s}`;
       if (eta < 20 && eta > 4 && at.a - stops[st.idx - 1].d > 50 && !this.approached.has(k)) {
@@ -279,6 +286,7 @@ export class Soundscape {
     if (this.lastIntro.key === k && performance.now() - this.lastIntro.at < 25_000) return;
     this.lastIntro = { key: k, at: performance.now() };
     const pack = packOf(c.id, t.line);
+    if (pack === 'none') return;
     const bk = this.book(t, next.s);
     if (bk) return this.lang(bk[0], bk[0].intro(bk[1]));
     const s = t.state;
@@ -357,6 +365,7 @@ export class Soundscape {
   private approach(t: LiveTrain, at: TimelineStop, terminal: boolean) {
     const c = this.app.city!;
     const pack = packOf(c.id, t.line);
+    if (pack === 'none') return;
     const bk = this.book(t, at.s);
     if (bk) return this.lang(bk[0], bk[0].approach(bk[1]));
     const nx = this.name(at.s);
@@ -414,6 +423,7 @@ export class Soundscape {
   private arrive(t: LiveTrain, at: TimelineStop, terminal: boolean) {
     const c = this.app.city!;
     const pack = packOf(c.id, t.line);
+    if (pack === 'none') return;
     const bk = this.book(t, at.s);
     if (bk) {
       const [b, s] = bk;
@@ -490,6 +500,7 @@ export class Soundscape {
 
   private depart(t: LiveTrain, next: TimelineStop) {
     const pack = packOf(this.app.city!.id, t.line);
+    if (pack === 'none') return;
     if (pack === 'book' && PHRASEBOOKS[this.app.city!.id]!.quietDepart) return;
     if (pack === 'caltrain') sfx.horn();
     if (pack === 'cable' || pack === 'streetcar') return this.intro(t, next);

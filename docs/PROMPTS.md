@@ -188,6 +188,22 @@ Typos are left as typed. Screenshots and reference images that came with a promp
 
 > the outlines are really messy in the cel shading (should be in screenspace or whatever, have a senior graphics engineer/architect figure it out)
 
+### 45. 2026-09-29 16:46 UTC
+
+> fix the airplanes with some other api, that company never got back to me with a key
+
+### 46. 2026-09-29 19:29 UTC
+
+> just continue your work i had another agent fix some stuff.
+
+### 47. 2026-09-29 19:29 UTC
+
+> just continue your work i had another agent fix some stuff with rtk
+
+### 48. 2026-09-30 00:49 UTC
+
+> Just use fly on [redacted]. -- Announcements in japanese should ONLY be in japan. Ideally announcemnets are in the language of the country (whatever they are and they should eb accurate, otherwise DONT include them)
+
 ## Briefs given to agents
 
 ### nyc-data (new agent, 2026-09-24 17:48 UTC)
