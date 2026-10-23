@@ -3,7 +3,7 @@
 // buses too; tiles are fetched one after another and reduced to the wanted products straight away.
 
 const BASE = 'https://v6.vbb.transport.rest/radar';
-const UA = 'TinyTrains/0.1 (live transit diorama; https://tinytrains.app)';
+const UA = 'TinyTrains/1.0 (+https://tinytrains.app)';
 
 /** [north, west, south, east]: the U-Bahn and tram networks in four tiles. */
 const TILES: [number, number, number, number][] = [

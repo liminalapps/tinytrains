@@ -4,7 +4,7 @@
 import { politeFetch, type RealtimeSource, type RtTrip } from '../gtfs/index.ts';
 
 const BASE = 'https://www.viaggiatreno.it/infomobilita/resteasy/viaggiatreno/partenze/';
-const UA = 'TinyTrains/0.1 (live transit diorama; https://tinytrains.app)';
+const UA = 'TinyTrains/1.0 (+https://tinytrains.app)';
 // Garibaldi Passante, Cadorna, Bovisa, Rogoredo, Garibaldi, Certosa, Lambrate, Centrale, San Cristoforo,
 // Greco Pirelli, Porta Vittoria, Rho: between them every S line and the Malpensa Express.
 const BOARDS = ['S01647', 'S01066', 'S01642', 'S01820', 'S01645', 'S01640', 'S01701', 'S01700', 'S01630', 'S01326', 'S01633', 'S01037'];

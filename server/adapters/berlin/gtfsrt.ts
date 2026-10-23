@@ -3,7 +3,7 @@
 // trips of wanted routes that run around now are kept.
 
 const URL = 'https://production.gtfsrt.vbb.de/data';
-const UA = 'TinyTrains/0.1 (live transit diorama; https://tinytrains.app)';
+const UA = 'TinyTrains/1.0 (+https://tinytrains.app)';
 
 export interface RtStopUpdate {
   stop: string; // GTFS stop_id

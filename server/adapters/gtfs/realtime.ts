@@ -350,7 +350,7 @@ export interface GtfsRealtimeOptions {
 /** Realtime feed URLs in use, so checks can serve synthetic data for them (see scripts/lib/gtfs/check.ts). */
 export const realtimeUrls = new Map<string, 'tripUpdates' | 'vehiclePositions'>();
 
-const UA = 'TinyTrains/0.1 (live transit diorama; https://tinytrains.app)';
+const UA = 'TinyTrains/1.0 (+https://tinytrains.app)';
 
 export function gtfsRealtime(o: GtfsRealtimeOptions): RealtimeSource {
   if (o.tripUpdates) realtimeUrls.set(o.tripUpdates, 'tripUpdates');

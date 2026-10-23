@@ -6,7 +6,7 @@ import { politeFetch, type RealtimeSource, type RtTrip } from '../gtfs/index.ts'
 import type { GtfsSchedule } from '../gtfs/index.ts';
 
 const URL_MONITOR = 'https://www.wienerlinien.at/ogd_realtime/monitor';
-const UA = 'TinyTrains/0.1 (live transit diorama; https://tinytrains.app)';
+const UA = 'TinyTrains/1.0 (+https://tinytrains.app)';
 const PER_REQUEST = 45;
 const EVERY_MS = 60_000;
 const STALE_MS = 4 * 60_000;

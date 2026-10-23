@@ -20,7 +20,7 @@ export interface Prediction {
   currentLocation?: string;
 }
 
-const UA = 'TinyTrains/0.1 (live transit diorama)';
+const UA = 'TinyTrains/1.0 (+https://tinytrains.app)';
 
 const SOURCES: { mode: TflMode; id: string; name: string }[] = [
   { mode: 'tube', id: 'london-tube', name: 'London Underground · TfL Unified API' },

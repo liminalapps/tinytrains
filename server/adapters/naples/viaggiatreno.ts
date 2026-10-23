@@ -4,7 +4,7 @@
 import { politeFetch, type GtfsSchedule, type RealtimeSource, type RtTrip } from '../gtfs/index.ts';
 
 const BASE = 'https://www.viaggiatreno.it/infomobilita/resteasy/viaggiatreno/partenze/';
-const UA = 'TinyTrains/0.1 (live transit diorama; https://tinytrains.app)';
+const UA = 'TinyTrains/1.0 (+https://tinytrains.app)';
 // Board code -> station id in transit.json.
 const BOARDS: [string, string][] = [
   ['S09101', 'nap:pozzuoli-solfatara'],

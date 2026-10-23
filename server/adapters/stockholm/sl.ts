@@ -4,7 +4,7 @@
 import { politeFetch, type GtfsSchedule, type RealtimeSource, type RtTrip } from '../gtfs/index.ts';
 
 const BASE = 'https://transport.integration.sl.se/v1/sites/';
-const UA = 'TinyTrains/0.1 (live transit diorama; https://tinytrains.app)';
+const UA = 'TinyTrains/1.0 (+https://tinytrains.app)';
 
 /**
  * Sites picked so that every tunnelbana and pendeltåg pattern passes one at least every 10 minutes (hubs first, then

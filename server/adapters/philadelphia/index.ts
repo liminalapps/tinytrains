@@ -6,7 +6,7 @@ import type { AdapterFactory } from '../types.ts';
 
 const TROLLEY_ROUTES = new Set(['T1', 'T2', 'T3', 'T4', 'T5', 'G1', 'D1', 'D2', 'M1']);
 const RR_PREFIXES = ['AIR', 'CHE', 'CHW', 'CYN', 'FOX', 'LAN', 'MED', 'NOR', 'PAO', 'TRE', 'WAR', 'WIL', 'WTR'];
-const UA = 'TinyTrains/0.1 (live transit diorama; https://tinytrains.app)';
+const UA = 'TinyTrains/1.0 (+https://tinytrains.app)';
 
 /** Trolley stock from the fleet number SEPTA puts in the vehicle label. */
 export function trolleyConsist(line: string, label: string): { stock?: string; cars?: number } {

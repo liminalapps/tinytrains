@@ -20,22 +20,37 @@ const SITE = 'https://tinytrains.app';
 const isCity = (s: string): s is CityId => (CITY_ORDER as string[]).includes(s);
 const binding = (city: CityId) => city.toUpperCase();
 
+/** On everything the Worker answers; files served straight from the edge get the same from public/_headers. */
+const SECURITY_HEADERS = {
+  'strict-transport-security': 'max-age=63072000; includeSubDomains',
+  'x-content-type-options': 'nosniff',
+  'referrer-policy': 'strict-origin-when-cross-origin',
+  'x-frame-options': 'DENY',
+};
+
 export default {
   async fetch(req, env, ctx) {
-    const url = new URL(req.url);
-    if (url.hostname === 'www.tinytrains.app') return Response.redirect(`${SITE}${url.pathname}${url.search}`, 301);
-    const m = url.pathname.match(/^\/api\/([a-z]+)\/trains$/);
-    if (m && isCity(m[1])) return trains(m[1], url, env, ctx);
-    const pm = url.pathname.match(/^\/api\/([a-z]+)\/planes$/);
-    if (pm && isCity(pm[1])) return planes(pm[1], url, env, ctx);
-    const rm = url.pathname.match(/^\/api\/route\/([A-Z0-9]{2,8})$/);
-    if (rm) return route(rm[1], url, env, ctx);
-    if (url.pathname === '/api/summary') return summary(url, env, ctx);
-    if (url.pathname === '/api/health') return Response.json({ ok: true });
-    if (url.pathname.startsWith('/api/')) return new Response('not found', { status: 404 });
-    return page(req, url, env);
+    const res = await handle(req, env, ctx);
+    const out = new Response(res.body, res);
+    for (const [name, value] of Object.entries(SECURITY_HEADERS)) out.headers.set(name, value);
+    return out;
   },
 } satisfies ExportedHandler<Env>;
+
+async function handle(req: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  const url = new URL(req.url);
+  if (url.hostname === 'www.tinytrains.app') return Response.redirect(`${SITE}${url.pathname}${url.search}`, 301);
+  const m = url.pathname.match(/^\/api\/([a-z]+)\/trains$/);
+  if (m && isCity(m[1])) return trains(m[1], url, env, ctx);
+  const pm = url.pathname.match(/^\/api\/([a-z]+)\/planes$/);
+  if (pm && isCity(pm[1])) return planes(pm[1], url, env, ctx);
+  const rm = url.pathname.match(/^\/api\/route\/([A-Z0-9]{2,8})$/);
+  if (rm) return route(rm[1], url, env, ctx);
+  if (url.pathname === '/api/summary') return summary(url, env, ctx);
+  if (url.pathname === '/api/health') return Response.json({ ok: true });
+  if (url.pathname.startsWith('/api/')) return new Response('not found', { status: 404 });
+  return page(req, url, env);
+}
 
 async function cityTrains(city: CityId, url: URL, env: Env, ctx: ExecutionContext): Promise<Response> {
   const cache = caches.default;

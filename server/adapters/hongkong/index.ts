@@ -7,7 +7,7 @@ import { Network, type Dir, type Pattern } from './network.ts';
 // trains: consecutive polled stations see the same train a run time apart, in the same order.
 
 const API = 'https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php';
-const UA = 'TinyTrains/0.1 (live transit diorama)';
+const UA = 'TinyTrains/1.0 (+https://tinytrains.app)';
 /** Politeness: never more than this many requests in any 60 s window. */
 const MAX_PER_MIN = 60;
 /** Boards are refreshed oldest first, spread so that all of them come round about once in this many seconds. */
