@@ -318,22 +318,27 @@ body.touring .tour-cta { opacity: 0; pointer-events: none; }
 .hint { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); padding: 9px 16px; border-radius: 999px; background: rgba(34, 50, 74, 0.8); color: #fff; font: 600 13px var(--body); white-space: nowrap; transition: opacity 0.6s, transform 0.6s; }
 .hint.gone { opacity: 0; transform: translate(-50%, 12px); }
 .credits { position: absolute; left: 18px; bottom: 12px; display: flex; gap: 10px; align-items: baseline; }
-.credit-line { font: 600 11px var(--body); color: color-mix(in srgb, #2c4460, #e8eeff calc(var(--night) * 100%)); opacity: 0.7; }
-.about-btn { font: 700 12px var(--body); color: color-mix(in srgb, #2c4460, #e8eeff calc(var(--night) * 100%)); opacity: 0.8; text-decoration: underline; text-underline-offset: 3px; }
-.about { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(520px, calc(100% - 32px)); max-height: 80vh; overflow: auto; padding: 22px 24px; font-size: 14px; line-height: 1.5; }
+/* Toy follows the real sky; every other theme paints its own map, so it sets its own --credit. */
+:root { --credit: color-mix(in srgb, #2c4460, #e8eeff calc(var(--night) * 100%)); }
+.credit-line { font: 600 11px var(--body); color: var(--credit); opacity: 0.7; }
+.about-btn { font: 700 12px var(--body); color: var(--credit); opacity: 0.8; text-decoration: underline; text-underline-offset: 3px; }
+.about { position: absolute; left: 50%; top: 50%; z-index: 8; transform: translate(-50%, -50%); width: min(520px, calc(100% - 32px)); max-height: 80vh; overflow: auto; padding: 22px 24px; font-size: 14px; line-height: 1.5; }
 .about h2 { margin: 0 0 8px; font: 600 24px var(--display); }
 .about h3 { margin: 14px 0 4px; font: 600 16px var(--display); }
 .about ul { padding-left: 18px; margin: 4px 0; }
 .about .x { position: absolute; right: 12px; top: 12px; width: 30px; height: 30px; border-radius: 50%; background: rgba(34, 50, 74, 0.06); font: 600 20px/1 var(--display); }
 
 .pills { display: flex; gap: 8px; }
-.fleet { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(920px, calc(100% - 32px)); max-height: min(82vh, 760px); overflow: auto; padding: 22px 24px 24px; }
+.fleet { position: absolute; left: 50%; top: 50%; z-index: 8; transform: translate(-50%, -50%); width: min(920px, calc(100% - 32px)); max-height: min(82vh, 760px); overflow: auto; padding: 22px 24px 24px; }
 .fleet h2 { margin: 0; font: 600 26px var(--display); }
 .fleet > p { margin: 4px 0 16px; font-size: 14px; }
 .fleet .x { position: absolute; right: 14px; top: 14px; width: 32px; height: 32px; border-radius: 50%; background: rgba(34, 50, 74, 0.06); font: 600 20px/1 var(--display); }
 .fleet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
-.fleet-card { text-align: left; display: flex; flex-direction: column; border-radius: 18px; background: #fff; box-shadow: 0 2px 10px rgba(28, 48, 86, 0.1); overflow: hidden; transition: transform 0.2s cubic-bezier(0.3, 1.5, 0.5, 1), box-shadow 0.2s; }
-.fleet-card:hover { transform: translateY(-3px) rotate(-0.6deg); box-shadow: 0 10px 24px rgba(28, 48, 86, 0.18); }
+/* A card is two sibling buttons, ride along and share, so neither nests inside the other. */
+.fleet-item { position: relative; display: flex; }
+.fleet-card { flex: 1; min-width: 0; text-align: left; display: flex; flex-direction: column; border-radius: 18px; background: #fff; box-shadow: 0 2px 10px rgba(28, 48, 86, 0.1); overflow: hidden; transition: transform 0.2s cubic-bezier(0.3, 1.5, 0.5, 1), box-shadow 0.2s; }
+.fleet-item:hover { transform: translateY(-3px) rotate(-0.6deg); }
+.fleet-item:hover .fleet-card { box-shadow: 0 10px 24px rgba(28, 48, 86, 0.18); }
 .fleet-card img { width: 100%; height: 120px; object-fit: contain; background: radial-gradient(ellipse 60% 50% at 50% 75%, #eef4df 0 58%, transparent 60%), linear-gradient(#f3f9ff, #fdfbf3); }
 .fc-body { padding: 10px 14px 14px; }
 .fc-name { font: 600 19px var(--display); }
@@ -427,9 +432,8 @@ body.touring .tour-cta { opacity: 0; pointer-events: none; }
 
 .tc-actions .share { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
 .head-share { position: absolute; right: 48px; top: 10px; width: 30px; height: 30px; border-radius: 50%; background: rgba(255, 255, 255, 0.85); color: #22324a; display: grid; place-items: center; box-shadow: var(--shadow-sm); z-index: 2; }
-.fleet-card { position: relative; }
-.fc-share { position: absolute; right: 10px; top: 10px; width: 30px; height: 30px; border-radius: 50%; background: rgba(255, 255, 255, 0.9); color: var(--ink); display: grid; place-items: center; box-shadow: 0 1px 4px rgba(28, 48, 86, 0.18); opacity: 0.75; }
-.fleet-card:hover .fc-share { opacity: 1; }
+.fc-share { position: absolute; right: 10px; top: 10px; z-index: 1; width: 30px; height: 30px; border-radius: 50%; background: rgba(255, 255, 255, 0.9); color: var(--ink); display: grid; place-items: center; box-shadow: 0 1px 4px rgba(28, 48, 86, 0.18); opacity: 0.75; }
+.fleet-item:hover .fc-share, .fc-share:focus-visible { opacity: 1; }
 .share-btn { color: #ff5a5f; }
 
 /* ---------------------------------------------------------------- weather tint */
@@ -462,7 +466,7 @@ body[data-weather='rain'] #stage, body[data-weather='storm'] #stage { filter: sa
 
 .fleet, .about { opacity: 0; transform: translate(-50%, -47%) scale(0.96); transition: opacity 0.28s, transform 0.45s var(--spring); }
 .fleet.shown, .about.shown { opacity: 1; transform: translate(-50%, -50%); }
-.fleet.shown .fleet-card { animation: pop-in 0.5s var(--spring) both; animation-delay: calc(0.08s + min(var(--i, 0), 12) * 0.04s); }
+.fleet.shown .fleet-item { animation: pop-in 0.5s var(--spring) both; animation-delay: calc(0.08s + min(var(--i, 0), 12) * 0.04s); }
 
 .sources { opacity: 0; transform: translateY(-6px) scale(0.98); transform-origin: top left; transition: opacity 0.2s, transform 0.3s var(--spring); }
 .sources.shown { opacity: 1; transform: none; }
@@ -484,10 +488,10 @@ body[data-weather='rain'] #stage, body[data-weather='storm'] #stage { filter: sa
 .lbl.clickable:hover { z-index: 5; box-shadow: 0 6px 16px rgba(28, 48, 86, 0.28); }
 
 /* Presses and hovers. */
-.pill-btn, .live:not(.badge), .controls button, .dock button, .tc-actions button, .chip, .sc-line, .ticket, .fleet-card, .x, .head-share, .picker-close, .search-results li, .lc-body li, .sc-arr li, .tc-stops li { transition: transform 0.2s var(--spring), background 0.2s, box-shadow 0.2s, opacity 0.2s; }
+.pill-btn, .live:not(.badge), .controls button, .dock button, .tc-actions button, .chip, .sc-line, .ticket, .fleet-item, .fleet-card, .x, .head-share, .picker-close, .search-results li, .lc-body li, .sc-arr li, .tc-stops li { transition: transform 0.2s var(--spring), background 0.2s, box-shadow 0.2s, opacity 0.2s; }
 .pill-btn:active, .live:active, .controls button:active, .tc-actions button:active, .chip:active, .sc-line:active, .x:active, .head-share:active, .picker-close:active { transform: scale(0.93); }
 .dock button:active { transform: scale(0.9); }
-.ticket:active, .fleet-card:active { transform: scale(0.97); }
+.ticket:active, .fleet-item:active { transform: scale(0.97); }
 .x:hover, .head-share:hover, .picker-close:hover { transform: rotate(90deg); }
 .head-share:hover { transform: translateY(-1px); }
 .city-switch .chev { transition: transform 0.35s var(--spring); }
@@ -610,7 +614,7 @@ body.og #ui > :not(.loader), body.og #labels .lbl.station, body.og .eta-flag, bo
   .search-field input { font-size: 17px; }
   .search-results { max-height: 64vh; }
 
-  .fleet, .about { left: 0; right: 0; top: auto; bottom: 0; width: auto; max-height: 88vh; border-radius: 24px 24px 0 0; padding-bottom: calc(24px + var(--safe-b)); z-index: 20; opacity: 1; transform: translateY(105%); transition: transform 0.45s var(--glide); }
+  .fleet, .about { left: 0; right: 0; top: auto; bottom: 0; width: auto; max-height: 88vh; border-radius: 24px 24px 0 0; padding-bottom: calc(24px + var(--safe-b)); z-index: 20; opacity: 1; transform: translateY(105%); transition: transform 0.45s var(--glide); background-color: var(--paper-solid); }
   .fleet.shown, .about.shown { transform: none; }
   .picker-inner { transform: translateY(100%); transition: transform 0.45s var(--glide); }
   .search-inner { transform: translateY(-100%); transition: transform 0.4s var(--glide); }
@@ -624,7 +628,8 @@ body.og #ui > :not(.loader), body.og #labels .lbl.station, body.og .eta-flag, bo
   .fc-name { font-size: 16px; }
 
   .notice { top: calc(88px + var(--safe-t)); font-size: 12.5px; }
-  .tour-pill { bottom: auto; top: calc(62px + var(--safe-t)); font-size: 12px; }
+  /* Below the brand column (logo, theme, live count), which is tallest in the Subway theme. */
+  .tour-pill { bottom: auto; top: calc(138px + var(--safe-t)); font-size: 12px; }
   .hint { bottom: calc(var(--dock-h) + 84px + var(--safe-b)); font-size: 12px; }
   .credits { left: 12px; bottom: calc(var(--dock-h) + 16px + var(--safe-b)); }
   .about-btn { font-size: 10.5px; }
@@ -669,7 +674,7 @@ body[data-theme='blueprint'] {
   --ink: #eaf3ff; --muted: #9fbde0; --paper: rgba(14, 52, 96, 0.85); --paper-solid: #123e70; --line-soft: rgba(234, 243, 255, 0.22);
   --shadow: none; --shadow-sm: none; --r: 3px; --accent: #ffd23f;
   --display: 'IBM Plex Mono', ui-monospace, monospace; --body: 'IBM Plex Mono', ui-monospace, monospace;
-  background: #123e70;
+  background: #123e70; --credit: #d6e8ff;
 }
 body[data-theme='blueprint'] :is(.panel, .logo, .sb-name, .pill-btn, .live:not(.badge), .controls button, .ticket, .city-switch, .theme-card, .lbl.station, .dock) { border: 1px solid rgba(234, 243, 255, 0.7); box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
 body[data-theme='blueprint'] .logo h1 { color: #eaf3ff; text-shadow: none; letter-spacing: 0.06em; text-transform: uppercase; }
@@ -682,7 +687,7 @@ body[data-theme='neon'] {
   --ink: #f7ecff; --muted: #c49ae6; --paper: rgba(16, 4, 34, 0.8); --paper-solid: #1a0633; --line-soft: rgba(255, 47, 179, 0.28);
   --shadow: 0 0 24px rgba(255, 47, 179, 0.35), 0 0 2px rgba(37, 232, 255, 0.9); --shadow-sm: 0 0 12px rgba(255, 47, 179, 0.35);
   --r: 10px; --accent: #ff2fb3; --display: 'Orbitron', sans-serif; --body: 'Rajdhani', sans-serif;
-  background: #0a0018;
+  background: #0a0018; --credit: #ff9ae0;
 }
 body[data-theme='neon'] :is(.panel, .logo, .sb-name, .pill-btn, .live:not(.badge), .controls button, .ticket, .city-switch, .theme-card) { border: 1px solid rgba(37, 232, 255, 0.55); }
 body[data-theme='neon'] .logo h1 { color: #ff2fb3; text-shadow: 0 0 8px #ff2fb3, 0 0 20px #ff2fb3; }
@@ -695,7 +700,7 @@ body[data-theme='clay'] {
   --ink: #3a3631; --muted: #8a847a; --paper: rgba(252, 251, 248, 0.92); --paper-solid: #fcfbf8; --line-soft: rgba(58, 54, 49, 0.1);
   --shadow: 0 10px 30px rgba(70, 60, 45, 0.12); --shadow-sm: 0 3px 10px rgba(70, 60, 45, 0.1); --r: 12px; --accent: #3a3631;
   --display: 'DM Sans', system-ui, sans-serif; --body: 'DM Sans', system-ui, sans-serif;
-  background: #efece5;
+  background: #efece5; --credit: #3a3631;
 }
 body[data-theme='clay'] :is(.panel, .logo, .sb-name, .pill-btn, .live:not(.badge), .controls button, .ticket, .theme-card, .lbl.station, .dock) { border: 1px solid rgba(58, 54, 49, 0.12); }
 body[data-theme='clay'] .logo h1 { color: #3a3631; text-shadow: none; font-weight: 700; letter-spacing: -0.01em; }
@@ -710,7 +715,7 @@ body[data-theme='pixel'] {
   --shadow: none; --shadow-sm: none; --r: 0; --accent: #ffd23f;
   --display: 'Pixelify Sans', monospace; --body: 'Pixelify Sans', monospace;
   --bevel: inset 2px 2px 0 #ffffff, inset -2px -2px 0 #6a6a6a, 0 0 0 1px #101010;
-  background: #000;
+  background: #000; --credit: #101010;
 }
 body[data-theme='pixel'] :is(.panel, .logo, .sb-name, .pill-btn, .live:not(.badge), .clock, .controls button, .ticket, .theme-card, .lbl.station, .city-switch, .dock, .tour-pill) { border: 0; border-radius: 0; box-shadow: var(--bevel); background: #c0c0c0; color: #101010; backdrop-filter: none; -webkit-backdrop-filter: none; }
 body[data-theme='pixel'] .logo h1 { font-family: 'Press Start 2P', monospace; font-size: 14px; color: #101010; text-shadow: 1px 1px 0 #fff; }
@@ -721,7 +726,7 @@ body[data-theme='pixel'] .lbl.station { font-weight: 600; }
 body[data-theme='pixel'] .lbl.geo { color: #fff; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }
 
 /* Voxel: the toy UI, cut into blocks: square corners and a solid bottom face under every panel. */
-body[data-theme='voxel'] { --r: 4px; --shadow: 0 6px 0 rgba(40, 60, 80, 0.28), 0 12px 24px rgba(40, 60, 80, 0.18); --shadow-sm: 0 4px 0 rgba(40, 60, 80, 0.25); }
+body[data-theme='voxel'] { --credit: #2c4460; --r: 4px; --shadow: 0 6px 0 rgba(40, 60, 80, 0.28), 0 12px 24px rgba(40, 60, 80, 0.18); --shadow-sm: 0 4px 0 rgba(40, 60, 80, 0.25); }
 body[data-theme='voxel'] :is(.panel, .logo, .sb-name, .pill-btn, .live:not(.badge), .controls button, .ticket, .theme-card, .lbl.station, .city-switch, .dock) { border-radius: 4px; }
 body[data-theme='voxel'] .lbl.station { box-shadow: 0 3px 0 rgba(40, 60, 80, 0.3); }
 body[data-theme='pixel'] :is(.sb-name i, .theme-row, .theme-row i) { border-radius: 0; }
@@ -733,7 +738,7 @@ body[data-theme='subway'] {
   --shadow: 0 8px 22px rgba(0, 0, 0, 0.28); --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.22); --r: 4px; --accent: #fccc0a;
   --display: 'Helvetica Neue', Helvetica, Arimo, Arial, sans-serif; --body: 'Helvetica Neue', Helvetica, Arimo, Arial, sans-serif;
   --rule: linear-gradient(#000 0 4px, #fff 4px 5px, transparent 5px);
-  background: #e9e8e4;
+  background: #e9e8e4; --credit: #1d1d1d;
 }
 body[data-theme='subway'] :is(.panel, .logo, .sb-name, .pill-btn, .live:not(.badge), .clock, .controls button, .ticket, .theme-card, .lbl.station, .city-switch, .dock) { backdrop-filter: none; -webkit-backdrop-filter: none; }
 body[data-theme='subway'] :is(.panel, .logo, .sb-name, .pill-btn, .live:not(.badge), .clock, .city-switch, .theme-card, .sb-name) { border-radius: 4px; }
@@ -757,7 +762,7 @@ body[data-theme='monet'] {
   --ink: #3d3a4a; --muted: #7c7486; --paper: rgba(252, 247, 238, 0.92); --paper-solid: #fcf7ee; --line-soft: rgba(61, 58, 74, 0.1);
   --shadow: 0 12px 30px rgba(90, 70, 110, 0.16); --shadow-sm: 0 4px 12px rgba(90, 70, 110, 0.12); --r: 16px; --accent: #c9b3e6;
   --display: 'Cormorant Garamond', Georgia, serif; --body: 'Cormorant Garamond', Georgia, serif;
-  background: #efe4d6;
+  background: #efe4d6; --credit: #5a5470;
 }
 body[data-theme='monet'] .logo h1 { color: #6a5a9a; text-shadow: none; font-style: italic; font-weight: 700; font-size: 30px; }
 body[data-theme='monet'] :is(.lbl.station, .pill-btn, .live:not(.badge), .clock, .sb-name) { font-weight: 700; }
@@ -770,7 +775,7 @@ body[data-theme='cubism'] {
   --ink: #2e241b; --muted: #6b5a47; --paper: #efe3c6; --paper-solid: #efe3c6; --line-soft: rgba(46, 36, 27, 0.14);
   --shadow: 6px 6px 0 rgba(46, 36, 27, 0.55); --shadow-sm: 4px 4px 0 rgba(46, 36, 27, 0.45); --r: 2px; --accent: #b6532f;
   --display: 'Syne', sans-serif; --body: 'Syne', sans-serif;
-  background: #cdb07a;
+  background: #cdb07a; --credit: #2e241b;
 }
 body[data-theme='cubism'] :is(.panel, .logo, .sb-name, .pill-btn, .live:not(.badge), .clock, .controls button, .ticket, .theme-card, .lbl.station, .city-switch, .dock) { border: 1.5px solid #2e241b; backdrop-filter: none; -webkit-backdrop-filter: none; }
 body[data-theme='cubism'] :is(.logo, .city-switch, .panel) { clip-path: polygon(0 4%, 97% 0, 100% 92%, 3% 100%); }
@@ -819,7 +824,7 @@ body[data-theme='noir'] {
   --ink: #f2f2f2; --muted: #9a9a9a; --paper: rgba(0, 0, 0, 0.9); --paper-solid: #000; --line-soft: rgba(255, 255, 255, 0.14);
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.6); --shadow-sm: 0 3px 10px rgba(0, 0, 0, 0.5); --r: 2px; --accent: #e0102a;
   --display: 'Special Elite', 'Courier New', monospace; --body: 'Special Elite', 'Courier New', monospace;
-  background: #000;
+  background: #000; --credit: #f2f2f2;
 }
 body[data-theme='noir'] :is(.panel, .logo, .sb-name, .pill-btn, .live:not(.badge), .clock, .controls button, .ticket, .lbl.station, .city-switch, .dock) { border: 1px solid #f2f2f2; border-radius: 2px; backdrop-filter: none; -webkit-backdrop-filter: none; }
 body[data-theme='noir'] .logo h1 { color: #f2f2f2; text-shadow: 2px 2px 0 #e0102a; }
@@ -837,7 +842,7 @@ body[data-theme='circuit'] {
   --ink: #c9f6ff; --muted: #5fa9b8; --paper: rgba(1, 10, 14, 0.9); --paper-solid: #010a0e; --line-soft: rgba(25, 230, 255, 0.16);
   --shadow: 0 0 0 1px rgba(25, 230, 255, 0.35), 0 0 24px rgba(25, 230, 255, 0.18); --shadow-sm: 0 0 0 1px rgba(25, 230, 255, 0.4), 0 0 10px rgba(25, 230, 255, 0.15);
   --r: 3px; --accent: #ffa51f; --display: 'Share Tech Mono', ui-monospace, monospace; --body: 'Share Tech Mono', ui-monospace, monospace;
-  background: #000;
+  background: #000; --credit: #7fe8ff;
 }
 body[data-theme='circuit'] :is(.panel, .logo, .sb-name, .pill-btn, .live:not(.badge), .clock, .controls button, .ticket, .lbl.station, .city-switch, .dock) { border-radius: 3px; }
 body[data-theme='circuit'] .logo h1 { color: #19e6ff; text-shadow: 0 0 8px rgba(25, 230, 255, 0.8); letter-spacing: 0.04em; }
@@ -901,7 +906,7 @@ body[data-theme='circuit'] .loader-text { color: #19e6ff; }
 .set-foot { margin: 12px 0 0; }
 .set-about { font: 700 13px var(--body); color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
 @media (max-width: 760px) {
-  .settings { top: auto; left: 0; right: 0; bottom: 0; width: auto; max-width: none; max-height: 86vh; border-radius: 22px 22px 0 0; padding-bottom: calc(18px + var(--safe-b)); transform: translateY(105%); }
+  .settings { top: auto; left: 0; right: 0; bottom: 0; width: auto; max-width: none; max-height: 86vh; border-radius: 22px 22px 0 0; padding-bottom: calc(18px + var(--safe-b)); transform: translateY(105%); background-color: var(--paper-solid); }
   .settings.shown { transform: none; }
   .set-themes { grid-template-columns: repeat(3, 1fr); }
 }
@@ -923,7 +928,7 @@ body[data-theme='cel'] {
   --ink: #2b1414; --muted: #6d4e46; --paper: #fffaf0; --paper-solid: #fffaf0; --line-soft: rgba(43, 20, 20, 0.12);
   --shadow: 5px 5px 0 #2b1414; --shadow-sm: 3px 3px 0 #2b1414; --r: 14px; --accent: #ffd23f;
   --display: 'Baloo 2', 'Fredoka', system-ui, sans-serif; --body: 'Baloo 2', 'Nunito', system-ui, sans-serif;
-  background: #3aa8ff;
+  background: #3aa8ff; --credit: #2b1414;
 }
 body[data-theme='cel'] :is(.panel, .logo, .sb-name, .pill-btn, .live:not(.badge), .clock, .controls button, .ticket, .theme-card, .lbl.station, .city-switch, .dock, .tour-pill) { border: 2.5px solid #2b1414; backdrop-filter: none; -webkit-backdrop-filter: none; }
 body[data-theme='cel'] .logo h1 { color: #e8452c; text-shadow: 2px 2px 0 #2b1414; font-weight: 800; }

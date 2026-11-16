@@ -800,6 +800,7 @@ export class Island implements Layer {
     mat.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, groundUniforms, lookUniforms);
       applyToon(sh);
+      sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>\n${LOOK_PARS}`);
       sh.vertexShader = sh.vertexShader
         .replace('#include <common>', `#include <common>\nuniform float uTime;\n${LOOK_PARS}`)
         .replace(

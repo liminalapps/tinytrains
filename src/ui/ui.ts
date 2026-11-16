@@ -191,7 +191,8 @@ export class UI {
     this.$('.style-bar').addEventListener('click', () => this.toggleThemes());
     this.$('.city-switch').addEventListener('click', () => this.togglePicker());
     this.$('.picker').addEventListener('click', (e) => {
-      const b = (e.target as HTMLElement).closest<HTMLElement>('[data-city]');
+      // Only the picker's own tickets: <body data-city> would match any other click inside it.
+      const b = (e.target as HTMLElement).closest<HTMLElement>('.ticket[data-city]');
       if (b) {
         this.togglePicker(false);
         if (b.dataset.city !== app.city?.id) void app.go({ city: b.dataset.city as CityId });
@@ -297,6 +298,12 @@ export class UI {
     const app = this.app;
     const rig = app.world.rig;
     const k = e.key.toLowerCase();
+    if (k === 'k' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      return this.openSearch();
+    }
+    // Leave the browser's own shortcuts alone (Cmd+C, Cmd+V, Cmd+1…).
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
     const n = Number(e.key);
     if (n >= 1 && n <= CITY_ORDER.length) void app.go({ city: CITY_ORDER[n - 1] });
     else if (k === 'escape') {
@@ -333,7 +340,7 @@ export class UI {
     else if (k === 'm') this.toggleSound();
     else if (k === 's') void this.share();
     else if (k === 't') this.app.toggleTour();
-    else if (k === '/' || (k === 'k' && (e.metaKey || e.ctrlKey))) {
+    else if (k === '/') {
       e.preventDefault();
       this.openSearch();
     } else if (k === 'c') this.togglePicker();
@@ -1594,22 +1601,21 @@ export class UI {
         .map((g, i) => {
           const line = [...g.lines.values()][0];
           const img = this.portraits.get(g.spec, line.color);
-          return `<button class="fleet-card" style="--i:${i}" data-stock="${esc(g.spec.id)}">
+          return `<div class="fleet-item" style="--i:${i}">
+            <button class="fleet-card" data-stock="${esc(g.spec.id)}">
             <img src="${img}" alt="${esc(g.spec.name)}" />
             <div class="fc-body"><div class="fc-name">${esc(g.spec.name)}</div>
             <div class="fc-meta">${esc(g.spec.maker)}${g.spec.introduced ? ` · ${g.spec.introduced}` : ''}</div>
             ${g.spec.blurb ? `<p>${esc(g.spec.blurb)}</p>` : ''}
             <div class="fc-lines"><b>${g.trains.length}</b> running on ${[...g.lines.values()].slice(0, 8).map((l) => bullet(l, c.id, 18)).join('')}</div></div>
-            <span class="fc-share" role="button" tabindex="0" aria-label="Share ${esc(g.spec.name)}" data-stock="${esc(g.spec.id)}">${SHARE_SVG}</span>
-          </button>`;
+            </button>
+            <button class="fc-share" aria-label="Share ${esc(g.spec.name)}" data-stock="${esc(g.spec.id)}">${SHARE_SVG}</button>
+          </div>`;
         })
         .join('')}</div>`;
     f.querySelector('.x')!.addEventListener('click', () => reveal(f, false));
     f.querySelectorAll<HTMLElement>('.fc-share').forEach((el) =>
-      el.addEventListener('click', (e) => {
-        e.stopPropagation();
-        void this.share({ city: c.id, stock: el.dataset.stock! });
-      }),
+      el.addEventListener('click', () => void this.share({ city: c.id, stock: el.dataset.stock! })),
     );
     f.querySelectorAll<HTMLElement>('.fleet-card').forEach((el) =>
       el.addEventListener('click', () => {
